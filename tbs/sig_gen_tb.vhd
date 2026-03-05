@@ -3,6 +3,7 @@ library work;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 use work.sig_gen_pkg.all;
+use work.sig_gen_tb_pkg.all;
 use work.sine_lut_pkg.LUT_ADDR_BITS;
 use work.sine_lut_pkg.OUT_RES_BITS;
 
@@ -14,67 +15,67 @@ end sig_gen_tb;
 
 architecture tb of sig_gen_tb is
 
-    -- Testbench signals
-    signal rst_n   : std_logic := '0';
-    signal clk     : std_logic := '0';
-    signal pha_inc : std_logic_vector(PHA_ACC_BITS-1 downto 0) := (others => '0');
-    signal dds_out : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal dut_if : sig_gen_dut_if_t := (
+        rst_i => '0',
+        clk_i => '0',
+        cyc_i => '0',
+        stb_i => '0',
+        we_i  => '0',
+        sel_i => (others => '0'),
+        dat_i => (others => '0'),
+        ack_o => '0',
+        dat_o => (others => '0')
+    );
 
     -- Clock period
-    constant CLK_PERIOD : time := 10 ns;
+    constant CLK_PERIOD : time := 20 ns;
 
     signal clk_en : boolean := true;
 
+    signal pha_inc : wb_data_t := x"00000000";
+
 begin
 
-    -- Instantiate the unit under test
-    uut : sig_gen
-        generic map (
-            PHA_ACC_BITS => PHA_ACC_BITS
-        )
-        port map (
-            rst_n   => rst_n,
-            clk     => clk,
-            pha_inc => pha_inc,
-            dds_out => dds_out
-        );
+    assert PHA_ACC_BITS = WB_DATA_WIDTH
+        report "sig_gen_tb expects PHA_ACC_BITS = 32"
+        severity failure;
 
-    -- Clock generation
-    clk_process : process
-    begin
-        while clk_en loop
-            clk <= '0';
-            wait for CLK_PERIOD / 2;
-            clk <= '1';
-            wait for CLK_PERIOD / 2;
-        end loop;
-        wait;
-    end process;
+    -- Instantiate the unit under test --
+    uut : sig_gen generic map (
+        PHA_ACC_BITS => PHA_ACC_BITS
+    ) port map (
+        rst_i => dut_if.rst_i,
+        clk_i => dut_if.clk_i,
+        cyc_i => dut_if.cyc_i,
+        stb_i => dut_if.stb_i,
+        we_i  => dut_if.we_i,
+        sel_i => dut_if.sel_i,
+        dat_i => dut_if.dat_i,
+        ack_o => dut_if.ack_o,
+        dat_o => dut_if.dat_o
+    );
 
-    -- Test stimulus
+    -- Clock generation --
+    dut_if.clk_i <= not dut_if.clk_i after (CLK_PERIOD/2) when clk_en else '0';
+
+    -- Test stimulus --
     stim_process : process
     begin
-        -- Initialize reset
-        rst_n <= '0';
-        pha_inc <= (others => '0');
-
-        -- Release reset
-        wait until rising_edge(clk);
-        rst_n <= '1';
+        
+        initialize_signals(dut_if);
+        reset(dut_if);
 
         for i in LUT_ADDR_BITS to PHA_ACC_BITS-1 loop
-            wait until rising_edge(clk);
             pha_inc <= std_logic_vector(shift_left(to_unsigned(1, PHA_ACC_BITS), i));
+            write_data(dut_if, pha_inc);
             for j in 0 to 2**(PHA_ACC_BITS-i)-1 loop
-                wait until rising_edge(clk);
+                wait until rising_edge(dut_if.clk_i);
             end loop;
         end loop;
-        
-        -- End simulation
-        wait until rising_edge(clk);
-        pha_inc <= (others => '0');
+
+        wait until rising_edge(dut_if.clk_i);
         clk_en <= false;
         wait;
-    end process;
+    end process stim_process;
 
 end tb;

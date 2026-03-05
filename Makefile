@@ -6,8 +6,10 @@ STEPSDIR = steps
 WORKDIR  = work
 WAVESDIR = waves
 
-RTL_SRC  = $(wildcard ./rtl/*.vhd)
-TBS_SRC  = $(wildcard ./tbs/*.vhd)
+RTL_SRC      = $(wildcard ./rtl/*.vhd)
+TBS_PKG_SRC  = ./tbs/sig_gen_tb_pkg.vhd
+TBS_TB_SRC   = ./tbs/sig_gen_tb.vhd
+TBS_SRC      = $(TBS_PKG_SRC) $(TBS_TB_SRC)
 
 RTL_TOP = sig_gen
 TBS_TOP = sig_gen_tb
