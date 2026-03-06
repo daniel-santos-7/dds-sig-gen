@@ -52,7 +52,8 @@ begin
         sel_i => dut_if.sel_i,
         dat_i => dut_if.dat_i,
         ack_o => dut_if.ack_o,
-        dat_o => dut_if.dat_o
+        dat_o => dut_if.dat_o,
+        sig_o => open
     );
 
     -- Clock generation --
@@ -61,8 +62,8 @@ begin
     -- Test stimulus --
     stim_process : process
     begin
-        
-        initialize_signals(dut_if);
+
+        initialize(dut_if);
         reset(dut_if);
 
         for i in LUT_ADDR_BITS to PHA_ACC_BITS-1 loop

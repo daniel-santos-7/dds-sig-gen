@@ -10,22 +10,23 @@ entity sig_gen is
         PHA_ACC_BITS : natural := 32
     );
     port (
-        rst_i : in  std_logic;
         clk_i : in  std_logic;
+        rst_i : in  std_logic;
         cyc_i : in  std_logic;
         stb_i : in  std_logic;
         we_i  : in  std_logic;
         sel_i : in  std_logic_vector(PHA_ACC_BITS/8-1 downto 0);
         dat_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
         ack_o : out std_logic;
-        dat_o : out std_logic_vector(PHA_ACC_BITS-1 downto 0)
+        dat_o : out std_logic_vector(PHA_ACC_BITS-1 downto 0);
+        sig_o : out std_logic_vector(OUT_RES_BITS-1 downto 0)
     );
 end entity sig_gen;
 
 architecture rtl of sig_gen is
 
     signal rst_n : std_logic;
-    
+
     signal pha_inc : std_logic_vector(PHA_ACC_BITS-1 downto 0);
 
     signal pha_val : std_logic_vector(PHA_ACC_BITS-1 downto 0);
@@ -53,10 +54,10 @@ begin
     u_pha_acc : pha_acc generic map (
         PHA_ACC_BITS => PHA_ACC_BITS
     ) port map (
-        rst_n   => rst_n,
-        clk     => clk_i,
-        pha_inc => pha_inc,
-        pha_val => pha_val
+        clk_i => clk_i,
+        rst_i => rst_i,
+        inc_i => pha_inc,
+        val_o => pha_val
     );
 
     addr <= pha_val(PHA_ACC_BITS-1 downto PHA_ACC_BITS-LUT_ADDR_BITS-2);
@@ -65,7 +66,7 @@ begin
         rst_n  => rst_n,
         clk    => clk_i,
         addr   => addr,
-        wave   => open
+        wave   => sig_o
     );
 
     dat_o <= pha_inc;

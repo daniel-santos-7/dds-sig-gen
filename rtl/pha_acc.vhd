@@ -7,10 +7,10 @@ entity pha_acc is
         PHA_ACC_BITS : natural := 32
     );
     port (
-        rst_n   : in  std_logic;
-        clk     : in  std_logic;
-        pha_inc : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
-        pha_val : out std_logic_vector(PHA_ACC_BITS-1 downto 0)
+        clk_i : in  std_logic;
+        rst_i : in  std_logic;
+        inc_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+        val_o : out std_logic_vector(PHA_ACC_BITS-1 downto 0)
     );
 end entity pha_acc;
 
@@ -20,15 +20,17 @@ architecture rtl of pha_acc is
 
 begin
 
-    pha_reg_logic : process(clk, rst_n)
+    pha_reg_proc : process(clk_i)
     begin
-        if rst_n = '0' then
-            pha_reg <= (others => '0');
-        elsif rising_edge(clk) then
-            pha_reg <= std_logic_vector(unsigned(pha_reg) + unsigned(pha_inc));
-        end if ;
-    end process pha_reg_logic; -- pha_reg_logic
+        if rising_edge(clk_i) then
+            if rst_i = '1' then
+                pha_reg <= (others => '0');
+            else
+                pha_reg <= std_logic_vector(unsigned(pha_reg) + unsigned(inc_i));
+            end if;
+        end if;
+    end process pha_reg_proc; -- pha_reg_proc
 
-    pha_val <= pha_reg;
+    val_o <= pha_reg;
 
 end architecture rtl;

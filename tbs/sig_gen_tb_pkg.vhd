@@ -21,7 +21,7 @@ package sig_gen_tb_pkg is
         dat_o : wb_data_t;
     end record sig_gen_dut_if_t;
 
-    procedure initialize_signals (
+    procedure initialize (
         signal dut_if : inout sig_gen_dut_if_t
     );
 
@@ -44,7 +44,7 @@ end package sig_gen_tb_pkg;
 
 package body sig_gen_tb_pkg is
 
-    procedure initialize_signals (
+    procedure initialize (
         signal dut_if : inout sig_gen_dut_if_t
     ) is
     begin
@@ -57,7 +57,7 @@ package body sig_gen_tb_pkg is
         dut_if.dat_i <= (others => '0');
         dut_if.ack_o <= 'Z';
         dut_if.dat_o <= (others => 'Z');
-    end procedure initialize_signals;
+    end procedure initialize;
 
     procedure reset (
         signal dut_if : inout sig_gen_dut_if_t

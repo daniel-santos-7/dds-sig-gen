@@ -20,10 +20,10 @@ package sig_gen_pkg is
             PHA_ACC_BITS : natural := 32
         );
         port (
-            rst_n   : in  std_logic;
-            clk     : in  std_logic;
-            pha_inc : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
-            pha_val : out std_logic_vector(PHA_ACC_BITS-1 downto 0)
+            clk_i : in  std_logic;
+            rst_i : in  std_logic;
+            inc_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            val_o : out std_logic_vector(PHA_ACC_BITS-1 downto 0)
         );
     end component pha_acc;
 
@@ -32,15 +32,16 @@ package sig_gen_pkg is
             PHA_ACC_BITS : natural := 32
         );
         port (
-            rst_i : in  std_logic;
             clk_i : in  std_logic;
+            rst_i : in  std_logic;
             cyc_i : in  std_logic;
             stb_i : in  std_logic;
             we_i  : in  std_logic;
             sel_i : in  std_logic_vector(PHA_ACC_BITS/8-1 downto 0);
             dat_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
             ack_o : out std_logic;
-            dat_o : out std_logic_vector(PHA_ACC_BITS-1 downto 0)
+            dat_o : out std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            sig_o : out std_logic_vector(OUT_RES_BITS-1 downto 0)
         );
     end component sig_gen;
 
