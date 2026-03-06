@@ -37,7 +37,7 @@ begin
 
     rst_n <= not rst_i;
 
-    u_sig_gen_wbif: sig_gen_wbif generic map (
+    u_sig_gen_csrs: sig_gen_csrs generic map (
         DATA_WIDTH => PHA_ACC_BITS
     ) port map (
         rst_i => rst_i,
@@ -48,7 +48,8 @@ begin
         sel_i => sel_i,
         dat_i => dat_i,
         ack_o => ack_o,
-        dat_o => pha_inc
+        dat_o => dat_o,
+        inc_o => pha_inc
     );
 
     u_pha_acc : pha_acc generic map (
@@ -68,7 +69,5 @@ begin
         addr   => addr,
         wave   => sig_o
     );
-
-    dat_o <= pha_inc;
 
 end architecture rtl;

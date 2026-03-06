@@ -45,7 +45,7 @@ package sig_gen_pkg is
         );
     end component sig_gen;
 
-    component sig_gen_wbif is
+    component sig_gen_csrs is
         generic (
             DATA_WIDTH : natural := 32
         );
@@ -58,8 +58,9 @@ package sig_gen_pkg is
             sel_i : in  std_logic_vector(DATA_WIDTH/8-1 downto 0);
             dat_i : in  std_logic_vector(DATA_WIDTH-1 downto 0);
             ack_o : out std_logic;
-            dat_o : out std_logic_vector(DATA_WIDTH-1 downto 0)
+            dat_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            inc_o : out std_logic_vector(DATA_WIDTH-1 downto 0)
         );
-    end component sig_gen_wbif;
+    end component sig_gen_csrs;
 
 end package sig_gen_pkg;

@@ -11,7 +11,6 @@ package sig_gen_tb_pkg is
 
     type sig_gen_dut_if_t is record
         rst_i : std_logic;
-        clk_i : std_logic;
         cyc_i : std_logic;
         stb_i : std_logic;
         we_i  : std_logic;
@@ -19,6 +18,7 @@ package sig_gen_tb_pkg is
         dat_i : wb_data_t;
         ack_o : std_logic;
         dat_o : wb_data_t;
+        sig_o : wb_data_t;
     end record sig_gen_dut_if_t;
 
     procedure initialize (
@@ -26,18 +26,15 @@ package sig_gen_tb_pkg is
     );
 
     procedure reset (
+        signal clk_i  : in std_logic;
         signal dut_if : inout sig_gen_dut_if_t
     );
 
     procedure write_data (
-        signal dut_if : inout sig_gen_dut_if_t;
-        constant data : wb_data_t
-    );
-
-    procedure write_data (
+        signal clk_i  : in std_logic;
         signal dut_if : inout sig_gen_dut_if_t;
         constant data : wb_data_t;
-        constant sel  : wb_sel_t
+        constant sel  : wb_sel_t := (others => '1')
     );
 
 end package sig_gen_tb_pkg;
@@ -49,7 +46,6 @@ package body sig_gen_tb_pkg is
     ) is
     begin
         dut_if.rst_i <= '0';
-        dut_if.clk_i <= 'Z';
         dut_if.cyc_i <= '0';
         dut_if.stb_i <= '0';
         dut_if.we_i  <= '0';
@@ -60,34 +56,24 @@ package body sig_gen_tb_pkg is
     end procedure initialize;
 
     procedure reset (
+        signal clk_i  : in std_logic;
         signal dut_if : inout sig_gen_dut_if_t
     ) is
     begin
-        wait until rising_edge(dut_if.clk_i);
+        wait until rising_edge(clk_i);
         dut_if.rst_i <= '1';
-        wait until rising_edge(dut_if.clk_i);
+        wait until rising_edge(clk_i);
         dut_if.rst_i <= '0';
     end procedure reset;
 
     procedure write_data (
-        signal dut_if : inout sig_gen_dut_if_t;
-        constant data : wb_data_t
-    ) is
-    begin
-        write_data(
-            dut_if => dut_if,
-            data   => data,
-            sel    => (others => '1')
-        );
-    end procedure write_data;
-
-    procedure write_data (
+        signal clk_i  : in std_logic;
         signal dut_if : inout sig_gen_dut_if_t;
         constant data : wb_data_t;
-        constant sel  : wb_sel_t
+        constant sel  : wb_sel_t := (others => '1')
     ) is
     begin
-        wait until rising_edge(dut_if.clk_i);
+        wait until rising_edge(clk_i);
         dut_if.cyc_i <= '1';
         dut_if.stb_i <= '1';
         dut_if.we_i  <= '1';
@@ -95,7 +81,7 @@ package body sig_gen_tb_pkg is
         dut_if.dat_i <= data;
 
         while dut_if.ack_o = '0' loop
-            wait until rising_edge(dut_if.clk_i);
+            wait until rising_edge(clk_i);
         end loop;
 
         dut_if.cyc_i <= '0';

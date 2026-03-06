@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
-entity sig_gen_wbif is
+entity sig_gen_csrs is
     generic (
         DATA_WIDTH : natural := 32
     );
@@ -15,11 +15,12 @@ entity sig_gen_wbif is
         sel_i : in  std_logic_vector(DATA_WIDTH/8-1 downto 0);
         dat_i : in  std_logic_vector(DATA_WIDTH-1 downto 0);
         ack_o : out std_logic;
-        dat_o : out std_logic_vector(DATA_WIDTH-1 downto 0)
+        dat_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        inc_o : out std_logic_vector(DATA_WIDTH-1 downto 0)
     );
-end entity sig_gen_wbif;
+end entity sig_gen_csrs;
 
-architecture rtl of sig_gen_wbif is
+architecture rtl of sig_gen_csrs is
 
     signal inc_en : std_logic;
 
@@ -46,5 +47,6 @@ begin
 
     ack_o <= stb_i;
     dat_o <= inc_reg;
+    inc_o <= inc_reg;
 
 end architecture rtl;
