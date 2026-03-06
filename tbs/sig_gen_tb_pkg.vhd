@@ -1,5 +1,7 @@
 library IEEE;
+library work;
 use IEEE.std_logic_1164.all;
+use work.sine_lut_pkg.OUT_RES_BITS;
 
 package sig_gen_tb_pkg is
 
@@ -18,7 +20,7 @@ package sig_gen_tb_pkg is
         dat_i : wb_data_t;
         ack_o : std_logic;
         dat_o : wb_data_t;
-        sig_o : wb_data_t;
+        sig_o : std_logic_vector(OUT_RES_BITS-1 downto 0);
     end record sig_gen_dut_if_t;
 
     procedure initialize (
@@ -53,6 +55,7 @@ package body sig_gen_tb_pkg is
         dut_if.dat_i <= (others => '0');
         dut_if.ack_o <= 'Z';
         dut_if.dat_o <= (others => 'Z');
+        dut_if.sig_o <= (others => 'Z');
     end procedure initialize;
 
     procedure reset (

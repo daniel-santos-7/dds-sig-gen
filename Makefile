@@ -1,3 +1,5 @@
+SHELL = bash
+
 GHDL = ghdl
 GHDL_OPTS = --workdir=$(WORKDIR)
 GHDL_RUNOPTS = --wave=$(WAVESDIR)/$(TBS_TOP).ghw
@@ -6,10 +8,8 @@ STEPSDIR = steps
 WORKDIR  = work
 WAVESDIR = waves
 
-RTL_SRC      = $(wildcard ./rtl/*.vhd)
-TBS_PKG_SRC  = ./tbs/sig_gen_tb_pkg.vhd
-TBS_TB_SRC   = ./tbs/sig_gen_tb.vhd
-TBS_SRC      = $(TBS_PKG_SRC) $(TBS_TB_SRC)
+RTL_SRC = $(wildcard ./rtl/*.vhd)
+TBS_SRC = $(wildcard ./tbs/*.vhd)
 
 RTL_TOP = sig_gen
 TBS_TOP = sig_gen_tb
@@ -27,11 +27,11 @@ clean: | $(WORKDIR)
 $(STEPSDIR) $(WORKDIR) $(WAVESDIR):
 	@mkdir $@
 
-$(STEPSDIR)/import: $(RTL_SRC) $(TBS_SRC) | $(STEPSDIR) $(WORKDIR) 
-	@$(GHDL) import $(GHDL_OPTS) $(RTL_SRC) $(TBS_SRC) | tee $@
+$(STEPSDIR)/import: $(RTL_SRC) $(TBS_SRC) | $(STEPSDIR) $(WORKDIR)
+	@set -o pipefail; $(GHDL) import $(GHDL_OPTS) $(RTL_SRC) $(TBS_SRC) | tee $@
 
 $(STEPSDIR)/make: $(STEPSDIR)/import
-	@$(GHDL) make $(GHDL_OPTS) $(TBS_TOP) | tee $@
+	@set -o pipefail; $(GHDL) make $(GHDL_OPTS) $(TBS_TOP) | tee $@
 
 $(STEPSDIR)/run: $(STEPSDIR)/make | $(WAVESDIR)
-	@$(GHDL) run  $(TBS_TOP) $(GHDL_RUNOPTS) | tee $@
+	@set -o pipefail; $(GHDL) run  $(TBS_TOP) $(GHDL_RUNOPTS) | tee $@
