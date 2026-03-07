@@ -8,10 +8,10 @@ package sig_gen_pkg is
 
     component sine_lut is
         port (
-            rst_n : in  std_logic;
-            clk   : in  std_logic;
-            addr  : in  std_logic_vector(LUT_ADDR_BITS+1 downto 0);
-            wave  : out std_logic_vector(OUT_RES_BITS-1 downto 0)
+            rst_i : in  std_logic;
+            clk_i : in  std_logic;
+            adr_i : in  std_logic_vector(LUT_ADDR_BITS+1 downto 0);
+            sig_o : out std_logic_vector(OUT_RES_BITS-1 downto 0)
         );
     end component sine_lut;
 

@@ -90,6 +90,8 @@ package body sig_gen_tb_pkg is
         dut_if.cyc_i <= '0';
         dut_if.stb_i <= '0';
         dut_if.we_i  <= '0';
+        dut_if.sel_i <= (others => '0');
+        dut_if.dat_i <= (others => '0');
     end procedure write_data;
 
 end package body sig_gen_tb_pkg;

@@ -6,10 +6,10 @@ use work.sine_lut_pkg.all;
 
 entity sine_lut is
     port (
-        rst_n : in  std_logic;
-        clk   : in  std_logic;
-        addr  : in  std_logic_vector(LUT_ADDR_BITS+1 downto 0);
-        wave  : out std_logic_vector(OUT_RES_BITS-1 downto 0)
+        rst_i : in  std_logic;
+        clk_i : in  std_logic;
+        adr_i : in  std_logic_vector(LUT_ADDR_BITS+1 downto 0);
+        sig_o : out std_logic_vector(OUT_RES_BITS-1 downto 0)
     );
 end entity sine_lut;
 
@@ -21,26 +21,28 @@ architecture rtl of sine_lut is
 
     signal wave_reg : std_logic_vector(OUT_RES_BITS-1 downto 0);
 
+    signal wave_mux : std_logic_vector(OUT_RES_BITS-1 downto 0);
+
 begin
 
-    pointer <= not addr(LUT_ADDR_BITS-1 downto 0) when addr(LUT_ADDR_BITS) = '1' else addr(LUT_ADDR_BITS-1 downto 0);
+    pointer <= not adr_i(LUT_ADDR_BITS-1 downto 0) when adr_i(LUT_ADDR_BITS) = '1' else adr_i(LUT_ADDR_BITS-1 downto 0);
 
     sine_val <= SINE_TABLE(to_integer(unsigned(pointer)));
 
-    wave_reg_logic : process(rst_n, clk)
+    wave_mux <= std_logic_vector(unsigned(not sine_val) + 1) when adr_i(LUT_ADDR_BITS + 1) = '1' else sine_val;
+
+    wave_reg_proc : process(rst_i, clk_i)
     begin
-        if rst_n = '0' then
-            wave_reg <= (others => '0');
-        elsif rising_edge(clk) then
-            if addr(LUT_ADDR_BITS + 1) = '1' then
-                wave_reg <= std_logic_vector(unsigned(not sine_val) + 1);
+        if rising_edge(clk_i) then
+            if rst_i = '1' then
+                wave_reg <= (others => '0');
             else
-                wave_reg <= sine_val;
+                wave_reg <= wave_mux;
             end if;
         end if ;
-    end process wave_reg_logic; -- wave_reg_logic
+    end process wave_reg_proc; -- wave_reg_logic
 
     -- Assign register to output
-    wave <= wave_reg;
+    sig_o <= wave_reg;
 
 end architecture rtl;

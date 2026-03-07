@@ -25,8 +25,6 @@ end entity sig_gen;
 
 architecture rtl of sig_gen is
 
-    signal rst_n : std_logic;
-
     signal pha_inc : std_logic_vector(PHA_ACC_BITS-1 downto 0);
 
     signal pha_val : std_logic_vector(PHA_ACC_BITS-1 downto 0);
@@ -34,8 +32,6 @@ architecture rtl of sig_gen is
     signal addr : std_logic_vector(LUT_ADDR_BITS+1 downto 0);
 
 begin
-
-    rst_n <= not rst_i;
 
     u_sig_gen_csrs: sig_gen_csrs generic map (
         DATA_WIDTH => PHA_ACC_BITS
@@ -64,10 +60,10 @@ begin
     addr <= pha_val(PHA_ACC_BITS-1 downto PHA_ACC_BITS-LUT_ADDR_BITS-2);
 
     u_sine_lut : sine_lut port map (
-        rst_n  => rst_n,
-        clk    => clk_i,
-        addr   => addr,
-        wave   => sig_o
+        rst_i => rst_i,
+        clk_i => clk_i,
+        adr_i => addr,
+        sig_o => sig_o
     );
 
 end architecture rtl;
