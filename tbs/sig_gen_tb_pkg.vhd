@@ -41,9 +41,9 @@ package sig_gen_tb_pkg is
     );
 
     function calc_phase_increment (
-        constant out_period : time;
-        constant clk_period : time;
-        constant ACC_BITS : natural
+        constant ACC_BITS : natural;
+        constant clk_freq : natural;
+        constant out_freq : natural
     ) return std_logic_vector;
 
 end package sig_gen_tb_pkg;
@@ -102,12 +102,12 @@ package body sig_gen_tb_pkg is
     end procedure write_data;
 
     function calc_phase_increment (
-        constant out_period : time;
-        constant clk_period : time;
-        constant ACC_BITS : natural
+        constant ACC_BITS : natural;
+        constant clk_freq : natural;
+        constant out_freq : natural
     ) return std_logic_vector is
         constant x : real := real(2 ** ACC_BITS);
-        constant y : real := real(out_period/clk_period);
+        constant y : real := real(clk_freq/out_freq);
     begin
         return std_logic_vector(to_unsigned(integer(x / y), ACC_BITS));
     end function calc_phase_increment;

@@ -9,15 +9,15 @@ use work.sine_lut_pkg.OUT_RES_BITS;
 
 entity sig_gen_tb is
     generic (
-        PHA_ACC_BITS : natural := 32;
-        OUT_PERIOD : time := 200 ns
+        PHA_ACC_BITS  : natural := 32;
+        CLK_FREQUENCY : natural := 50e6;
+        OUT_FREQUENCY : natural := 1e6
     );
 end sig_gen_tb;
 
 architecture tb of sig_gen_tb is
 
-    -- Clock period --
-    constant CLK_PERIOD : time := 20 ns;
+    constant CLK_PERIOD : time := (1 sec / CLK_FREQUENCY);
 
     signal clk_en : boolean;
 
@@ -25,7 +25,9 @@ architecture tb of sig_gen_tb is
 
     signal dut_if : sig_gen_dut_if_t;
 
-    constant PHA_INC : std_logic_vector(PHA_ACC_BITS-1 downto 0) := calc_phase_increment(OUT_PERIOD, CLK_PERIOD, PHA_ACC_BITS);
+    constant PHA_INC : std_logic_vector(PHA_ACC_BITS-1 downto 0) := calc_phase_increment(PHA_ACC_BITS, CLK_FREQUENCY, OUT_FREQUENCY);
+
+    constant OUT_PERIOD : time := (1 sec / OUT_FREQUENCY);
 
 begin
 
@@ -59,7 +61,7 @@ begin
         initialize(dut_if);
         reset(clk_i, dut_if);
         write_data(clk_i, dut_if, PHA_INC);
-        wait for 5 * OUT_PERIOD;
+        wait for OUT_PERIOD;
         clk_en <= false;
         wait;
     end process stim_process;
