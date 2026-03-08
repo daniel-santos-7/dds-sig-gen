@@ -13,6 +13,10 @@ TBS_SRC = $(wildcard ./tbs/*.vhd)
 RTL_TOP = sig_gen
 TBS_TOP = sig_gen_tb
 
+ifdef OUT_FREQUENCY
+GHDL_RUNOPTS += -gOUT_FREQUENCY=$(OUT_FREQUENCY)
+endif
+
 .PHONY: all simulation clean
 
 all: run
