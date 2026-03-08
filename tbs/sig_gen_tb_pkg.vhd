@@ -1,6 +1,7 @@
 library IEEE;
 library work;
 use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
 use work.sine_lut_pkg.OUT_RES_BITS;
 
 package sig_gen_tb_pkg is
@@ -38,6 +39,12 @@ package sig_gen_tb_pkg is
         constant data : wb_data_t;
         constant sel  : wb_sel_t := (others => '1')
     );
+
+    function calc_phase_increment (
+        constant out_period : time;
+        constant clk_period : time;
+        constant ACC_BITS : natural
+    ) return std_logic_vector;
 
 end package sig_gen_tb_pkg;
 
@@ -93,5 +100,16 @@ package body sig_gen_tb_pkg is
         dut_if.sel_i <= (others => '0');
         dut_if.dat_i <= (others => '0');
     end procedure write_data;
+
+    function calc_phase_increment (
+        constant out_period : time;
+        constant clk_period : time;
+        constant ACC_BITS : natural
+    ) return std_logic_vector is
+        constant x : real := real(2 ** ACC_BITS);
+        constant y : real := real(out_period/clk_period);
+    begin
+        return std_logic_vector(to_unsigned(integer(x / y), ACC_BITS));
+    end function calc_phase_increment;
 
 end package body sig_gen_tb_pkg;

@@ -9,7 +9,8 @@ use work.sine_lut_pkg.OUT_RES_BITS;
 
 entity sig_gen_tb is
     generic (
-        PHA_ACC_BITS : natural := 32
+        PHA_ACC_BITS : natural := 32;
+        OUT_PERIOD : time := 200 ns
     );
 end sig_gen_tb;
 
@@ -24,7 +25,7 @@ architecture tb of sig_gen_tb is
 
     signal dut_if : sig_gen_dut_if_t;
 
-    signal pha_inc : wb_data_t := x"00000000";
+    constant PHA_INC : std_logic_vector(PHA_ACC_BITS-1 downto 0) := calc_phase_increment(OUT_PERIOD, CLK_PERIOD, PHA_ACC_BITS);
 
 begin
 
@@ -57,16 +58,8 @@ begin
         clk_en <= true;
         initialize(dut_if);
         reset(clk_i, dut_if);
-
-        for i in LUT_ADDR_BITS to PHA_ACC_BITS-1 loop
-            pha_inc <= std_logic_vector(shift_left(to_unsigned(1, PHA_ACC_BITS), i));
-            write_data(clk_i, dut_if, pha_inc);
-            for j in 0 to 2**(PHA_ACC_BITS-i)-1 loop
-                wait until rising_edge(clk_i);
-            end loop;
-        end loop;
-
-        wait until rising_edge(clk_i);
+        write_data(clk_i, dut_if, PHA_INC);
+        wait for 5 * OUT_PERIOD;
         clk_en <= false;
         wait;
     end process stim_process;
