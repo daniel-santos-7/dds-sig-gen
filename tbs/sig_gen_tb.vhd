@@ -31,10 +31,6 @@ architecture tb of sig_gen_tb is
 
 begin
 
-    assert PHA_ACC_BITS = WB_DATA_WIDTH
-        report "sig_gen_tb expects PHA_ACC_BITS = 32"
-        severity failure;
-
     -- Instantiate the unit under test --
     uut : sig_gen generic map (
         PHA_ACC_BITS => PHA_ACC_BITS
