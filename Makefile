@@ -13,11 +13,11 @@ TBS_SRC = $(wildcard ./tbs/*.vhd)
 RTL_TOP = sig_gen
 TBS_TOP = sig_gen_tb
 
-.PHONY: all run clean
+.PHONY: all simulation clean
 
 all: run
 
-run: $(WORKDIR)/.run
+simulation: $(WORKDIR)/.run
 
 clean: | $(WORKDIR)
 	@$(GHDL) clean $(GHDL_OPTS)
