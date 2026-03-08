@@ -1,5 +1,3 @@
-SHELL = bash
-
 GHDL = ghdl
 GHDL_OPTS = --workdir=$(WORKDIR)
 GHDL_RUNOPTS = --wave=$(WAVESDIR)/$(TBS_TOP).ghw
@@ -13,28 +11,30 @@ TBS_SRC = $(wildcard ./tbs/*.vhd)
 RTL_TOP = sig_gen
 TBS_TOP = sig_gen_tb
 
+ifdef CLK_FREQUENCY
+GHDL_RUNOPTS += -gCLK_FREQUENCY=$(CLK_FREQUENCY)
+endif
+
 ifdef OUT_FREQUENCY
 GHDL_RUNOPTS += -gOUT_FREQUENCY=$(OUT_FREQUENCY)
 endif
 
-.PHONY: all simulation clean
+.PHONY: all run clean
 
 all: run
 
-simulation: $(WORKDIR)/.run
+$(WORKDIR) $(WAVESDIR):
+	@mkdir -p $@
+
+$(WORKDIR)/.import: $(RTL_SRC) $(TBS_SRC) | $(WORKDIR)
+	@$(GHDL) import $(GHDL_OPTS) $(RTL_SRC) $(TBS_SRC) | tee $@
+
+$(WORKDIR)/.make: $(WORKDIR)/.import
+	@$(GHDL) make $(GHDL_OPTS) $(TBS_TOP) | tee $@
+
+run: $(WORKDIR)/.make | $(WAVESDIR)
+	@$(GHDL) run  $(TBS_TOP) $(GHDL_RUNOPTS)
 
 clean: | $(WORKDIR)
 	@$(GHDL) clean $(GHDL_OPTS)
 	@rm -rf $(WORKDIR) $(WAVESDIR)
-
-$(WORKDIR) $(WAVESDIR):
-	@mkdir $@
-
-$(WORKDIR)/.import: $(RTL_SRC) $(TBS_SRC) | $(WORKDIR)
-	@set -o pipefail; $(GHDL) import $(GHDL_OPTS) $(RTL_SRC) $(TBS_SRC) | tee $@
-
-$(WORKDIR)/.make: $(WORKDIR)/.import
-	@set -o pipefail; $(GHDL) make $(GHDL_OPTS) $(TBS_TOP) | tee $@
-
-$(WORKDIR)/.run: $(WORKDIR)/.make | $(WAVESDIR)
-	@set -o pipefail; $(GHDL) run  $(TBS_TOP) $(GHDL_RUNOPTS) | tee $@
