@@ -30,7 +30,7 @@ begin
             if rst_i = '1' then
                 inc_reg <= (others => '0');
             elsif we_i = '1' then
-                inc_reg <= pha_i;
+                inc_reg <= inc_i;
             end if;
         end if;
     end process inc_reg_proc;

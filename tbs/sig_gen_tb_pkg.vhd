@@ -15,7 +15,6 @@ package sig_gen_tb_pkg is
         inc_i : pha_acc_t;
         pha_i : pha_acc_t;
         amp_i : std_logic_vector(OUT_RES_BITS-1 downto 0);
-        sig_o : std_logic_vector(OUT_RES_BITS-1 downto 0);
     end record sig_gen_dut_if_t;
 
     procedure initialize (
@@ -54,7 +53,6 @@ package body sig_gen_tb_pkg is
         dut_if.inc_i <= (others => '0');
         dut_if.pha_i <= (others => '0');
         dut_if.amp_i <= (others => '0');
-        dut_if.sig_o <= (others => 'Z');
     end procedure initialize;
 
     procedure reset (

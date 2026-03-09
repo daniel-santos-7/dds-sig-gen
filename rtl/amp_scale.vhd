@@ -18,7 +18,7 @@ architecture rtl of amp_scale is
 
     signal amp_reg : std_logic_vector(OUT_RES_BITS-1 downto 0);
 
-    signal mul_res : std_logic_vector(2*OUT_RES_BITS-1 downto 0);
+    signal mul_res : signed(2*OUT_RES_BITS downto 0);
 
     signal sig_reg : std_logic_vector(OUT_RES_BITS-1 downto 0);
 
@@ -35,7 +35,7 @@ begin
         end if;
     end process amp_reg_proc;
 
-    mul_res <= std_logic_vector(unsigned(sig_i) * unsigned(amp_reg));
+    mul_res <= signed(sig_i) * signed('0' & amp_reg);
 
     sig_reg_proc : process(clk_i)
     begin
@@ -43,7 +43,9 @@ begin
             if rst_i = '1' then
                 sig_reg <= (others => '0');
             else
-                sig_reg <= mul_res(2*OUT_RES_BITS-1 downto OUT_RES_BITS);
+                sig_reg <= std_logic_vector(
+                    resize(shift_right(mul_res, OUT_RES_BITS), OUT_RES_BITS)
+                );
             end if;
         end if;
     end process sig_reg_proc;
