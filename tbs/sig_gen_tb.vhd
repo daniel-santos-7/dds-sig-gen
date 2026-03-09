@@ -1,5 +1,4 @@
 library IEEE;
-library work;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 use work.sig_gen_pkg.all;
@@ -19,9 +18,9 @@ architecture tb of sig_gen_tb is
 
     constant CLK_PERIOD : time := (1 sec / CLK_FREQUENCY);
 
-    signal clk_en : boolean;
+    signal clk_en : boolean := false;
 
-    signal clk_i : std_logic;
+    signal clk_i : std_logic := '0';
 
     signal dut_if : sig_gen_dut_if_t;
 
@@ -37,13 +36,10 @@ begin
     ) port map (
         clk_i => clk_i,
         rst_i => dut_if.rst_i,
-        cyc_i => dut_if.cyc_i,
-        stb_i => dut_if.stb_i,
         we_i  => dut_if.we_i,
-        sel_i => dut_if.sel_i,
-        dat_i => dut_if.dat_i,
-        ack_o => dut_if.ack_o,
-        dat_o => dut_if.dat_o,
+        inc_i => dut_if.inc_i,
+        pha_i => dut_if.pha_i,
+        amp_i => dut_if.amp_i,
         sig_o => dut_if.sig_o
     );
 
