@@ -43,13 +43,11 @@ begin
             if rst_i = '1' then
                 sig_reg <= (others => '0');
             else
-                sig_reg <= std_logic_vector(
-                    resize(shift_right(mul_res, OUT_RES_BITS), OUT_RES_BITS)
-                );
+                sig_reg <= std_logic_vector(mul_res(2*OUT_RES_BITS-1 downto OUT_RES_BITS));
             end if;
         end if;
     end process sig_reg_proc;
 
-    sig_o <= sig_reg;
+    sig_o <= not sig_reg(OUT_RES_BITS-1) & sig_reg(OUT_RES_BITS-2 downto 0);
 
 end architecture rtl;
