@@ -56,11 +56,13 @@ package sig_gen_pkg is
 
     component sig_gen_csrs is
         generic (
-            DATA_WIDTH : natural := 32
+            DATA_WIDTH : natural := 32;
+            ADDR_WIDTH : natural := 4
         );
         port (
             rst_i : in  std_logic;
             clk_i : in  std_logic;
+            adr_i : in  std_logic_vector(ADDR_WIDTH-1 downto 0);
             cyc_i : in  std_logic;
             stb_i : in  std_logic;
             we_i  : in  std_logic;
@@ -68,8 +70,32 @@ package sig_gen_pkg is
             dat_i : in  std_logic_vector(DATA_WIDTH-1 downto 0);
             ack_o : out std_logic;
             dat_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
-            inc_o : out std_logic_vector(DATA_WIDTH-1 downto 0)
+            inc_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            pha_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            amp_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            we_o  : out std_logic
         );
     end component sig_gen_csrs;
+
+    component wb_sig_gen is
+        generic (
+            DATA_WIDTH   : natural := 32;
+            ADDR_WIDTH   : natural := 4;
+            PHA_ACC_BITS : natural := 32
+        );
+        port (
+            rst_i : in  std_logic;
+            clk_i : in  std_logic;
+            adr_i : in  std_logic_vector(ADDR_WIDTH-1 downto 0);
+            cyc_i : in  std_logic;
+            stb_i : in  std_logic;
+            we_i  : in  std_logic;
+            sel_i : in  std_logic_vector(DATA_WIDTH/8-1 downto 0);
+            dat_i : in  std_logic_vector(DATA_WIDTH-1 downto 0);
+            ack_o : out std_logic;
+            dat_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            sig_o : out std_logic_vector(OUT_RES_BITS-1 downto 0)
+        );
+    end component wb_sig_gen;
 
 end package sig_gen_pkg;
