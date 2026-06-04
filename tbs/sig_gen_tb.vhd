@@ -1,68 +1,69 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
+use STD.textio.all;
 use work.sig_gen_pkg.all;
 use work.sig_gen_tb_pkg.all;
-use work.sine_lut_pkg.LUT_ADDR_BITS;
 use work.sine_lut_pkg.OUT_RES_BITS;
 
 entity sig_gen_tb is
     generic (
         PHA_ACC_BITS  : natural := 32;
-        CLK_FREQUENCY : natural := 50e6;
-        OUT_FREQUENCY : natural := 1e6
+        REG_INC_VAL   : natural := 85899345;
+        REG_PHA_VAL   : natural := 0;
+        REG_AMP_VAL   : natural := 4095;
+        DATA_FILE     : string  := "sig_gen_tb.txt"
     );
 end sig_gen_tb;
 
 architecture tb of sig_gen_tb is
 
-    constant CLK_PERIOD : time := (1 sec / CLK_FREQUENCY);
+    constant CLK_PERIOD : time := 20 ns;
+
+    constant CYCLES_PER_PERIOD : natural := natural((2.0 ** PHA_ACC_BITS + real(REG_INC_VAL) - 1.0) / real(REG_INC_VAL));
 
     signal clk_en : boolean := false;
     signal clk_i  : std_logic := '0';
+    signal rst_i  : std_logic := '0';
 
-    signal dut_if : sig_gen_dut_if_t;
-    signal sig_o  : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal wb : wb_bus;
 
-    constant PHA_INC : std_logic_vector(PHA_ACC_BITS-1 downto 0) := calc_phase_increment(PHA_ACC_BITS, CLK_FREQUENCY, OUT_FREQUENCY);
-    constant OUT_PERIOD : time := (1 sec / OUT_FREQUENCY);
+    signal sig_o : std_logic_vector(OUT_RES_BITS-1 downto 0);
 
 begin
 
-    uut : sig_gen
-        generic map (PHA_ACC_BITS => PHA_ACC_BITS)
-        port map (
-            clk_i => clk_i,
-            rst_i => dut_if.rst_i,
-            we_i  => dut_if.we_i,
-            inc_i => dut_if.inc_i,
-            pha_i => dut_if.pha_i,
-            amp_i => dut_if.amp_i,
-            sig_o => sig_o
-        );
+    uut : wb_sig_gen generic map (
+        DATA_WIDTH   => DATA_WIDTH,
+        ADDR_WIDTH   => ADDR_WIDTH,
+        PHA_ACC_BITS => PHA_ACC_BITS
+    ) port map (
+        rst_i => rst_i,
+        clk_i => clk_i,
+        adr_i => wb.adr_i,
+        cyc_i => wb.cyc_i,
+        stb_i => wb.stb_i,
+        we_i  => wb.we_i,
+        sel_i => wb.sel_i,
+        dat_i => wb.dat_i,
+        ack_o => wb.ack_o,
+        dat_o => wb.dat_o,
+        sig_o => sig_o
+    );
 
     clk_i <= not clk_i after (CLK_PERIOD / 2) when clk_en else '0';
 
     stim_process : process
-        variable cross_time_1 : time;
-        variable cross_time_2 : time;
+        file outfile : text open write_mode is DATA_FILE;
     begin
         clk_en <= true;
-        initialize(dut_if);
-        reset(clk_i, dut_if);
 
-        write_data(clk_i, dut_if, PHA_INC);
-        wait until sig_o(OUT_RES_BITS-1) = '1';
+        wb_init(wb);
+        wb_reset(clk_i, rst_i);
+        wb_write_config(clk_i, wb, REG_INC_VAL, REG_PHA_VAL, REG_AMP_VAL);
 
-        cross_time_1 := now;
-        for i in 1 to 9 loop
-            wait until sig_o(OUT_RES_BITS-1) = '1';
-        end loop;
-        cross_time_2 := now;
+        write_sample(clk_i, outfile, sig_o, CYCLES_PER_PERIOD);
 
-        report "Measured output frequency: " &
-            real'image(1.0e3 * real(9) / real((cross_time_2 - cross_time_1) / 1 ns)) & " MHz";
-
+        report "Saved " & integer'image(CYCLES_PER_PERIOD) & " samples";
         clk_en <= false;
         wait;
     end process stim_process;
