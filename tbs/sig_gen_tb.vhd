@@ -12,6 +12,7 @@ entity sig_gen_tb is
         REG_INC_VAL   : natural := 85899345;
         REG_PHA_VAL   : natural := 0;
         REG_AMP_VAL   : natural := 4095;
+        NUM_PERIODS   : natural := 4;
         DATA_FILE     : string  := "sig_gen_tb.txt"
     );
 end sig_gen_tb;
@@ -21,6 +22,7 @@ architecture tb of sig_gen_tb is
     constant CLK_PERIOD : time := 20 ns;
 
     constant CYCLES_PER_PERIOD : natural := natural((2.0 ** PHA_ACC_BITS + real(REG_INC_VAL) - 1.0) / real(REG_INC_VAL));
+    constant TOTAL_SAMPLES     : natural := NUM_PERIODS * CYCLES_PER_PERIOD;
 
     signal clk_en : boolean := false;
     signal clk_i  : std_logic := '0';
@@ -61,9 +63,9 @@ begin
         wb_reset(clk_i, rst_i);
         wb_write_config(clk_i, wb, REG_INC_VAL, REG_PHA_VAL, REG_AMP_VAL);
 
-        write_sample(clk_i, outfile, sig_o, CYCLES_PER_PERIOD);
+        write_sample(clk_i, outfile, sig_o, TOTAL_SAMPLES);
 
-        report "Saved " & integer'image(CYCLES_PER_PERIOD) & " samples";
+        report "Saved " & integer'image(TOTAL_SAMPLES) & " samples (" & integer'image(NUM_PERIODS) & " periods)";
         clk_en <= false;
         wait;
     end process stim_process;

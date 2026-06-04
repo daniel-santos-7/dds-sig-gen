@@ -4,3 +4,5 @@ work
 *.o
 sig_gen
 sig_gen_tb
+py/.venv
+sig_gen_tb.txt

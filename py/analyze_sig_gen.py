@@ -11,6 +11,11 @@ def freq_guess(power, freqs):
     peak = np.argmax(power)
     return None if peak == 0 else freqs[peak]
 
+def trim_leading(values):
+    first = values[0]
+    n_repeat = np.argmax(values != first)
+    return values[n_repeat:] if n_repeat > 0 else values
+
 
 def bins_around(freqs, target_freq, half_width):
     center = np.argmin(np.abs(freqs - target_freq))
@@ -74,6 +79,17 @@ def sinad_db(power, freqs, fund_freq):
 def enob(power, freqs, fund_freq):
     return (sinad_db(power, freqs, fund_freq) - 1.76) / 6.02
 
+def jitter_ui(ac, t, freq):
+    signs = np.sign(ac)
+    rising = np.where(np.diff(signs) > 0)[0]
+    if len(rising) < 2:
+        return None
+    dt_sample = t[1] - t[0]
+    cross_times = [(c + (-ac[c] / (ac[c + 1] - ac[c]))) * dt_sample
+                   for c in rising]
+    periods = np.diff(cross_times)
+    return np.std(periods) * freq
+
 
 def fit_sine(values, clk_frequency, freq0):
     n = len(values)
@@ -102,6 +118,7 @@ def main():
     args = parser.parse_args()
 
     values = np.loadtxt(args.data)
+    values = trim_leading(values)
     n = len(values)
 
     if n < 4:
@@ -109,7 +126,7 @@ def main():
         return
 
     ac = values - np.mean(values)
-    power, freqs = periodogram(ac, fs=args.clk_frequency, window='hann')
+    freqs, power = periodogram(ac, fs=args.clk_frequency, window='hann')
 
     freq0 = freq_guess(power, freqs)
     if freq0 is None:
@@ -122,6 +139,9 @@ def main():
         return
 
     amp, freq, phase, offset, t = result
+
+    ac = values - offset
+    jitter = jitter_ui(ac, t, freq)
 
     thd_val = thd(power, freqs, freq)
 
@@ -141,6 +161,10 @@ def main():
     print(f"SNR: {snr_val:.2f} dB")
     print(f"SINAD: {sinad_val:.2f} dB")
     print(f"ENOB: {enob_val:.2f} bits")
+    if jitter is not None:
+        print(f"Phase jitter: {jitter:.2e} UI ({jitter / freq:.2e} s)")
+    else:
+        print("Phase jitter: unavailable")
 
 
 if __name__ == "__main__":
