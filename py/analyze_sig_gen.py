@@ -19,35 +19,19 @@ def main():
 
     values = np.loadtxt(args.data)
     values = trim_leading(values)
-    n = len(values)
 
     try:
         est = SineEstimate(values, args.clk_frequency)
-    except ValueError as e:
-        print(f"Error: {e}")
-        return
-
-    try:
         spec = Spectrum(values, args.clk_frequency)
-    except ValueError as e:
-        print(f"Error: {e}")
-        return
-
-    try:
         fit = SineFit(values, args.clk_frequency, spec.fund_freq)
+        metrics = SpectralMetrics(spec)
+
+        est.report()
+        fit.report()
+        spec.report()
+        metrics.report()
     except ValueError as e:
         print(f"Error: {e}")
-        return
-
-    spec.fund_freq = fit.freq
-
-    metrics = SpectralMetrics(spec)
-
-    print(f"Samples: {n}")
-    est.report()
-    fit.report()
-    spec.report()
-    metrics.report()
 
 if __name__ == "__main__":
     main()

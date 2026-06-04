@@ -1,10 +1,10 @@
 import numpy as np
 from scipy.optimize import curve_fit
 
-def _sine_model(t, amp, freq, phase, offset):
-    return amp * np.sin(2 * np.pi * freq * t + phase) + offset
-
 class SineFit:
+    @staticmethod
+    def _sine_model(t, amp, freq, phase, offset):
+        return amp * np.sin(2 * np.pi * freq * t + phase) + offset
     def __init__(self, values, clk_frequency, freq0):
         n = len(values)
         if n < 4:
@@ -15,7 +15,7 @@ class SineFit:
         amp0 = np.ptp(values) / 2
 
         try:
-            popt, _ = curve_fit(_sine_model, t, values,
+            popt, _ = curve_fit(SineFit._sine_model, t, values,
                                 p0=[amp0, freq0, 0, offset0], maxfev=5000)
         except (RuntimeError, ValueError):
             raise ValueError("sine fit did not converge")

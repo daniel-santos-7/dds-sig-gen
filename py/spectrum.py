@@ -10,9 +10,10 @@ class Spectrum:
         ac = values - np.mean(values)
         self._freqs, self._power = periodogram(ac, fs=clk_frequency, window='hann')
 
-        freq0 = self._freq_guess()
-        if freq0 is None:
+        peak = np.argmax(self._power)
+        if peak == 0:
             raise ValueError("could not determine initial frequency")
+        freq0 = self._freqs[peak]
 
         self._fund_freq = freq0
         self._fund_bins = self._bins_around(freq0, 1)
@@ -21,10 +22,6 @@ class Spectrum:
     def _bins_around(self, target_freq, half_width):
         center = np.argmin(np.abs(self._freqs - target_freq))
         return set(range(max(0, center - half_width), min(len(self._freqs), center + half_width + 1)))
-
-    def _freq_guess(self):
-        peak = np.argmax(self._power)
-        return None if peak == 0 else self._freqs[peak]
 
     def _compute_harm_bins(self):
         harm_bins = set()
@@ -38,12 +35,6 @@ class Spectrum:
     @property
     def fund_freq(self):
         return self._fund_freq
-
-    @fund_freq.setter
-    def fund_freq(self, value):
-        self._fund_freq = value
-        self._fund_bins = self._bins_around(value, 1)
-        self._harm_bins = self._compute_harm_bins()
 
     @property
     def fundamental_power(self):
