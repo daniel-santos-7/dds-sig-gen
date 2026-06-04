@@ -15,8 +15,7 @@ class SineFit:
         amp0 = np.ptp(values) / 2
 
         try:
-            popt, _ = curve_fit(SineFit._sine_model, t, values,
-                                p0=[amp0, freq0, 0, offset0], maxfev=5000)
+            popt, _ = curve_fit(SineFit._sine_model, t, values, p0=[amp0, freq0, 0, offset0], maxfev=5000)
         except (RuntimeError, ValueError):
             raise ValueError("sine fit did not converge")
 
