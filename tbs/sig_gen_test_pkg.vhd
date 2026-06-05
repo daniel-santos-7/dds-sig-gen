@@ -2,6 +2,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 use IEEE.math_real.all;
+use STD.textio.all;
 
 package sig_gen_test_pkg is
 
@@ -37,6 +38,7 @@ package sig_gen_test_pkg is
 
     function get_test_vector(index : natural) return test_vector_t;
     function to_regs(tv : test_vector_t) return reg_values_t;
+    procedure write_case_file(file_name : string; tv : test_vector_t; test_index : natural);
 
 end package sig_gen_test_pkg;
 
@@ -89,5 +91,19 @@ package body sig_gen_test_pkg is
     begin
         return TEST_VECTORS(index);
     end function;
+
+    procedure write_case_file(file_name : string; tv : test_vector_t; test_index : natural) is
+        file f : text open write_mode is file_name;
+        variable l : line;
+    begin
+        write(l, string'("freq_hz: ")   & real'image(tv.freq_hz));
+        writeline(f, l);
+        write(l, string'("phase_deg: ") & real'image(tv.phase_deg));
+        writeline(f, l);
+        write(l, string'("amp_pct: ")   & real'image(tv.amp_pct));
+        writeline(f, l);
+        write(l, string'("test_index: ") & integer'image(test_index));
+        writeline(f, l);
+    end procedure;
 
 end package body sig_gen_test_pkg;

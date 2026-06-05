@@ -10,7 +10,8 @@ entity sig_gen_tb is
         PHA_ACC_BITS  : natural := 32;
         TEST_INDEX    : natural := 0;
         NUM_PERIODS   : natural := 4;
-        DATA_FILE     : string  := "sig_gen_tb.txt"
+        DATA_FILE     : string  := "sig_gen_tb.txt";
+        CASE_FILE     : string  := "case.txt"
     );
 end sig_gen_tb;
 
@@ -63,6 +64,8 @@ begin
         wb_init(wb);
         wb_reset(clk_i, rst_i);
         wb_write_config(clk_i, wb, REGS.inc, REGS.pha, REGS.amp);
+
+        write_case_file(CASE_FILE, TV, TEST_INDEX);
 
         write_sample(clk_i, DATA_FILE, sig_o, TOTAL_SAMPLES);
 
