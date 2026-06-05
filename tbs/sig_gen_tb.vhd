@@ -10,8 +10,9 @@ entity sig_gen_tb is
         PHA_ACC_BITS  : natural := 32;
         TEST_INDEX    : natural := 0;
         NUM_PERIODS   : natural := 4;
-        DATA_FILE     : string  := "sig_gen_tb.txt";
-        CASE_FILE     : string  := "case.txt"
+        DATA_FILE     : string  := "samples.txt";
+        CASE_FILE     : string  := "test_case.txt";
+        TEST_VECTORS  : string  := "test_vectors.csv"
     );
 end sig_gen_tb;
 
@@ -19,10 +20,10 @@ architecture tb of sig_gen_tb is
 
     constant CLK_PERIOD : time := 20 ns;
 
-    constant TV   : test_vector_t := get_test_vector(TEST_INDEX);
-    constant REGS : reg_values_t  := to_regs(TV);
+    constant TC   : test_case_t := get_test_case(TEST_INDEX, TEST_VECTORS);
+    constant REGS : reg_values_t  := to_regs(TC);
 
-    constant INC_REAL : real := TV.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS);
+    constant INC_REAL : real := TC.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS);
 
     constant CYCLES_PER_PERIOD : natural := natural(ceil((2.0 ** PHA_ACC_BITS) / INC_REAL));
     constant TOTAL_SAMPLES     : natural := NUM_PERIODS * CYCLES_PER_PERIOD;
@@ -65,7 +66,7 @@ begin
         wb_reset(clk_i, rst_i);
         wb_write_config(clk_i, wb, REGS.inc, REGS.pha, REGS.amp);
 
-        write_case_file(CASE_FILE, TV, TEST_INDEX);
+        write_case_file(CASE_FILE, TC);
 
         write_sample(clk_i, DATA_FILE, sig_o, TOTAL_SAMPLES);
 

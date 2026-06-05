@@ -6,11 +6,12 @@ use STD.textio.all;
 
 package sig_gen_test_pkg is
 
-    type test_vector_t is record
-        freq_hz   : real;
-        phase_deg : real;
-        amp_pct   : real;
-    end record test_vector_t;
+    type test_case_t is record
+        test_index : natural;
+        freq_hz    : real;
+        phase_deg  : real;
+        amp_pct    : real;
+    end record test_case_t;
 
     type reg_values_t is record
         inc : std_logic_vector(31 downto 0);
@@ -18,27 +19,13 @@ package sig_gen_test_pkg is
         amp : std_logic_vector(31 downto 0);
     end record reg_values_t;
 
-    type test_vector_array is array (natural range <>) of test_vector_t;
-    type real_array is array (natural range <>) of real;
-
-    constant NUM_TESTS     : natural := 128;
     constant CLK_FREQ      : real    := 50.0e6;
     constant PHA_ACC_BITS  : natural := 32;
     constant AMP_MAX       : real    := 4095.0;
 
-    constant FREQ_HZ   : real_array(0 to 3) := (100000.0, 1000000.0, 10000000.0, 25000000.0);
-    constant PHASE_DEG : real_array(0 to 7) := (0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0);
-    constant AMP_PCT   : real_array(0 to 3) := (12.5, 50.0, 75.0, 100.0);
-
-    function generate_test_vectors (
-        freqs  : real_array;
-        phases : real_array;
-        amps   : real_array
-    ) return test_vector_array;
-
-    function get_test_vector(index : natural) return test_vector_t;
-    function to_regs(tv : test_vector_t) return reg_values_t;
-    procedure write_case_file(file_name : string; tv : test_vector_t; test_index : natural);
+    impure function get_test_case(index : natural; csv_file : string) return test_case_t;
+    function to_regs(tv : test_case_t) return reg_values_t;
+    procedure write_case_file(file_name : string; tv : test_case_t);
 
 end package sig_gen_test_pkg;
 
@@ -57,7 +44,7 @@ package body sig_gen_test_pkg is
         return std_logic_vector(result);
     end function;
 
-    function to_regs(tv : test_vector_t) return reg_values_t is
+    function to_regs(tv : test_case_t) return reg_values_t is
     begin
         return (
             inc => real_to_slv32(tv.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS)),
@@ -66,43 +53,59 @@ package body sig_gen_test_pkg is
         );
     end function;
 
-    function generate_test_vectors (
-        freqs  : real_array;
-        phases : real_array;
-        amps   : real_array
-    ) return test_vector_array is
-        variable result : test_vector_array(0 to NUM_TESTS-1);
-        variable idx : natural := 0;
+    impure function get_test_case(index : natural; csv_file : string) return test_case_t is
+        file f : text;
+        variable l : line;
+        variable comma : character;
+        variable idx_int : integer;
+        variable freq : real;
+        variable phase : real;
+        variable amp : real;
+        variable good : boolean;
     begin
-        for i in freqs'range loop
-            for j in phases'range loop
-                for k in amps'range loop
-                    result(idx) := (freq_hz => freqs(i), phase_deg => phases(j), amp_pct => amps(k));
-                    idx := idx + 1;
-                end loop;
-            end loop;
+        file_open(f, csv_file, read_mode);
+
+        readline(f, l);
+
+        for i in 0 to index loop
+            readline(f, l);
         end loop;
-        return result;
+
+        read(l, idx_int, good);
+        read(l, comma);
+        read(l, freq, good);
+        read(l, comma);
+        read(l, phase, good);
+        read(l, comma);
+        read(l, amp, good);
+
+        file_close(f);
+
+        return (test_index => idx_int, freq_hz => freq, phase_deg => phase, amp_pct => amp);
     end function;
 
-    constant TEST_VECTORS : test_vector_array(0 to NUM_TESTS-1) := generate_test_vectors(FREQ_HZ, PHASE_DEG, AMP_PCT);
-
-    function get_test_vector(index : natural) return test_vector_t is
-    begin
-        return TEST_VECTORS(index);
-    end function;
-
-    procedure write_case_file(file_name : string; tv : test_vector_t; test_index : natural) is
+    procedure write_case_file(file_name : string; tv : test_case_t) is
         file f : text open write_mode is file_name;
         variable l : line;
+        variable regs : reg_values_t;
     begin
+        regs := to_regs(tv);
+        write(l, string'("test_index: ") & integer'image(tv.test_index));
+        writeline(f, l);
         write(l, string'("freq_hz: ")   & real'image(tv.freq_hz));
         writeline(f, l);
         write(l, string'("phase_deg: ") & real'image(tv.phase_deg));
         writeline(f, l);
         write(l, string'("amp_pct: ")   & real'image(tv.amp_pct));
         writeline(f, l);
-        write(l, string'("test_index: ") & integer'image(test_index));
+        write(l, string'("inc: 0x"));
+        hwrite(l, to_bitvector(regs.inc));
+        writeline(f, l);
+        write(l, string'("pha: 0x"));
+        hwrite(l, to_bitvector(regs.pha));
+        writeline(f, l);
+        write(l, string'("amp: 0x"));
+        hwrite(l, to_bitvector(regs.amp));
         writeline(f, l);
     end procedure;
 
