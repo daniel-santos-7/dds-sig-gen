@@ -36,16 +36,16 @@ package sig_gen_tb_pkg is
     );
 
     procedure wb_write_config (
-        signal clk : in std_logic;
-        signal wb : inout wb_bus;
-        constant inc  : natural;
-        constant pha  : natural;
-        constant amp  : natural
+        signal clk   : in std_logic;
+        signal wb    : inout wb_bus;
+        constant inc  : std_logic_vector(31 downto 0);
+        constant pha  : std_logic_vector(31 downto 0);
+        constant amp  : std_logic_vector(31 downto 0)
     );
 
     procedure write_sample (
         signal clk : in std_logic;
-        file f : text;
+        constant file_name : in string;
         signal value : in std_logic_vector;
         constant count : in natural
     );
@@ -98,24 +98,25 @@ package body sig_gen_tb_pkg is
     procedure wb_write_config (
         signal clk   : in std_logic;
         signal wb    : inout wb_bus;
-        constant inc : natural;
-        constant pha : natural;
-        constant amp : natural
+        constant inc : std_logic_vector(31 downto 0);
+        constant pha : std_logic_vector(31 downto 0);
+        constant amp : std_logic_vector(31 downto 0)
     ) is
         constant WRITE_COMMAND : std_logic_vector(DATA_WIDTH-1 downto 0) := x"00000001";
     begin
-        wb_write(clk, wb, REG_INC, std_logic_vector(to_unsigned(inc, DATA_WIDTH)));
-        wb_write(clk, wb, REG_PHA, std_logic_vector(to_unsigned(pha, DATA_WIDTH)));
-        wb_write(clk, wb, REG_AMP, std_logic_vector(to_unsigned(amp, DATA_WIDTH)));
+        wb_write(clk, wb, REG_INC, inc);
+        wb_write(clk, wb, REG_PHA, pha);
+        wb_write(clk, wb, REG_AMP, amp);
         wb_write(clk, wb, REG_WE, WRITE_COMMAND);
     end procedure wb_write_config;
 
     procedure write_sample (
         signal clk : in std_logic;
-        file f : text;
+        constant file_name : in string;
         signal value : in std_logic_vector;
         constant count : in natural
     ) is
+        file f : text open write_mode is file_name;
         variable l : line;
     begin
         for i in 0 to count-1 loop

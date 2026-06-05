@@ -1,17 +1,15 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
-use STD.textio.all;
 use work.sig_gen_pkg.all;
 use work.sig_gen_tb_pkg.all;
+use work.sig_gen_test_pkg.all;
 use work.sine_lut_pkg.OUT_RES_BITS;
 
 entity sig_gen_tb is
     generic (
         PHA_ACC_BITS  : natural := 32;
-        REG_INC_VAL   : natural := 85899345;
-        REG_PHA_VAL   : natural := 0;
-        REG_AMP_VAL   : natural := 4095;
+        TEST_INDEX    : natural := 0;
         NUM_PERIODS   : natural := 4;
         DATA_FILE     : string  := "sig_gen_tb.txt"
     );
@@ -21,7 +19,11 @@ architecture tb of sig_gen_tb is
 
     constant CLK_PERIOD : time := 20 ns;
 
-    constant CYCLES_PER_PERIOD : natural := natural((2.0 ** PHA_ACC_BITS + real(REG_INC_VAL) - 1.0) / real(REG_INC_VAL));
+    constant TV : test_vector_t := get_test_vector(TEST_INDEX);
+
+    constant INC_VAL : natural := to_integer(unsigned(TV.inc));
+
+    constant CYCLES_PER_PERIOD : natural := natural((2.0 ** PHA_ACC_BITS + real(INC_VAL) - 1.0) / real(INC_VAL));
     constant TOTAL_SAMPLES     : natural := NUM_PERIODS * CYCLES_PER_PERIOD;
 
     signal clk_en : boolean := false;
@@ -55,15 +57,14 @@ begin
     clk_i <= not clk_i after (CLK_PERIOD / 2) when clk_en else '0';
 
     stim_process : process
-        file outfile : text open write_mode is DATA_FILE;
     begin
         clk_en <= true;
 
         wb_init(wb);
         wb_reset(clk_i, rst_i);
-        wb_write_config(clk_i, wb, REG_INC_VAL, REG_PHA_VAL, REG_AMP_VAL);
+        wb_write_config(clk_i, wb, TV.inc, TV.pha, TV.amp);
 
-        write_sample(clk_i, outfile, sig_o, TOTAL_SAMPLES);
+        write_sample(clk_i, DATA_FILE, sig_o, TOTAL_SAMPLES);
 
         report "Saved " & integer'image(TOTAL_SAMPLES) & " samples (" & integer'image(NUM_PERIODS) & " periods)";
         clk_en <= false;
