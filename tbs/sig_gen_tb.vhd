@@ -1,11 +1,9 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
-use IEEE.numeric_std.all;
 use IEEE.math_real.all;
 use work.sig_gen_pkg.all;
 use work.sig_gen_tb_pkg.all;
 use work.sig_gen_test_pkg.all;
-use work.sine_lut_pkg.OUT_RES_BITS;
 
 entity sig_gen_tb is
     generic (
@@ -20,9 +18,10 @@ architecture tb of sig_gen_tb is
 
     constant CLK_PERIOD : time := 20 ns;
 
-    constant TV : test_vector_t := get_test_vector(TEST_INDEX);
+    constant TV   : test_vector_t := get_test_vector(TEST_INDEX);
+    constant REGS : reg_values_t  := to_regs(TV);
 
-    constant INC_REAL : real := slv32_to_real(TV.inc);
+    constant INC_REAL : real := TV.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS);
 
     constant CYCLES_PER_PERIOD : natural := natural(ceil((2.0 ** PHA_ACC_BITS) / INC_REAL));
     constant TOTAL_SAMPLES     : natural := NUM_PERIODS * CYCLES_PER_PERIOD;
@@ -33,7 +32,7 @@ architecture tb of sig_gen_tb is
 
     signal wb : wb_bus;
 
-    signal sig_o : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal sig_o : std_logic_vector(11 downto 0);
 
 begin
 
@@ -63,7 +62,7 @@ begin
 
         wb_init(wb);
         wb_reset(clk_i, rst_i);
-        wb_write_config(clk_i, wb, TV.inc, TV.pha, TV.amp);
+        wb_write_config(clk_i, wb, REGS.inc, REGS.pha, REGS.amp);
 
         write_sample(clk_i, DATA_FILE, sig_o, TOTAL_SAMPLES);
 

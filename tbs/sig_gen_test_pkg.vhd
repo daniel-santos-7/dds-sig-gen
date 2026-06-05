@@ -6,10 +6,16 @@ use IEEE.math_real.all;
 package sig_gen_test_pkg is
 
     type test_vector_t is record
+        freq_hz   : real;
+        phase_deg : real;
+        amp_pct   : real;
+    end record test_vector_t;
+
+    type reg_values_t is record
         inc : std_logic_vector(31 downto 0);
         pha : std_logic_vector(31 downto 0);
         amp : std_logic_vector(31 downto 0);
-    end record test_vector_t;
+    end record reg_values_t;
 
     type test_vector_array is array (natural range <>) of test_vector_t;
     type real_array is array (natural range <>) of real;
@@ -19,22 +25,22 @@ package sig_gen_test_pkg is
     constant PHA_ACC_BITS  : natural := 32;
     constant AMP_MAX       : real    := 4095.0;
 
-    function make_test_vector(f_hz, p_deg, a_pct : real) return test_vector_t;
+    constant FREQ_HZ   : real_array(0 to 3) := (100000.0, 1000000.0, 10000000.0, 25000000.0);
+    constant PHASE_DEG : real_array(0 to 7) := (0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0);
+    constant AMP_PCT   : real_array(0 to 3) := (12.5, 50.0, 75.0, 100.0);
 
     function generate_test_vectors (
-        freqs   : real_array;
-        phases  : real_array;
-        amps    : real_array
+        freqs  : real_array;
+        phases : real_array;
+        amps   : real_array
     ) return test_vector_array;
+
     function get_test_vector(index : natural) return test_vector_t;
+    function to_regs(tv : test_vector_t) return reg_values_t;
 
 end package sig_gen_test_pkg;
 
 package body sig_gen_test_pkg is
-
-    constant FREQ_HZ   : real_array(0 to 3) := (100000.0, 1000000.0, 10000000.0, 25000000.0);
-    constant PHASE_DEG : real_array(0 to 7) := (0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0);
-    constant AMP_PCT   : real_array(0 to 3) := (12.5, 50.0, 75.0, 100.0);
 
     function real_to_slv32(val : real) return std_logic_vector is
         variable result : unsigned(31 downto 0) := (others => '0');
@@ -49,19 +55,19 @@ package body sig_gen_test_pkg is
         return std_logic_vector(result);
     end function;
 
-    function make_test_vector(f_hz, p_deg, a_pct : real) return test_vector_t is
+    function to_regs(tv : test_vector_t) return reg_values_t is
     begin
         return (
-            inc => real_to_slv32(f_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS)),
-            pha => real_to_slv32(p_deg / 360.0 * (2.0 ** PHA_ACC_BITS)),
-            amp => real_to_slv32(round(a_pct / 100.0 * AMP_MAX))
+            inc => real_to_slv32(tv.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS)),
+            pha => real_to_slv32(tv.phase_deg / 360.0 * (2.0 ** PHA_ACC_BITS)),
+            amp => real_to_slv32(round(tv.amp_pct / 100.0 * AMP_MAX))
         );
     end function;
 
     function generate_test_vectors (
-        freqs   : real_array;
-        phases  : real_array;
-        amps    : real_array
+        freqs  : real_array;
+        phases : real_array;
+        amps   : real_array
     ) return test_vector_array is
         variable result : test_vector_array(0 to NUM_TESTS-1);
         variable idx : natural := 0;
@@ -69,7 +75,7 @@ package body sig_gen_test_pkg is
         for i in freqs'range loop
             for j in phases'range loop
                 for k in amps'range loop
-                    result(idx) := make_test_vector(freqs(i), phases(j), amps(k));
+                    result(idx) := (freq_hz => freqs(i), phase_deg => phases(j), amp_pct => amps(k));
                     idx := idx + 1;
                 end loop;
             end loop;
