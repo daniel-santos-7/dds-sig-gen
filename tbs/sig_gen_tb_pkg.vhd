@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
+use IEEE.math_real.all;
 use STD.textio.all;
 
 package sig_gen_tb_pkg is
@@ -49,6 +50,8 @@ package sig_gen_tb_pkg is
         signal value : in std_logic_vector;
         constant count : in natural
     );
+
+    function slv32_to_real(v : std_logic_vector(31 downto 0)) return real;
 
     procedure wb_reset (
         signal clk : in std_logic;
@@ -125,6 +128,17 @@ package body sig_gen_tb_pkg is
             writeline(f, l);
         end loop;
     end procedure write_sample;
+
+    function slv32_to_real(v : std_logic_vector(31 downto 0)) return real is
+        variable result : real := 0.0;
+    begin
+        for i in 0 to 31 loop
+            if v(i) = '1' then
+                result := result + 2.0 ** i;
+            end if;
+        end loop;
+        return result;
+    end function;
 
     procedure wb_reset (
         signal clk : in std_logic;

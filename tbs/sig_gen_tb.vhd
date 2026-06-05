@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
+use IEEE.math_real.all;
 use work.sig_gen_pkg.all;
 use work.sig_gen_tb_pkg.all;
 use work.sig_gen_test_pkg.all;
@@ -21,9 +22,9 @@ architecture tb of sig_gen_tb is
 
     constant TV : test_vector_t := get_test_vector(TEST_INDEX);
 
-    constant INC_VAL : natural := to_integer(unsigned(TV.inc));
+    constant INC_REAL : real := slv32_to_real(TV.inc);
 
-    constant CYCLES_PER_PERIOD : natural := natural((2.0 ** PHA_ACC_BITS + real(INC_VAL) - 1.0) / real(INC_VAL));
+    constant CYCLES_PER_PERIOD : natural := natural(ceil((2.0 ** PHA_ACC_BITS) / INC_REAL));
     constant TOTAL_SAMPLES     : natural := NUM_PERIODS * CYCLES_PER_PERIOD;
 
     signal clk_en : boolean := false;
