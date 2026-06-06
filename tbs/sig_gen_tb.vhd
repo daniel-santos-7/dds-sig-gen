@@ -3,7 +3,6 @@ use IEEE.std_logic_1164.all;
 use IEEE.math_real.all;
 use work.sig_gen_pkg.all;
 use work.sig_gen_tb_pkg.all;
-use work.sig_gen_test_pkg.all;
 
 entity sig_gen_tb is
     generic (
