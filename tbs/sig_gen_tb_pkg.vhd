@@ -10,9 +10,9 @@ package sig_gen_tb_pkg is
     constant ADDR_WIDTH : natural := 4;
 
     type test_case_t is record
-        freq_hz    : real;
-        phase_deg  : real;
-        amp_pct    : real;
+        freq_hz   : real;
+        phase_deg : real;
+        amp_val   : real;
     end record test_case_t;
 
     type reg_values_t is record
@@ -23,7 +23,6 @@ package sig_gen_tb_pkg is
 
     constant CLK_FREQ      : real    := 50.0e6;
     constant PHA_ACC_BITS  : natural := 32;
-    constant AMP_MAX       : real    := 4095.0;
 
     function img(r : real) return string;
     function to_regs(tv : test_case_t) return reg_values_t;
@@ -99,7 +98,7 @@ package body sig_gen_tb_pkg is
         return (
             inc => real_to_slv32(tv.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS)),
             pha => real_to_slv32(tv.phase_deg / 360.0 * (2.0 ** PHA_ACC_BITS)),
-            amp => real_to_slv32(round(tv.amp_pct / 100.0 * AMP_MAX))
+            amp => real_to_slv32(tv.amp_val + 2048.0)
         );
     end function;
 
@@ -124,7 +123,7 @@ package body sig_gen_tb_pkg is
         writeline(f, l);
         write(l, string'("phase_deg: ") & img(tv.phase_deg));
         writeline(f, l);
-        write(l, string'("amp_pct: ")   & img(tv.amp_pct));
+        write(l, string'("amp_val: ")   & img(tv.amp_val));
         writeline(f, l);
     end procedure;
 

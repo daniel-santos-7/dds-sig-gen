@@ -8,10 +8,10 @@ GHDL_RUNOPTS += -gCASE_FILE=$(OUTDIR)/test_case.txt
 GHDL_RUNOPTS += -gREG_FILE=$(OUTDIR)/reg_values.txt
 GHDL_RUNOPTS += -gFREQ_HZ=$(FREQ_HZ)
 GHDL_RUNOPTS += -gPHASE_DEG=$(PHASE_DEG)
-GHDL_RUNOPTS += -gAMP_PCT_X10=$(AMP_PCT_X10)
+GHDL_RUNOPTS += -gAMP_VAL=$(AMP_VAL)
 
 WORKDIR = work
-OUTDIR  = output/test_$(FREQ_HZ)hz_$(PHASE_DEG)deg_$(AMP_PCT_X10)pct
+OUTDIR  = output/test_$(FREQ_HZ)hz_$(PHASE_DEG)deg_$(AMP_VAL)
 VENVDIR = py/.venv
 
 RTL_SRC = $(wildcard ./rtl/*.vhd)
@@ -22,7 +22,7 @@ TBS_TOP = sig_gen_tb
 
 FREQ_HZ     ?= 100000
 PHASE_DEG   ?= 0
-AMP_PCT_X10 ?= 1000
+AMP_VAL     ?= 2047
 NUM_PERIODS ?= 4
 
 .PHONY: run analyze plot clean distclean

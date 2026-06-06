@@ -9,7 +9,7 @@ entity sig_gen_tb is
         PHA_ACC_BITS  : natural := 32;
         FREQ_HZ       : natural := 100000;
         PHASE_DEG     : natural := 0;
-        AMP_PCT_X10   : natural := 1000;
+        AMP_VAL       : natural := 2047;
         NUM_PERIODS   : natural := 4;
         SAMPLES_FILE  : string  := "samples.txt";
         CASE_FILE     : string  := "test_case.txt";
@@ -21,11 +21,11 @@ architecture tb of sig_gen_tb is
 
     constant CLK_PERIOD : time := 20 ns;
 
-    constant FREQ_HZ_VAL  : real := real(FREQ_HZ);
+    constant FREQ_HZ_VAL   : real := real(FREQ_HZ);
     constant PHASE_DEG_VAL : real := real(PHASE_DEG);
-    constant AMP_PCT_VAL   : real := real(AMP_PCT_X10) / 10.0;
+    constant AMP_VAL_VAL   : real := real(AMP_VAL);
 
-    constant TC   : test_case_t := (freq_hz => FREQ_HZ_VAL, phase_deg => PHASE_DEG_VAL, amp_pct => AMP_PCT_VAL);
+    constant TC   : test_case_t := (freq_hz => FREQ_HZ_VAL, phase_deg => PHASE_DEG_VAL, amp_val => AMP_VAL_VAL);
     constant REGS : reg_values_t  := to_regs(TC);
 
     constant INC_REAL : real := TC.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS);
@@ -65,7 +65,7 @@ begin
 
     stim_process : process
     begin
-        report "freq=" & img(TC.freq_hz) & " Hz, phase=" & img(TC.phase_deg) & " deg, amp=" & img(TC.amp_pct) & "%";
+        report "freq=" & img(TC.freq_hz) & " Hz, phase=" & img(TC.phase_deg) & " deg, amp=" & img(TC.amp_val);
         clk_en <= true;
 
         wb_init(wb);
@@ -75,9 +75,8 @@ begin
         write_case_file(CASE_FILE, TC);
         write_reg_file(REG_FILE, REGS);
 
-        for i in 0 to 2 loop
-            wait until rising_edge(clk_i);
-        end loop;
+        wait until rising_edge(clk_i);
+        wait until rising_edge(clk_i);
 
         write_sample(clk_i, SAMPLES_FILE, sig_o, TOTAL_SAMPLES);
 
