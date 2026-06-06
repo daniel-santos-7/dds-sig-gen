@@ -4,10 +4,11 @@ GHDL_OPTS = --std=08 --workdir=$(WORKDIR)
 GHDL_RUNOPTS =
 GHDL_RUNOPTS += --wave=$(OUTDIR)/test_$(TEST_INDEX)/$(TBS_TOP)_$(TEST_INDEX).ghw --ieee-asserts=disable
 GHDL_RUNOPTS += -gNUM_PERIODS=$(NUM_PERIODS)
-GHDL_RUNOPTS += -gDATA_FILE=$(OUTDIR)/test_$(TEST_INDEX)/samples.txt
+GHDL_RUNOPTS += -gSAMPLES_FILE=$(OUTDIR)/test_$(TEST_INDEX)/samples.txt
 GHDL_RUNOPTS += -gCASE_FILE=$(OUTDIR)/test_$(TEST_INDEX)/test_case.txt
+GHDL_RUNOPTS += -gREG_FILE=$(OUTDIR)/test_$(TEST_INDEX)/reg_values.txt
 GHDL_RUNOPTS += -gTEST_INDEX=$(TEST_INDEX)
-GHDL_RUNOPTS += -gTEST_VECTORS=test_vectors.csv
+GHDL_RUNOPTS += -gVECTORS_FILE=test_vectors.csv
 
 WORKDIR = work
 OUTDIR  = output

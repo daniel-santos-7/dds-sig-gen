@@ -69,6 +69,11 @@ begin
 
         write_case_file(CASE_FILE, TC);
         write_reg_file(REG_FILE, REGS);
+
+        for i in 0 to 2 loop
+            wait until rising_edge(clk_i);
+        end loop;
+
         write_sample(clk_i, SAMPLES_FILE, sig_o, TOTAL_SAMPLES);
 
         clk_en <= false;
