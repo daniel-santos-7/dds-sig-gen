@@ -10,7 +10,6 @@ package sig_gen_tb_pkg is
     constant ADDR_WIDTH : natural := 4;
 
     type test_case_t is record
-        test_index : natural;
         freq_hz    : real;
         phase_deg  : real;
         amp_pct    : real;
@@ -27,7 +26,6 @@ package sig_gen_tb_pkg is
     constant AMP_MAX       : real    := 4095.0;
 
     function img(r : real) return string;
-    impure function get_test_case(index : natural; csv_file : string) return test_case_t;
     function to_regs(tv : test_case_t) return reg_values_t;
     procedure write_case_file(file_name : string; tv : test_case_t);
     procedure write_reg_file(file_name : string; regs : reg_values_t);
@@ -105,37 +103,6 @@ package body sig_gen_tb_pkg is
         );
     end function;
 
-    impure function get_test_case(index : natural; csv_file : string) return test_case_t is
-        file f : text;
-        variable l : line;
-        variable comma : character;
-        variable idx_int : integer;
-        variable freq : real;
-        variable phase : real;
-        variable amp : real;
-        variable good : boolean;
-    begin
-        file_open(f, csv_file, read_mode);
-
-        readline(f, l);
-
-        for i in 0 to index loop
-            readline(f, l);
-        end loop;
-
-        read(l, idx_int, good);
-        read(l, comma);
-        read(l, freq, good);
-        read(l, comma);
-        read(l, phase, good);
-        read(l, comma);
-        read(l, amp, good);
-
-        file_close(f);
-
-        return (test_index => idx_int, freq_hz => freq, phase_deg => phase, amp_pct => amp);
-    end function;
-
     function img(r : real) return string is
         variable n : integer;
     begin
@@ -153,8 +120,6 @@ package body sig_gen_tb_pkg is
         file f : text open write_mode is file_name;
         variable l : line;
     begin
-        write(l, string'("test_index: ") & integer'image(tv.test_index));
-        writeline(f, l);
         write(l, string'("freq_hz: ")   & img(tv.freq_hz));
         writeline(f, l);
         write(l, string'("phase_deg: ") & img(tv.phase_deg));

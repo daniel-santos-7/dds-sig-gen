@@ -1,17 +1,17 @@
 GHDL = ghdl
 GHDL_OPTS = --std=08 --workdir=$(WORKDIR)
 
-GHDL_RUNOPTS =
-GHDL_RUNOPTS += --wave=$(OUTDIR)/test_$(TEST_INDEX)/$(TBS_TOP)_$(TEST_INDEX).ghw --ieee-asserts=disable
+GHDL_RUNOPTS = --wave=$(OUTDIR)/sig_gen_tb.ghw --ieee-asserts=disable
 GHDL_RUNOPTS += -gNUM_PERIODS=$(NUM_PERIODS)
-GHDL_RUNOPTS += -gSAMPLES_FILE=$(OUTDIR)/test_$(TEST_INDEX)/samples.txt
-GHDL_RUNOPTS += -gCASE_FILE=$(OUTDIR)/test_$(TEST_INDEX)/test_case.txt
-GHDL_RUNOPTS += -gREG_FILE=$(OUTDIR)/test_$(TEST_INDEX)/reg_values.txt
-GHDL_RUNOPTS += -gTEST_INDEX=$(TEST_INDEX)
-GHDL_RUNOPTS += -gVECTORS_FILE=test_vectors.csv
+GHDL_RUNOPTS += -gSAMPLES_FILE=$(OUTDIR)/samples.txt
+GHDL_RUNOPTS += -gCASE_FILE=$(OUTDIR)/test_case.txt
+GHDL_RUNOPTS += -gREG_FILE=$(OUTDIR)/reg_values.txt
+GHDL_RUNOPTS += -gFREQ_HZ=$(FREQ_HZ)
+GHDL_RUNOPTS += -gPHASE_DEG=$(PHASE_DEG)
+GHDL_RUNOPTS += -gAMP_PCT_X10=$(AMP_PCT_X10)
 
 WORKDIR = work
-OUTDIR  = output
+OUTDIR  = output/test_$(FREQ_HZ)hz_$(PHASE_DEG)deg_$(AMP_PCT_X10)pct
 VENVDIR = py/.venv
 
 RTL_SRC = $(wildcard ./rtl/*.vhd)
@@ -20,14 +20,14 @@ TBS_SRC = $(wildcard ./tbs/*.vhd)
 RTL_TOP = sig_gen
 TBS_TOP = sig_gen_tb
 
-TEST_INDEX  ?= 0
+FREQ_HZ     ?= 100000
+PHASE_DEG   ?= 0
+AMP_PCT_X10 ?= 1000
 NUM_PERIODS ?= 4
 
-.PHONY: all run run-all analyze analyze-all clean distclean
+.PHONY: run analyze plot clean distclean
 
-all: run-all analyze-all
-
-$(WORKDIR) $(OUTDIR)/test_$(TEST_INDEX):
+$(WORKDIR) $(OUTDIR):
 	@mkdir -p $@
 
 $(VENVDIR): py/requirements.txt
@@ -40,21 +40,18 @@ $(VENVDIR): py/requirements.txt
 .make: .import
 	@$(GHDL) make $(GHDL_OPTS) $(TBS_TOP) | tee $@
 
-run: .make | $(OUTDIR)/test_$(TEST_INDEX)
+run: .make | $(OUTDIR)
 	@$(GHDL) run $(TBS_TOP) $(GHDL_RUNOPTS)
 
-run-all: test_vectors.csv
-	@for i in $$(tail -n +2 $< | cut -d, -f1); do $(MAKE) run TEST_INDEX=$$i; done
+analyze: $(VENVDIR) | $(OUTDIR)
+	$(VENVDIR)/bin/python3 py/analyze_sig_gen.py --data $(OUTDIR)/samples.txt --clk 50e6 > $(OUTDIR)/analysis.txt
 
-analyze: $(VENVDIR) | $(OUTDIR)/test_$(TEST_INDEX)
-	$(VENVDIR)/bin/python3 py/analyze_sig_gen.py --data $(OUTDIR)/test_$(TEST_INDEX)/samples.txt --clk 50e6 > $(OUTDIR)/test_$(TEST_INDEX)/analysis.txt
-
-analyze-all: test_vectors.csv
-	@for i in $$(tail -n +2 $< | cut -d, -f1); do $(MAKE) analyze TEST_INDEX=$$i; done
+plot: $(VENVDIR) | $(OUTDIR)
+	$(VENVDIR)/bin/python3 py/plot_sig_gen.py --data $(OUTDIR)/samples.txt --output $(OUTDIR) --clk 50e6
 
 clean:
 	@$(GHDL) clean $(GHDL_OPTS)
-	@rm -rf $(WORKDIR) $(OUTDIR) .import .make
+	@rm -rf $(WORKDIR) output .import .make
 
 distclean: clean
 	@rm -rf $(VENVDIR)

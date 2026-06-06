@@ -7,12 +7,13 @@ use work.sig_gen_tb_pkg.all;
 entity sig_gen_tb is
     generic (
         PHA_ACC_BITS  : natural := 32;
-        TEST_INDEX    : natural := 0;
+        FREQ_HZ       : natural := 100000;
+        PHASE_DEG     : natural := 0;
+        AMP_PCT_X10   : natural := 1000;
         NUM_PERIODS   : natural := 4;
         SAMPLES_FILE  : string  := "samples.txt";
         CASE_FILE     : string  := "test_case.txt";
-        REG_FILE      : string  := "reg_values.txt";
-        VECTORS_FILE  : string  := "test_vectors.csv"
+        REG_FILE      : string  := "reg_values.txt"
     );
 end sig_gen_tb;
 
@@ -20,7 +21,11 @@ architecture tb of sig_gen_tb is
 
     constant CLK_PERIOD : time := 20 ns;
 
-    constant TC   : test_case_t := get_test_case(TEST_INDEX, VECTORS_FILE);
+    constant FREQ_HZ_VAL  : real := real(FREQ_HZ);
+    constant PHASE_DEG_VAL : real := real(PHASE_DEG);
+    constant AMP_PCT_VAL   : real := real(AMP_PCT_X10) / 10.0;
+
+    constant TC   : test_case_t := (freq_hz => FREQ_HZ_VAL, phase_deg => PHASE_DEG_VAL, amp_pct => AMP_PCT_VAL);
     constant REGS : reg_values_t  := to_regs(TC);
 
     constant INC_REAL : real := TC.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS);
@@ -60,7 +65,7 @@ begin
 
     stim_process : process
     begin
-        report "Running test " & integer'image(TEST_INDEX) & ": freq=" & img(TC.freq_hz) & " Hz, phase=" & img(TC.phase_deg) & " deg, amp=" & img(TC.amp_pct) & "%";
+        report "freq=" & img(TC.freq_hz) & " Hz, phase=" & img(TC.phase_deg) & " deg, amp=" & img(TC.amp_pct) & "%";
         clk_en <= true;
 
         wb_init(wb);
