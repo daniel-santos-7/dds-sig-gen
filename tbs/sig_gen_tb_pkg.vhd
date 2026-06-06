@@ -30,6 +30,7 @@ package sig_gen_tb_pkg is
     impure function get_test_case(index : natural; csv_file : string) return test_case_t;
     function to_regs(tv : test_case_t) return reg_values_t;
     procedure write_case_file(file_name : string; tv : test_case_t);
+    procedure write_reg_file(file_name : string; regs : reg_values_t);
 
     constant REG_INC : std_logic_vector(ADDR_WIDTH-1 downto 0) := x"0";
     constant REG_PHA : std_logic_vector(ADDR_WIDTH-1 downto 0) := x"4";
@@ -151,9 +152,7 @@ package body sig_gen_tb_pkg is
     procedure write_case_file(file_name : string; tv : test_case_t) is
         file f : text open write_mode is file_name;
         variable l : line;
-        variable regs : reg_values_t;
     begin
-        regs := to_regs(tv);
         write(l, string'("test_index: ") & integer'image(tv.test_index));
         writeline(f, l);
         write(l, string'("freq_hz: ")   & img(tv.freq_hz));
@@ -162,6 +161,12 @@ package body sig_gen_tb_pkg is
         writeline(f, l);
         write(l, string'("amp_pct: ")   & img(tv.amp_pct));
         writeline(f, l);
+    end procedure;
+
+    procedure write_reg_file(file_name : string; regs : reg_values_t) is
+        file f : text open write_mode is file_name;
+        variable l : line;
+    begin
         write(l, string'("inc: 0x"));
         hwrite(l, to_bitvector(regs.inc));
         writeline(f, l);
