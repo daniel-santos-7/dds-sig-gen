@@ -23,6 +23,7 @@ package sig_gen_test_pkg is
     constant PHA_ACC_BITS  : natural := 32;
     constant AMP_MAX       : real    := 4095.0;
 
+    function img(r : real) return string;
     impure function get_test_case(index : natural; csv_file : string) return test_case_t;
     function to_regs(tv : test_case_t) return reg_values_t;
     procedure write_case_file(file_name : string; tv : test_case_t);
@@ -84,6 +85,19 @@ package body sig_gen_test_pkg is
         return (test_index => idx_int, freq_hz => freq, phase_deg => phase, amp_pct => amp);
     end function;
 
+    function img(r : real) return string is
+        variable n : integer;
+    begin
+        if r = 0.0 then return "0"; end if;
+        n := integer(r);
+        if real(n) = r then return integer'image(n); end if;
+        n := integer(r * 10.0);
+        if real(n) / 10.0 = r then
+            return integer'image(n / 10) & "." & integer'image(abs(n mod 10));
+        end if;
+        return real'image(r);
+    end function;
+
     procedure write_case_file(file_name : string; tv : test_case_t) is
         file f : text open write_mode is file_name;
         variable l : line;
@@ -92,11 +106,11 @@ package body sig_gen_test_pkg is
         regs := to_regs(tv);
         write(l, string'("test_index: ") & integer'image(tv.test_index));
         writeline(f, l);
-        write(l, string'("freq_hz: ")   & real'image(tv.freq_hz));
+        write(l, string'("freq_hz: ")   & img(tv.freq_hz));
         writeline(f, l);
-        write(l, string'("phase_deg: ") & real'image(tv.phase_deg));
+        write(l, string'("phase_deg: ") & img(tv.phase_deg));
         writeline(f, l);
-        write(l, string'("amp_pct: ")   & real'image(tv.amp_pct));
+        write(l, string'("amp_pct: ")   & img(tv.amp_pct));
         writeline(f, l);
         write(l, string'("inc: 0x"));
         hwrite(l, to_bitvector(regs.inc));

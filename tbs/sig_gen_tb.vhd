@@ -60,6 +60,7 @@ begin
 
     stim_process : process
     begin
+        report "Running test " & integer'image(TEST_INDEX) & ": freq=" & img(TC.freq_hz) & " Hz, phase=" & img(TC.phase_deg) & " deg, amp=" & img(TC.amp_pct) & "%";
         clk_en <= true;
 
         wb_init(wb);
@@ -67,10 +68,8 @@ begin
         wb_write_config(clk_i, wb, REGS.inc, REGS.pha, REGS.amp);
 
         write_case_file(CASE_FILE, TC);
-
         write_sample(clk_i, DATA_FILE, sig_o, TOTAL_SAMPLES);
 
-        report "Saved " & integer'image(TOTAL_SAMPLES) & " samples (" & integer'image(NUM_PERIODS) & " periods)";
         clk_en <= false;
         wait;
     end process stim_process;
