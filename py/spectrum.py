@@ -1,5 +1,8 @@
 import numpy as np
 from scipy.signal import periodogram
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 class Spectrum:
     def __init__(self, values, clk_frequency):
@@ -66,3 +69,14 @@ class Spectrum:
         print(f"  Spur          {self.spur_power:>13.4e}")
         print(f"  Noise         {self.noise_power:>13.4e}")
         print(f"  Total         {self.total_power:>13.4e}")
+
+    def plot(self, path):
+        fig, ax = plt.subplots(figsize=(12, 5))
+        ax.plot(self._freqs / 1e6, 10 * np.log10(self._power + 1e-30), linewidth=0.8)
+        ax.set_xlabel("Frequency (MHz)")
+        ax.set_ylabel("Power (dB)")
+        ax.set_title("Spectrum")
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
+        fig.savefig(path, dpi=150)
+        plt.close(fig)

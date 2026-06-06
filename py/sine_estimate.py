@@ -1,4 +1,7 @@
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 class SineEstimate:
     def __init__(self, values, clk_frequency):
@@ -48,3 +51,17 @@ class SineEstimate:
         print(f"  Frequency     {self.freq:>13.6f}")
         print(f"  Phase         {self.phase_deg:>13.3f}")
         print(f"  DC offset     {self.offset:>13.3f}")
+
+    def plot(self, path):
+        t_us = self._t * 1e6
+        n = len(self._values)
+
+        fig, ax = plt.subplots(figsize=(12, 4))
+        ax.step(t_us, self._values, linewidth=0.8, where="post")
+        ax.set_xlabel("Time (µs)")
+        ax.set_ylabel("Amplitude")
+        ax.set_title(f"Waveform ({n} samples)")
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
+        fig.savefig(path, dpi=150)
+        plt.close(fig)

@@ -1,5 +1,8 @@
 import numpy as np
 from scipy.optimize import curve_fit
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 class SineFit:
     @staticmethod
@@ -67,3 +70,19 @@ class SineFit:
             print(f"  Jitter (s)    {j / self._freq:>13.2e}")
         else:
             print("  Jitter        unavailable")
+
+    def plot(self, path):
+        t_us = self._t * 1e6
+        y_fit = SineFit._sine_model(self._t, self._amp, self._freq, self._phase, self._offset)
+
+        fig, ax = plt.subplots(figsize=(12, 5))
+        ax.step(t_us, self._values, linewidth=0.5, where="post", alpha=0.6, label="Samples")
+        ax.plot(t_us, y_fit, linewidth=1.5, color="red", label="Fit")
+        ax.set_xlabel("Time (µs)")
+        ax.set_ylabel("Amplitude")
+        ax.set_title(f"Fit comparison (freq={self._freq:.3f} Hz, amp={self._amp:.3f})")
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
+        fig.savefig(path, dpi=150)
+        plt.close(fig)

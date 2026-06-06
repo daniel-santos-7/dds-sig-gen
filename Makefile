@@ -44,10 +44,10 @@ run: .make | $(OUTDIR)
 	@$(GHDL) run $(TBS_TOP) $(GHDL_RUNOPTS)
 
 analyze: $(VENVDIR) | $(OUTDIR)
-	$(VENVDIR)/bin/python3 py/analyze_sig_gen.py --data $(OUTDIR)/samples.txt --clk 50e6 > $(OUTDIR)/analysis.txt
+	$(VENVDIR)/bin/python3 py/sig_gen_report.py --data $(OUTDIR)/samples.txt --clk 50e6 --output $(OUTDIR)/analysis.txt
 
 plot: $(VENVDIR) | $(OUTDIR)
-	$(VENVDIR)/bin/python3 py/plot_sig_gen.py --data $(OUTDIR)/samples.txt --output $(OUTDIR) --clk 50e6
+	$(VENVDIR)/bin/python3 py/sig_gen_report.py --data $(OUTDIR)/samples.txt --clk 50e6 --plot $(OUTDIR)
 
 clean:
 	@$(GHDL) clean $(GHDL_OPTS)
