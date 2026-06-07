@@ -7,3 +7,4 @@ py/.venv
 py/__pycache__
 .import
 .make
+AGENTS.md
