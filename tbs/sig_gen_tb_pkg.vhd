@@ -25,7 +25,7 @@ package sig_gen_tb_pkg is
         drag_coeff : std_logic_vector(31 downto 0);
     end record reg_values_t;
 
-    constant CLK_FREQ      : real    := 50.0e6;
+    constant CLK_FREQ      : real    := 100.0e6;
     constant PHA_ACC_BITS  : natural := 32;
 
     function img(r : real) return string;

@@ -11,7 +11,7 @@ TBS_SRC = $(wildcard ./tbs/*.vhd)
 RTL_TOP = sig_gen
 TBS_TOP = sig_gen_tb
 
-CLK_FREQ_HZ ?= 50e6
+CLK_FREQ_HZ ?= 100e6
 CLK_PERIODS ?= 4
 FREQ_HZ     ?= 100000
 PHASE_DEG   ?= 0

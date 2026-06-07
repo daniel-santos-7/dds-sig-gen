@@ -19,7 +19,7 @@ end sig_gen_tb;
 
 architecture tb of sig_gen_tb is
 
-    constant CLK_PERIOD : time := 20 ns;
+    constant CLK_PERIOD : time := 10 ns;
 
     constant FREQ_HZ_VAL   : real := real(FREQ_HZ);
     constant PHASE_DEG_VAL : real := real(PHASE_DEG);
