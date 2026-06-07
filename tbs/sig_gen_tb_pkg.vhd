@@ -7,18 +7,22 @@ use STD.textio.all;
 package sig_gen_tb_pkg is
 
     constant DATA_WIDTH : natural := 32;
-    constant ADDR_WIDTH : natural := 4;
+    constant ADDR_WIDTH : natural := 5;
 
     type test_case_t is record
-        freq_hz   : real;
-        phase_deg : real;
-        amp_val   : real;
+        freq_hz    : real;
+        phase_deg  : real;
+        amp_val    : real;
+        pulse_len  : natural;
+        drag_coeff : real;
     end record test_case_t;
 
     type reg_values_t is record
-        inc : std_logic_vector(31 downto 0);
-        pha : std_logic_vector(31 downto 0);
-        amp : std_logic_vector(31 downto 0);
+        inc        : std_logic_vector(31 downto 0);
+        pha        : std_logic_vector(31 downto 0);
+        amp        : std_logic_vector(31 downto 0);
+        env_step   : std_logic_vector(31 downto 0);
+        drag_coeff : std_logic_vector(31 downto 0);
     end record reg_values_t;
 
     constant CLK_FREQ      : real    := 50.0e6;
@@ -29,10 +33,13 @@ package sig_gen_tb_pkg is
     procedure write_case_file(file_name : string; tv : test_case_t);
     procedure write_reg_file(file_name : string; regs : reg_values_t);
 
-    constant REG_INC : std_logic_vector(ADDR_WIDTH-1 downto 0) := x"0";
-    constant REG_PHA : std_logic_vector(ADDR_WIDTH-1 downto 0) := x"4";
-    constant REG_AMP : std_logic_vector(ADDR_WIDTH-1 downto 0) := x"8";
-    constant REG_WE  : std_logic_vector(ADDR_WIDTH-1 downto 0) := x"c";
+    constant REG_INC        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "00000"; -- 0x0
+    constant REG_PHA        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "00100"; -- 0x4
+    constant REG_AMP        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "01000"; -- 0x8
+    constant REG_ENV_STEP   : std_logic_vector(ADDR_WIDTH-1 downto 0) := "01100"; -- 0xc
+    constant REG_DRAG_COEFF : std_logic_vector(ADDR_WIDTH-1 downto 0) := "10000"; -- 0x10
+    constant REG_WE         : std_logic_vector(ADDR_WIDTH-1 downto 0) := "10100"; -- 0x14
+    constant REG_TRIG       : std_logic_vector(ADDR_WIDTH-1 downto 0) := "11000"; -- 0x18
 
     type wb_bus is record
         adr_i : std_logic_vector(ADDR_WIDTH-1 downto 0);
@@ -59,15 +66,19 @@ package sig_gen_tb_pkg is
     procedure wb_write_config (
         signal clk   : in std_logic;
         signal wb    : inout wb_bus;
-        constant inc  : std_logic_vector(31 downto 0);
-        constant pha  : std_logic_vector(31 downto 0);
-        constant amp  : std_logic_vector(31 downto 0)
+        constant regs : reg_values_t
     );
 
-    procedure write_sample (
+    procedure wb_trigger (
+        signal clk   : in std_logic;
+        signal wb    : inout wb_bus
+    );
+
+    procedure write_iq_sample (
         signal clk : in std_logic;
         constant file_name : in string;
-        signal value : in std_logic_vector;
+        signal sig_i : in std_logic_vector;
+        signal sig_q : in std_logic_vector;
         constant count : in natural
     );
 
@@ -94,11 +105,24 @@ package body sig_gen_tb_pkg is
     end function;
 
     function to_regs(tv : test_case_t) return reg_values_t is
+        variable step_val : real;
+        variable drag_val : integer;
     begin
+        -- ENV_STEP: step size to go 4096 in pulse_len cycles
+        -- Using fractional bits: step = 4096.0 * (2^20) / pulse_len
+        step_val := 4096.0 * (2.0**20) / real(tv.pulse_len);
+        
+        -- DRAG_COEFF: signed Q1.15
+        drag_val := integer(tv.drag_coeff * 32768.0);
+        if drag_val > 32767 then drag_val := 32767; end if;
+        if drag_val < -32768 then drag_val := -32768; end if;
+        
         return (
-            inc => real_to_slv32(tv.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS)),
-            pha => real_to_slv32(tv.phase_deg / 360.0 * (2.0 ** PHA_ACC_BITS)),
-            amp => real_to_slv32(tv.amp_val + 2048.0)
+            inc        => real_to_slv32(tv.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS)),
+            pha        => real_to_slv32(tv.phase_deg / 360.0 * (2.0 ** PHA_ACC_BITS)),
+            amp        => real_to_slv32(tv.amp_val),
+            env_step   => std_logic_vector(to_unsigned(integer(step_val), 32)),
+            drag_coeff => std_logic_vector(to_signed(drag_val, 32))
         );
     end function;
 
@@ -119,27 +143,22 @@ package body sig_gen_tb_pkg is
         file f : text open write_mode is file_name;
         variable l : line;
     begin
-        write(l, string'("freq_hz: ")   & img(tv.freq_hz));
-        writeline(f, l);
-        write(l, string'("phase_deg: ") & img(tv.phase_deg));
-        writeline(f, l);
-        write(l, string'("amp_val: ")   & img(tv.amp_val));
-        writeline(f, l);
+        write(l, string'("freq_hz: ")   & img(tv.freq_hz)); writeline(f, l);
+        write(l, string'("phase_deg: ") & img(tv.phase_deg)); writeline(f, l);
+        write(l, string'("amp_val: ")   & img(tv.amp_val)); writeline(f, l);
+        write(l, string'("pulse_len: ") & integer'image(tv.pulse_len)); writeline(f, l);
+        write(l, string'("drag_coeff: ") & img(tv.drag_coeff)); writeline(f, l);
     end procedure;
 
     procedure write_reg_file(file_name : string; regs : reg_values_t) is
         file f : text open write_mode is file_name;
         variable l : line;
     begin
-        write(l, string'("inc: 0x"));
-        hwrite(l, to_bitvector(regs.inc));
-        writeline(f, l);
-        write(l, string'("pha: 0x"));
-        hwrite(l, to_bitvector(regs.pha));
-        writeline(f, l);
-        write(l, string'("amp: 0x"));
-        hwrite(l, to_bitvector(regs.amp));
-        writeline(f, l);
+        write(l, string'("inc: 0x")); hwrite(l, to_bitvector(regs.inc)); writeline(f, l);
+        write(l, string'("pha: 0x")); hwrite(l, to_bitvector(regs.pha)); writeline(f, l);
+        write(l, string'("amp: 0x")); hwrite(l, to_bitvector(regs.amp)); writeline(f, l);
+        write(l, string'("env_step: 0x")); hwrite(l, to_bitvector(regs.env_step)); writeline(f, l);
+        write(l, string'("drag_coeff: 0x")); hwrite(l, to_bitvector(regs.drag_coeff)); writeline(f, l);
     end procedure;
 
     procedure wb_init (
@@ -181,22 +200,32 @@ package body sig_gen_tb_pkg is
     procedure wb_write_config (
         signal clk   : in std_logic;
         signal wb    : inout wb_bus;
-        constant inc : std_logic_vector(31 downto 0);
-        constant pha : std_logic_vector(31 downto 0);
-        constant amp : std_logic_vector(31 downto 0)
+        constant regs : reg_values_t
     ) is
         constant WRITE_COMMAND : std_logic_vector(DATA_WIDTH-1 downto 0) := x"00000001";
     begin
-        wb_write(clk, wb, REG_INC, inc);
-        wb_write(clk, wb, REG_PHA, pha);
-        wb_write(clk, wb, REG_AMP, amp);
+        wb_write(clk, wb, REG_INC, regs.inc);
+        wb_write(clk, wb, REG_PHA, regs.pha);
+        wb_write(clk, wb, REG_AMP, regs.amp);
+        wb_write(clk, wb, REG_ENV_STEP, regs.env_step);
+        wb_write(clk, wb, REG_DRAG_COEFF, regs.drag_coeff);
         wb_write(clk, wb, REG_WE, WRITE_COMMAND);
     end procedure wb_write_config;
 
-    procedure write_sample (
+    procedure wb_trigger (
+        signal clk   : in std_logic;
+        signal wb    : inout wb_bus
+    ) is
+        constant WRITE_COMMAND : std_logic_vector(DATA_WIDTH-1 downto 0) := x"00000001";
+    begin
+        wb_write(clk, wb, REG_TRIG, WRITE_COMMAND);
+    end procedure wb_trigger;
+
+    procedure write_iq_sample (
         signal clk : in std_logic;
         constant file_name : in string;
-        signal value : in std_logic_vector;
+        signal sig_i : in std_logic_vector;
+        signal sig_q : in std_logic_vector;
         constant count : in natural
     ) is
         file f : text open write_mode is file_name;
@@ -204,10 +233,12 @@ package body sig_gen_tb_pkg is
     begin
         for i in 0 to count-1 loop
             wait until rising_edge(clk);
-            write(l, to_integer(unsigned(value)));
+            write(l, to_integer(unsigned(sig_i)));
+            write(l, string'(","));
+            write(l, to_integer(unsigned(sig_q)));
             writeline(f, l);
         end loop;
-    end procedure write_sample;
+    end procedure write_iq_sample;
 
     procedure wb_reset (
         signal clk : in std_logic;

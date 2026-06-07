@@ -29,13 +29,35 @@ def write_report(path, values, clk):
         sys.stdout = old
 
 
+import matplotlib.pyplot as plt
+
 def generate_plots(directory, values, clk):
     os.makedirs(directory, exist_ok=True)
-    est, spec, fit, _ = analyze(values, clk)
-    est.plot(os.path.join(directory, "waveform.png"))
-    fit.plot(os.path.join(directory, "fit_compare.png"))
-    spec.plot(os.path.join(directory, "spectrum.png"))
-    write_report(os.path.join(directory, "analysis.txt"), values, clk)
+    
+    if values.ndim > 1:
+        i_vals = values[:, 0]
+        q_vals = values[:, 1]
+        
+        plt.figure(figsize=(10, 4))
+        plt.plot(i_vals, label="I Channel (Gaussian)")
+        plt.plot(q_vals, label="Q Channel (DRAG)")
+        plt.title("IQ Envelope Generation")
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(os.path.join(directory, "iq_envelope.png"))
+        plt.close()
+        
+        est, spec, fit, _ = analyze(i_vals, clk)
+        est.plot(os.path.join(directory, "waveform_i.png"))
+        fit.plot(os.path.join(directory, "fit_compare_i.png"))
+        spec.plot(os.path.join(directory, "spectrum_i.png"))
+        write_report(os.path.join(directory, "analysis_i.txt"), i_vals, clk)
+    else:
+        est, spec, fit, _ = analyze(values, clk)
+        est.plot(os.path.join(directory, "waveform.png"))
+        fit.plot(os.path.join(directory, "fit_compare.png"))
+        spec.plot(os.path.join(directory, "spectrum.png"))
+        write_report(os.path.join(directory, "analysis.txt"), values, clk)
 
 
 def main():
@@ -49,10 +71,16 @@ def main():
     if not args.output and not args.plot:
         parser.error("at least one of --output or --plot is required")
 
-    values = np.loadtxt(args.data)
+    try:
+        values = np.loadtxt(args.data, delimiter=",")
+    except ValueError:
+        values = np.loadtxt(args.data)
 
     if args.output:
-        write_report(args.output, values, args.clk)
+        if values.ndim > 1:
+            write_report(args.output, values[:, 0], args.clk)
+        else:
+            write_report(args.output, values, args.clk)
 
     if args.plot:
         generate_plots(args.plot, values, args.clk)

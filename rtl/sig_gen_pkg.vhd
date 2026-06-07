@@ -54,10 +54,43 @@ package sig_gen_pkg is
         );
     end component amp_scale;
 
+    component iq_sig_gen is
+        generic (
+            PHA_ACC_BITS : natural := 32
+        );
+        port (
+            clk_i   : in  std_logic;
+            rst_i   : in  std_logic;
+            we_i    : in  std_logic;
+            inc_i   : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            pha_i   : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            
+            env_i_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
+            env_q_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
+            
+            sig_i_o : out std_logic_vector(OUT_RES_BITS-1 downto 0);
+            sig_q_o : out std_logic_vector(OUT_RES_BITS-1 downto 0)
+        );
+    end component iq_sig_gen;
+
+    component envelope_gen is
+        port (
+            clk_i        : in  std_logic;
+            rst_i        : in  std_logic;
+            trigger_i    : in  std_logic;
+            step_i       : in  std_logic_vector(31 downto 0);
+            drag_coeff_i : in  std_logic_vector(15 downto 0);
+            
+            env_i_o      : out std_logic_vector(15 downto 0);
+            env_q_o      : out std_logic_vector(15 downto 0);
+            active_o     : out std_logic
+        );
+    end component envelope_gen;
+
     component sig_gen_csrs is
         generic (
             DATA_WIDTH : natural := 32;
-            ADDR_WIDTH : natural := 4
+            ADDR_WIDTH : natural := 5
         );
         port (
             rst_i : in  std_logic;
@@ -70,10 +103,15 @@ package sig_gen_pkg is
             dat_i : in  std_logic_vector(DATA_WIDTH-1 downto 0);
             ack_o : out std_logic;
             dat_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
-            inc_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
-            pha_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
-            amp_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
-            we_o  : out std_logic
+            
+            inc_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            pha_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            amp_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            env_step_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            drag_coeff_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            
+            we_o         : out std_logic;
+            trig_o       : out std_logic
         );
     end component sig_gen_csrs;
 

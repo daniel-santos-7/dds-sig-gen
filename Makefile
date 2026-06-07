@@ -47,7 +47,7 @@ $(VENVDIR): py/requirements.txt
 .make: .import
 	@$(GHDL) make $(GHDL_OPTS) $(TBS_TOP) | tee $@
 
-run: .make | $(OUTDIR)
+run: .make | $(OUTDIR) $(TESTDIR)
 	@$(GHDL) run $(TBS_TOP) $(GHDL_RUNOPTS)
 
 analyze: $(VENVDIR) $(SAMPLES_FILE) | $(OUTDIR)
