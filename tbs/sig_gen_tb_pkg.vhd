@@ -38,8 +38,7 @@ package sig_gen_tb_pkg is
     constant REG_AMP        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "01000"; -- 0x8
     constant REG_ENV_STEP   : std_logic_vector(ADDR_WIDTH-1 downto 0) := "01100"; -- 0xc
     constant REG_DRAG_COEFF : std_logic_vector(ADDR_WIDTH-1 downto 0) := "10000"; -- 0x10
-    constant REG_WE         : std_logic_vector(ADDR_WIDTH-1 downto 0) := "10100"; -- 0x14
-    constant REG_TRIG       : std_logic_vector(ADDR_WIDTH-1 downto 0) := "11000"; -- 0x18
+    constant REG_TRIG       : std_logic_vector(ADDR_WIDTH-1 downto 0) := "10100"; -- 0x14
 
     type wb_bus is record
         adr_i : std_logic_vector(ADDR_WIDTH-1 downto 0);
@@ -67,11 +66,6 @@ package sig_gen_tb_pkg is
         signal clk   : in std_logic;
         signal wb    : inout wb_bus;
         constant regs : reg_values_t
-    );
-
-    procedure wb_trigger (
-        signal clk   : in std_logic;
-        signal wb    : inout wb_bus
     );
 
     procedure write_iq_sample (
@@ -209,17 +203,8 @@ package body sig_gen_tb_pkg is
         wb_write(clk, wb, REG_AMP, regs.amp);
         wb_write(clk, wb, REG_ENV_STEP, regs.env_step);
         wb_write(clk, wb, REG_DRAG_COEFF, regs.drag_coeff);
-        wb_write(clk, wb, REG_WE, WRITE_COMMAND);
-    end procedure wb_write_config;
-
-    procedure wb_trigger (
-        signal clk   : in std_logic;
-        signal wb    : inout wb_bus
-    ) is
-        constant WRITE_COMMAND : std_logic_vector(DATA_WIDTH-1 downto 0) := x"00000001";
-    begin
         wb_write(clk, wb, REG_TRIG, WRITE_COMMAND);
-    end procedure wb_trigger;
+    end procedure wb_write_config;
 
     procedure write_iq_sample (
         signal clk : in std_logic;

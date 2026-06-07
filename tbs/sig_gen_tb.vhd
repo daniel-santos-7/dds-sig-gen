@@ -108,12 +108,6 @@ begin
         write_case_file(CASE_FILE, TC);
         write_reg_file(REG_FILE, REGS);
 
-        wait until rising_edge(clk_i);
-        wait until rising_edge(clk_i);
-        
-        -- Send trigger
-        wb_trigger(clk_i, wb);
-
         write_iq_sample(clk_i, SAMPLES_FILE, sig_i, sig_q, TOTAL_SAMPLES);
 
         clk_en <= false;

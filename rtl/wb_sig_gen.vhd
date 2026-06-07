@@ -36,7 +36,6 @@ architecture rtl of wb_sig_gen is
     signal csr_env_step   : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal csr_drag_coeff : std_logic_vector(DATA_WIDTH-1 downto 0);
     
-    signal csr_we         : std_logic;
     signal csr_trig       : std_logic;
     
     signal env_active : std_logic;
@@ -69,7 +68,6 @@ begin
         amp_o        => csr_amp,
         env_step_o   => csr_env_step,
         drag_coeff_o => csr_drag_coeff,
-        we_o         => csr_we,
         trig_o       => csr_trig
     );
 
@@ -78,7 +76,7 @@ begin
     ) port map (
         clk_i => clk_i,
         rst_i => rst_i,
-        we_i  => csr_we,
+        we_i  => csr_trig,
         inc_i => csr_inc(PHA_ACC_BITS-1 downto 0),
         pha_i => csr_pha(PHA_ACC_BITS-1 downto 0),
         val_o => pha_val
