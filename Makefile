@@ -50,11 +50,11 @@ $(VENVDIR): py/requirements.txt
 run: .make | $(OUTDIR) $(TESTDIR)
 	@$(GHDL) run $(TBS_TOP) $(GHDL_RUNOPTS)
 
-analyze: $(VENVDIR) $(SAMPLES_FILE) | $(OUTDIR)
-	@$(VENVDIR)/bin/python3 py/sig_gen_report.py --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --output $(OUTDIR)/analysis.txt
+analyze: $(VENVDIR) $(SAMPLES_FILE) | $(TESTDIR)
+	@$(VENVDIR)/bin/python3 py/sig_gen_report.py --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --output $(TESTDIR)/analysis.txt
 
-plot: $(VENVDIR) $(SAMPLES_FILE) | $(OUTDIR)
-	@$(VENVDIR)/bin/python3 py/sig_gen_report.py --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --plot $(OUTDIR)
+plot: $(VENVDIR) $(SAMPLES_FILE) | $(TESTDIR)
+	@$(VENVDIR)/bin/python3 py/sig_gen_report.py --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --plot $(TESTDIR)
 
 clean:
 	@$(GHDL) clean $(GHDL_OPTS)
