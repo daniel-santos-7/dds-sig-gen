@@ -54,25 +54,6 @@ package sig_gen_pkg is
         );
     end component amp_scale;
 
-    component iq_sig_gen is
-        generic (
-            PHA_ACC_BITS : natural := 32
-        );
-        port (
-            clk_i   : in  std_logic;
-            rst_i   : in  std_logic;
-            we_i    : in  std_logic;
-            inc_i   : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
-            pha_i   : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
-            
-            env_i_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
-            env_q_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
-            
-            sig_i_o : out std_logic_vector(OUT_RES_BITS-1 downto 0);
-            sig_q_o : out std_logic_vector(OUT_RES_BITS-1 downto 0)
-        );
-    end component iq_sig_gen;
-
     component envelope_gen is
         port (
             clk_i        : in  std_logic;
