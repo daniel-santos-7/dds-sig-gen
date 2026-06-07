@@ -28,45 +28,22 @@ package sig_gen_pkg is
         );
     end component pha_acc;
 
-    component sig_gen is
-        generic (
-            PHA_ACC_BITS : natural := 32
-        );
-        port (
-            clk_i : in  std_logic;
-            rst_i : in  std_logic;
-            we_i  : in  std_logic;
-            inc_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
-            pha_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
-            amp_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
-            sig_o : out std_logic_vector(OUT_RES_BITS-1 downto 0)
-        );
-    end component sig_gen;
-
-    component amp_scale is
-        port (
-            clk_i : in  std_logic;
-            rst_i : in  std_logic;
-            we_i  : in  std_logic;
-            amp_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
-            sig_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
-            sig_o : out std_logic_vector(OUT_RES_BITS-1 downto 0)
-        );
-    end component amp_scale;
-
-    component envelope_gen is
+    component env_gen is
         port (
             clk_i        : in  std_logic;
             rst_i        : in  std_logic;
             trigger_i    : in  std_logic;
             step_i       : in  std_logic_vector(31 downto 0);
             drag_coeff_i : in  std_logic_vector(15 downto 0);
-            
-            env_i_o      : out std_logic_vector(15 downto 0);
-            env_q_o      : out std_logic_vector(15 downto 0);
+
+            sine_i_i     : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
+            sine_q_i     : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
+
+            sig_i_o      : out std_logic_vector(OUT_RES_BITS-1 downto 0);
+            sig_q_o      : out std_logic_vector(OUT_RES_BITS-1 downto 0);
             active_o     : out std_logic
         );
-    end component envelope_gen;
+    end component env_gen;
 
     component sig_gen_csrs is
         generic (

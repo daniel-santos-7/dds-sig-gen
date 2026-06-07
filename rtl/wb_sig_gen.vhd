@@ -39,8 +39,6 @@ architecture rtl of wb_sig_gen is
     signal csr_we         : std_logic;
     signal csr_trig       : std_logic;
     
-    signal env_i     : std_logic_vector(15 downto 0);
-    signal env_q     : std_logic_vector(15 downto 0);
     signal env_active : std_logic;
 
     signal pha_val : std_logic_vector(PHA_ACC_BITS-1 downto 0);
@@ -75,17 +73,6 @@ begin
         trig_o       => csr_trig
     );
 
-    u_envelope_gen : envelope_gen port map (
-        clk_i        => clk_i,
-        rst_i        => rst_i,
-        trigger_i    => csr_trig,
-        step_i       => csr_env_step,
-        drag_coeff_i => csr_drag_coeff(15 downto 0),
-        env_i_o      => env_i,
-        env_q_o      => env_q,
-        active_o     => env_active
-    );
-
     u_pha_acc : pha_acc generic map (
         PHA_ACC_BITS => PHA_ACC_BITS
     ) port map (
@@ -114,22 +101,19 @@ begin
         sig_o => sine_q
     );
 
-    u_amp_scale_i : amp_scale port map (
-        clk_i => clk_i,
-        rst_i => rst_i,
-        we_i  => '1',
-        amp_i => env_i(15 downto 16-OUT_RES_BITS),
-        sig_i => sine_i,
-        sig_o => sig_i_o
-    );
+    u_env_gen : env_gen port map (
+        clk_i        => clk_i,
+        rst_i        => rst_i,
+        trigger_i    => csr_trig,
+        step_i       => csr_env_step,
+        drag_coeff_i => csr_drag_coeff(15 downto 0),
 
-    u_amp_scale_q : amp_scale port map (
-        clk_i => clk_i,
-        rst_i => rst_i,
-        we_i  => '1',
-        amp_i => env_q(15 downto 16-OUT_RES_BITS),
-        sig_i => sine_q,
-        sig_o => sig_q_o
+        sine_i_i     => sine_i,
+        sine_q_i     => sine_q,
+
+        sig_i_o      => sig_i_o,
+        sig_q_o      => sig_q_o,
+        active_o     => env_active
     );
 
 end architecture rtl;
