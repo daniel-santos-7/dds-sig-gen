@@ -33,8 +33,16 @@ architecture rtl of env_gen is
 
     signal env_q_mult : signed(31 downto 0);
 
-    signal mul_i_res : signed(2*OUT_RES_BITS downto 0);
-    signal mul_q_res : signed(2*OUT_RES_BITS downto 0);
+    signal gauss_sgn : signed(OUT_RES_BITS downto 0);
+    signal drag_sgn  : signed(OUT_RES_BITS downto 0);
+
+    signal mul_i_i : signed(2*OUT_RES_BITS downto 0);
+    signal mul_q_q : signed(2*OUT_RES_BITS downto 0);
+    signal mul_i_q : signed(2*OUT_RES_BITS downto 0);
+    signal mul_q_i : signed(2*OUT_RES_BITS downto 0);
+
+    signal sum_i : signed(2*OUT_RES_BITS downto 0);
+    signal sum_q : signed(2*OUT_RES_BITS downto 0);
 
     signal sig_i_reg : std_logic_vector(OUT_RES_BITS-1 downto 0);
     signal sig_q_reg : std_logic_vector(OUT_RES_BITS-1 downto 0);
@@ -81,8 +89,16 @@ begin
 
     env_q_mult <= signed(drag_val) * signed(drag_coeff_i);
 
-    mul_i_res <= signed(sine_i_i) * signed('0' & gauss_val);
-    mul_q_res <= signed(sine_q_i) * signed('0' & std_logic_vector(env_q_mult(30 downto 15)));
+    gauss_sgn <= signed('0' & gauss_val);
+    drag_sgn  <= env_q_mult(31 downto 15);
+
+    mul_i_i <= signed(sine_i_i) * gauss_sgn;
+    mul_q_q <= signed(sine_q_i) * drag_sgn;
+    mul_i_q <= signed(sine_i_i) * drag_sgn;
+    mul_q_i <= signed(sine_q_i) * gauss_sgn;
+
+    sum_i <= mul_i_i - mul_q_q;
+    sum_q <= mul_q_i + mul_i_q;
 
     process(clk_i)
     begin
@@ -91,8 +107,8 @@ begin
                 sig_i_reg <= (others => '0');
                 sig_q_reg <= (others => '0');
             else
-                sig_i_reg <= std_logic_vector(mul_i_res(2*OUT_RES_BITS-1 downto OUT_RES_BITS));
-                sig_q_reg <= std_logic_vector(mul_q_res(2*OUT_RES_BITS-1 downto OUT_RES_BITS));
+                sig_i_reg <= std_logic_vector(sum_i(2*OUT_RES_BITS-1 downto OUT_RES_BITS));
+                sig_q_reg <= std_logic_vector(sum_q(2*OUT_RES_BITS-1 downto OUT_RES_BITS));
             end if;
         end if;
     end process;

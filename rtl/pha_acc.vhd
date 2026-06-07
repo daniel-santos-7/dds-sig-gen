@@ -42,6 +42,8 @@ begin
         if rising_edge(clk_i) then
             if rst_i = '1' then
                 acc_reg <= (others => '0');
+            elsif we_i = '1' then
+                acc_reg <= (others => '0');
             else
                 acc_reg <= std_logic_vector(unsigned(acc_reg) + unsigned(ftw_reg));
             end if;
