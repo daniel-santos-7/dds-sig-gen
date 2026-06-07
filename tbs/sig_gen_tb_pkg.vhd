@@ -18,8 +18,8 @@ package sig_gen_tb_pkg is
     end record test_case_t;
 
     type reg_values_t is record
-        inc        : std_logic_vector(31 downto 0);
-        pha        : std_logic_vector(31 downto 0);
+        ftw        : std_logic_vector(31 downto 0);
+        pow        : std_logic_vector(31 downto 0);
         amp        : std_logic_vector(31 downto 0);
         env_step   : std_logic_vector(31 downto 0);
         drag_coeff : std_logic_vector(31 downto 0);
@@ -33,8 +33,8 @@ package sig_gen_tb_pkg is
     procedure write_case_file(file_name : string; tv : test_case_t);
     procedure write_reg_file(file_name : string; regs : reg_values_t);
 
-    constant REG_INC        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "00000"; -- 0x0
-    constant REG_PHA        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "00100"; -- 0x4
+    constant REG_FTW        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "00000"; -- 0x0
+    constant REG_POW        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "00100"; -- 0x4
     constant REG_AMP        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "01000"; -- 0x8
     constant REG_ENV_STEP   : std_logic_vector(ADDR_WIDTH-1 downto 0) := "01100"; -- 0xc
     constant REG_DRAG_COEFF : std_logic_vector(ADDR_WIDTH-1 downto 0) := "10000"; -- 0x10
@@ -112,8 +112,8 @@ package body sig_gen_tb_pkg is
         if drag_val < -32768 then drag_val := -32768; end if;
         
         return (
-            inc        => real_to_slv32(tv.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS)),
-            pha        => real_to_slv32(tv.phase_deg / 360.0 * (2.0 ** PHA_ACC_BITS)),
+        ftw        => real_to_slv32(tv.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS)),
+        pow        => real_to_slv32(tv.phase_deg / 360.0 * (2.0 ** PHA_ACC_BITS)),
             amp        => real_to_slv32(tv.amp_val),
             env_step   => std_logic_vector(to_unsigned(integer(step_val), 32)),
             drag_coeff => std_logic_vector(to_signed(drag_val, 32))
@@ -148,8 +148,8 @@ package body sig_gen_tb_pkg is
         file f : text open write_mode is file_name;
         variable l : line;
     begin
-        write(l, string'("inc: 0x")); hwrite(l, to_bitvector(regs.inc)); writeline(f, l);
-        write(l, string'("pha: 0x")); hwrite(l, to_bitvector(regs.pha)); writeline(f, l);
+        write(l, string'("ftw: 0x")); hwrite(l, to_bitvector(regs.ftw)); writeline(f, l);
+        write(l, string'("pow: 0x")); hwrite(l, to_bitvector(regs.pow)); writeline(f, l);
         write(l, string'("amp: 0x")); hwrite(l, to_bitvector(regs.amp)); writeline(f, l);
         write(l, string'("env_step: 0x")); hwrite(l, to_bitvector(regs.env_step)); writeline(f, l);
         write(l, string'("drag_coeff: 0x")); hwrite(l, to_bitvector(regs.drag_coeff)); writeline(f, l);
@@ -198,8 +198,8 @@ package body sig_gen_tb_pkg is
     ) is
         constant WRITE_COMMAND : std_logic_vector(DATA_WIDTH-1 downto 0) := x"00000001";
     begin
-        wb_write(clk, wb, REG_INC, regs.inc);
-        wb_write(clk, wb, REG_PHA, regs.pha);
+        wb_write(clk, wb, REG_FTW, regs.ftw);
+        wb_write(clk, wb, REG_POW, regs.pow);
         wb_write(clk, wb, REG_AMP, regs.amp);
         wb_write(clk, wb, REG_ENV_STEP, regs.env_step);
         wb_write(clk, wb, REG_DRAG_COEFF, regs.drag_coeff);

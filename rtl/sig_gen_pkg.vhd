@@ -22,8 +22,8 @@ package sig_gen_pkg is
             clk_i : in  std_logic;
             rst_i : in  std_logic;
             we_i  : in  std_logic;
-            inc_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
-            pha_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            ftw_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            pow_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
             val_o : out std_logic_vector(PHA_ACC_BITS-1 downto 0)
         );
     end component pha_acc;
@@ -62,8 +62,8 @@ package sig_gen_pkg is
             ack_o : out std_logic;
             dat_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
             
-            inc_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
-            pha_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            ftw_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            pow_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
             amp_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
             env_step_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
             drag_coeff_o : out std_logic_vector(DATA_WIDTH-1 downto 0);

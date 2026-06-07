@@ -30,8 +30,8 @@ end entity wb_sig_gen;
 
 architecture rtl of wb_sig_gen is
 
-    signal csr_inc        : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal csr_pha        : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal csr_ftw        : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal csr_pow        : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal csr_amp        : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal csr_env_step   : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal csr_drag_coeff : std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -63,8 +63,8 @@ begin
         ack_o => ack_o,
         dat_o => dat_o,
         
-        inc_o        => csr_inc,
-        pha_o        => csr_pha,
+        ftw_o        => csr_ftw,
+        pow_o        => csr_pow,
         amp_o        => csr_amp,
         env_step_o   => csr_env_step,
         drag_coeff_o => csr_drag_coeff,
@@ -77,8 +77,8 @@ begin
         clk_i => clk_i,
         rst_i => rst_i,
         we_i  => csr_trig,
-        inc_i => csr_inc(PHA_ACC_BITS-1 downto 0),
-        pha_i => csr_pha(PHA_ACC_BITS-1 downto 0),
+        ftw_i => csr_ftw(PHA_ACC_BITS-1 downto 0),
+        pow_i => csr_pow(PHA_ACC_BITS-1 downto 0),
         val_o => pha_val
     );
 

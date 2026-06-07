@@ -19,8 +19,8 @@ entity sig_gen_csrs is
         ack_o : out std_logic;
         dat_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
         
-        inc_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
-        pha_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        ftw_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        pow_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
         amp_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
         env_step_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
         drag_coeff_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -33,8 +33,8 @@ architecture rtl of sig_gen_csrs is
 
     constant BYTE_LANES : natural := DATA_WIDTH / 8;
 
-    constant REG_INC        : integer := 0;
-    constant REG_PHA        : integer := 4;
+    constant REG_FTW        : integer := 0;
+    constant REG_POW        : integer := 4;
     constant REG_AMP        : integer := 8;
     constant REG_ENV_STEP   : integer := 12;
     constant REG_DRAG_COEFF : integer := 16;
@@ -43,8 +43,8 @@ architecture rtl of sig_gen_csrs is
     signal ack_reg : std_logic;
     signal dat_reg : std_logic_vector(DATA_WIDTH-1 downto 0);
     
-    signal inc_reg        : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal pha_reg        : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal ftw_reg        : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal pow_reg        : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal amp_reg        : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal env_step_reg   : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal drag_coeff_reg : std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -75,8 +75,8 @@ begin
             if rst_i = '1' then
                 ack_reg <= '0';
                 dat_reg <= (others => '0');
-                inc_reg <= (others => '0');
-                pha_reg <= (others => '0');
+                ftw_reg <= (others => '0');
+                pow_reg <= (others => '0');
                 amp_reg <= (others => '0');
                 env_step_reg <= (others => '0');
                 drag_coeff_reg <= (others => '0');
@@ -87,17 +87,17 @@ begin
 
                 if cyc_i = '1' and stb_i = '1' and ack_reg = '0' then
                     case to_integer(unsigned(adr_i)) is
-                        when REG_INC =>
+                        when REG_FTW =>
                             if we_i = '1' then
-                                inc_reg <= apply_sel(inc_reg, dat_i, sel_i);
+                                ftw_reg <= apply_sel(ftw_reg, dat_i, sel_i);
                             end if;
-                            dat_reg <= inc_reg;
+                            dat_reg <= ftw_reg;
 
-                        when REG_PHA =>
+                        when REG_POW =>
                             if we_i = '1' then
-                                pha_reg <= apply_sel(pha_reg, dat_i, sel_i);
+                                pow_reg <= apply_sel(pow_reg, dat_i, sel_i);
                             end if;
-                            dat_reg <= pha_reg;
+                            dat_reg <= pow_reg;
 
                         when REG_AMP =>
                             if we_i = '1' then
@@ -134,8 +134,8 @@ begin
     ack_o <= ack_reg;
     dat_o <= dat_reg;
     
-    inc_o        <= inc_reg;
-    pha_o        <= pha_reg;
+    ftw_o        <= ftw_reg;
+    pow_o        <= pow_reg;
     amp_o        <= amp_reg;
     env_step_o   <= env_step_reg;
     drag_coeff_o <= drag_coeff_reg;
