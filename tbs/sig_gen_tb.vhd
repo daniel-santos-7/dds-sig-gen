@@ -3,6 +3,7 @@ use IEEE.std_logic_1164.all;
 use IEEE.math_real.all;
 use work.sig_gen_pkg.all;
 use work.sig_gen_tb_pkg.all;
+use IEEE.numeric_std.all;
 
 entity sig_gen_tb is
     generic (
@@ -45,8 +46,16 @@ architecture tb of sig_gen_tb is
 
     signal wb : wb_bus;
 
-    signal sig_i : std_logic_vector(15 downto 0);
-    signal sig_q : std_logic_vector(15 downto 0);
+    signal sig_i    : std_logic_vector(15 downto 0);
+    signal sig_q    : std_logic_vector(15 downto 0);
+    signal active   : std_logic;
+
+    signal mon_cycles : natural := 0;
+    signal mon_edges  : natural := 0;
+    signal mon_pre_i  : std_logic_vector(15 downto 0) := (others => '0');
+    signal mon_pre_q  : std_logic_vector(15 downto 0) := (others => '0');
+    signal mon_post_i : std_logic_vector(15 downto 0) := (others => '0');
+    signal mon_post_q : std_logic_vector(15 downto 0) := (others => '0');
 
     -- component wb_sig_gen
     component wb_sig_gen is
@@ -67,8 +76,9 @@ architecture tb of sig_gen_tb is
             ack_o : out std_logic;
             dat_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
             
-            sig_i_o : out std_logic_vector(15 downto 0);
-            sig_q_o : out std_logic_vector(15 downto 0)
+            sig_i_o  : out std_logic_vector(15 downto 0);
+            sig_q_o  : out std_logic_vector(15 downto 0);
+            active_o : out std_logic
         );
     end component wb_sig_gen;
 
@@ -89,11 +99,32 @@ begin
         dat_i => wb.dat_i,
         ack_o => wb.ack_o,
         dat_o => wb.dat_o,
-        sig_i_o => sig_i,
-        sig_q_o => sig_q
+        sig_i_o  => sig_i,
+        sig_q_o  => sig_q,
+        active_o => active
     );
 
     clk_i <= not clk_i after (CLK_PERIOD / 2) when clk_en else '0';
+
+    monitor_proc : process(clk_i)
+        variable prev : std_logic := '0';
+    begin
+        if rising_edge(clk_i) and clk_en then
+            if active = '1' and prev = '0' then
+                mon_edges <= mon_edges + 1;
+                mon_pre_i <= sig_i;
+                mon_pre_q <= sig_q;
+            elsif active = '0' and prev = '1' then
+                mon_edges <= mon_edges + 1;
+                mon_post_i <= sig_i;
+                mon_post_q <= sig_q;
+            end if;
+            if active = '1' then
+                mon_cycles <= mon_cycles + 1;
+            end if;
+            prev := active;
+        end if;
+    end process monitor_proc;
 
     stim_process : process
     begin
@@ -109,6 +140,32 @@ begin
 
         write_iq_sample(clk_i, SAMPLES_FILE, sig_i, sig_q, TOTAL_SAMPLES);
 
+        report "Pulse width: " & integer'image(mon_cycles) & " cycles (expected " & integer'image(PULSE_LEN) & ")";
+        assert mon_cycles >= PULSE_LEN and mon_cycles <= PULSE_LEN + 2
+            report "PULSE WIDTH CHECK FAILED: " & integer'image(mon_cycles) & " (expected " & integer'image(PULSE_LEN) & ")"
+            severity error;
+
+        assert mon_edges = 2
+            report "GLITCH CHECK FAILED: " & integer'image(mon_edges) & " edges"
+            severity error;
+
+        assert abs(to_integer(unsigned(mon_pre_i)) - 32768) < 50
+            report "PRE-PULSE EXTINCTION I FAILED: " & integer'image(to_integer(unsigned(mon_pre_i)))
+            severity error;
+
+        assert abs(to_integer(unsigned(mon_pre_q)) - 32768) < 50
+            report "PRE-PULSE EXTINCTION Q FAILED: " & integer'image(to_integer(unsigned(mon_pre_q)))
+            severity error;
+
+        assert abs(to_integer(unsigned(mon_post_i)) - 32768) < 50
+            report "POST-PULSE EXTINCTION I FAILED: " & integer'image(to_integer(unsigned(mon_post_i)))
+            severity error;
+
+        assert abs(to_integer(unsigned(mon_post_q)) - 32768) < 50
+            report "POST-PULSE EXTINCTION Q FAILED: " & integer'image(to_integer(unsigned(mon_post_q)))
+            severity error;
+
+        report "VHDL assertions: all passed";
         clk_en <= false;
         wait;
     end process stim_process;

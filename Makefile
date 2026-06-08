@@ -37,7 +37,7 @@ GHDL_RUNOPTS += -gSAMPLES_FILE=$(SAMPLES_FILE)
 GHDL_RUNOPTS += -gCASE_FILE=$(TEST_CASE_FILE)
 GHDL_RUNOPTS += -gREG_FILE=$(REG_VALUES_FILE)
 
-.PHONY: run analyze plot clean distclean
+.PHONY: run analyze plot verify clean distclean
 
 $(WORKDIR) $(OUTDIR) $(TESTDIR):
 	@mkdir -p $@
@@ -60,6 +60,9 @@ analyze: $(VENVDIR) $(SAMPLES_FILE) | $(TESTDIR)
 
 plot: $(VENVDIR) $(SAMPLES_FILE) | $(TESTDIR)
 	@$(VENVDIR)/bin/python3 py/sig_gen_report.py --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --plot $(TESTDIR)
+
+verify: $(VENVDIR) $(SAMPLES_FILE)
+	@$(VENVDIR)/bin/python3 py/verify_pulse.py --data $(SAMPLES_FILE) --amp $(AMP_VAL) --pulse $(PULSE_LEN)
 
 clean:
 	@$(GHDL) clean $(GHDL_OPTS)

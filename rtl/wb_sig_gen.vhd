@@ -23,8 +23,9 @@ entity wb_sig_gen is
         ack_o : out std_logic;
         dat_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
         
-        sig_i_o : out std_logic_vector(OUT_RES_BITS-1 downto 0);
-        sig_q_o : out std_logic_vector(OUT_RES_BITS-1 downto 0)
+        sig_i_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
+        sig_q_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
+        active_o : out std_logic
     );
 end entity wb_sig_gen;
 
@@ -119,5 +120,7 @@ begin
         sig_q_o      => sig_q_o,
         active_o     => env_active
     );
+
+    active_o <= env_active;
 
 end architecture rtl;
