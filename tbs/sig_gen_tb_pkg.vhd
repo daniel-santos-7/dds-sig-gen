@@ -62,6 +62,13 @@ package sig_gen_tb_pkg is
         constant dat : std_logic_vector(DATA_WIDTH-1 downto 0)
     );
 
+    procedure wb_read (
+        signal clk  : in std_logic;
+        signal wb   : inout wb_bus;
+        constant adr : std_logic_vector(ADDR_WIDTH-1 downto 0);
+        variable dat : out std_logic_vector(DATA_WIDTH-1 downto 0)
+    );
+
     procedure wb_write_config (
         signal clk   : in std_logic;
         signal wb    : inout wb_bus;
@@ -190,6 +197,26 @@ package body sig_gen_tb_pkg is
         wb.sel_i <= (others => '0');
         wb.dat_i <= (others => '0');
     end procedure wb_write;
+
+    procedure wb_read (
+        signal clk  : in std_logic;
+        signal wb   : inout wb_bus;
+        constant adr : std_logic_vector(ADDR_WIDTH-1 downto 0);
+        variable dat : out std_logic_vector(DATA_WIDTH-1 downto 0)
+    ) is
+    begin
+        wait until rising_edge(clk);
+        wb.adr_i <= adr;
+        wb.sel_i <= (others => '1');
+        wb.cyc_i <= '1';
+        wb.stb_i <= '1';
+        wb.we_i  <= '0';
+        wait until rising_edge(clk) and wb.ack_o = '1';
+        dat := wb.dat_o;
+        wb.cyc_i <= '0';
+        wb.stb_i <= '0';
+        wb.sel_i <= (others => '0');
+    end procedure wb_read;
 
     procedure wb_write_config (
         signal clk   : in std_logic;

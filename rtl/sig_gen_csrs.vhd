@@ -26,8 +26,10 @@ entity sig_gen_csrs is
         drag_coeff_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
         
         trig_o       : out std_logic;
+        delay_o      : out std_logic_vector(23 downto 0);
 
-        busy_i       : in  std_logic
+        busy_i       : in  std_logic;
+        pending_i    : in  std_logic
     );
 end entity sig_gen_csrs;
 
@@ -52,6 +54,7 @@ architecture rtl of sig_gen_csrs is
     signal drag_coeff_reg : std_logic_vector(DATA_WIDTH-1 downto 0);
     
     signal trig_reg : std_logic;
+    signal delay_reg : std_logic_vector(DATA_WIDTH-1 downto 0);
 
     function apply_sel (
         cur : std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -82,6 +85,7 @@ begin
                 amp_reg <= (others => '0');
                 env_step_reg <= (others => '0');
                 drag_coeff_reg <= (others => '0');
+                delay_reg <= (others => '0');
                 trig_reg <= '0';
             else
                 ack_reg <= cyc_i and stb_i and not ack_reg;
@@ -122,8 +126,9 @@ begin
                         when REG_TRIG =>
                             if we_i = '1' then
                                 trig_reg <= sel_i(0) and dat_i(0);
+                                delay_reg <= apply_sel(delay_reg, dat_i, sel_i);
                             end if;
-                            dat_reg <= (0 => trig_reg, 1 => busy_i, others => '0');
+                            dat_reg <= delay_reg(31 downto 8) & "00000" & pending_i & busy_i & trig_reg;
 
                         when others =>
                             dat_reg <= (others => '0');
@@ -143,5 +148,6 @@ begin
     drag_coeff_o <= drag_coeff_reg;
     
     trig_o       <= trig_reg;
+    delay_o      <= delay_reg(23 downto 0);
 
 end architecture rtl;

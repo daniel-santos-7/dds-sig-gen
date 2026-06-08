@@ -57,6 +57,11 @@ architecture tb of sig_gen_tb is
     signal mon_post_i : std_logic_vector(15 downto 0) := (others => '0');
     signal mon_post_q : std_logic_vector(15 downto 0) := (others => '0');
 
+    signal p2_arm    : std_logic := '0';
+    signal p2_cycles : natural := 0;
+    signal p2_edges  : natural := 0;
+    signal p2_active : std_logic := '0';
+
     -- component wb_sig_gen
     component wb_sig_gen is
         generic (
@@ -108,6 +113,7 @@ begin
 
     monitor_proc : process(clk_i)
         variable prev : std_logic := '0';
+        variable p2_prev : std_logic := '0';
     begin
         if rising_edge(clk_i) and clk_en then
             if active = '1' and prev = '0' then
@@ -123,6 +129,20 @@ begin
                 mon_cycles <= mon_cycles + 1;
             end if;
             prev := active;
+
+            if p2_arm = '1' then
+                if active = '1' and p2_prev = '0' then
+                    p2_edges <= p2_edges + 1;
+                    p2_active <= '1';
+                elsif active = '0' and p2_prev = '1' then
+                    p2_edges <= p2_edges + 1;
+                    p2_active <= '0';
+                end if;
+                if active = '1' then
+                    p2_cycles <= p2_cycles + 1;
+                end if;
+            end if;
+            p2_prev := active;
         end if;
     end process monitor_proc;
 
@@ -166,6 +186,44 @@ begin
             severity error;
 
         report "VHDL assertions: all passed";
+
+        -- ============================================
+        -- Phase 2: Pending trigger with delay
+        -- ============================================
+        report "=== Phase 2: Pending trigger with delay test ===";
+
+        -- Arm phase 2 monitor
+        p2_arm <= '1';
+        wait until rising_edge(clk_i);
+
+        -- Write new config while idle
+        wb_write(clk_i, wb, REG_FTW, x"00000001");
+        wb_write(clk_i, wb, REG_AMP, x"00007FFF");
+
+        -- Trigger pulse 2 (normal, no pending)
+        wb_write(clk_i, wb, REG_TRIG, x"00000001");
+
+        -- Wait for env_active to go high (pulse started)
+        wait until rising_edge(clk_i) and active = '1';
+
+        -- Now write TRIG with delay=75 while pulse is active — should pend
+        wb_write(clk_i, wb, REG_TRIG, x"00004B01");  -- delay=75 (0x4B), trig=1
+
+        -- Wait for current pulse to finish + delay + next pulse
+        for i in 0 to PULSE_LEN + 150 + PULSE_LEN loop
+            wait until rising_edge(clk_i);
+        end loop;
+
+        -- Verify phase 2 pulse quality
+        assert p2_edges = 2
+            report "PHASE 2 GLITCH CHECK FAILED: " & integer'image(p2_edges) & " edges"
+            severity error;
+
+        assert p2_cycles >= PULSE_LEN and p2_cycles <= PULSE_LEN + 2
+            report "PHASE 2 PULSE WIDTH CHECK FAILED: " & integer'image(p2_cycles)
+            severity error;
+
+        report "Phase 2 assertions: all passed";
         clk_en <= false;
         wait;
     end process stim_process;

@@ -70,8 +70,10 @@ package sig_gen_pkg is
             drag_coeff_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
             
             trig_o       : out std_logic;
+            delay_o      : out std_logic_vector(23 downto 0);
 
-            busy_i       : in  std_logic
+            busy_i       : in  std_logic;
+            pending_i    : in  std_logic
         );
     end component sig_gen_csrs;
 
