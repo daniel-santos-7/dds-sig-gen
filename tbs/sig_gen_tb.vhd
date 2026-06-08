@@ -10,6 +10,8 @@ entity sig_gen_tb is
         FREQ_HZ       : natural := 1000000;
         PHASE_DEG     : natural := 0;
         AMP_VAL       : natural := 65535;
+        PULSE_LEN     : natural := 200;
+        DRAG_COEFF    : integer := 16384;  -- Q1.15: 0.5 * 32768
         NUM_PERIODS   : natural := 4;
         SAMPLES_FILE  : string  := "samples.txt";
         CASE_FILE     : string  := "test_case.txt";
@@ -25,20 +27,17 @@ architecture tb of sig_gen_tb is
     constant PHASE_DEG_VAL : real := real(PHASE_DEG);
     constant AMP_VAL_VAL   : real := real(AMP_VAL);
     
-    constant PULSE_LEN_VAL : natural := 200;
-    constant DRAG_COEFF_VAL : real := 0.5;
-
     constant TC   : test_case_t := (
         freq_hz => FREQ_HZ_VAL, 
         phase_deg => PHASE_DEG_VAL, 
         amp_val => AMP_VAL_VAL,
-        pulse_len => PULSE_LEN_VAL,
-        drag_coeff => DRAG_COEFF_VAL
+        pulse_len => PULSE_LEN,
+        drag_coeff => real(DRAG_COEFF) / 32768.0
     );
     
     constant REGS : reg_values_t  := to_regs(TC);
 
-    constant TOTAL_SAMPLES : natural := PULSE_LEN_VAL + 50; -- Pulse + padding
+    constant TOTAL_SAMPLES : natural := PULSE_LEN + 50; -- Pulse + padding
 
     signal clk_en : boolean := false;
     signal clk_i  : std_logic := '0';

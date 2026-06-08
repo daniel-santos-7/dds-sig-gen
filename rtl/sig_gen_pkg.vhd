@@ -69,7 +69,9 @@ package sig_gen_pkg is
             env_step_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
             drag_coeff_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
             
-            trig_o       : out std_logic
+            trig_o       : out std_logic;
+
+            busy_i       : in  std_logic
         );
     end component sig_gen_csrs;
 

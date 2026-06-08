@@ -25,7 +25,9 @@ entity sig_gen_csrs is
         env_step_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
         drag_coeff_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
         
-        trig_o       : out std_logic
+        trig_o       : out std_logic;
+
+        busy_i       : in  std_logic
     );
 end entity sig_gen_csrs;
 
@@ -121,7 +123,7 @@ begin
                             if we_i = '1' then
                                 trig_reg <= sel_i(0) and dat_i(0);
                             end if;
-                            dat_reg <= (0 => trig_reg, others => '0');
+                            dat_reg <= (0 => trig_reg, 1 => busy_i, others => '0');
 
                         when others =>
                             dat_reg <= (others => '0');
