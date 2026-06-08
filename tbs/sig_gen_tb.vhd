@@ -9,7 +9,7 @@ entity sig_gen_tb is
         PHA_ACC_BITS  : natural := 32;
         FREQ_HZ       : natural := 1000000;
         PHASE_DEG     : natural := 0;
-        AMP_VAL       : natural := 32767;
+        AMP_VAL       : natural := 65535;
         NUM_PERIODS   : natural := 4;
         SAMPLES_FILE  : string  := "samples.txt";
         CASE_FILE     : string  := "test_case.txt";

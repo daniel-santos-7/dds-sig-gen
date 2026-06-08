@@ -105,6 +105,7 @@ begin
         trigger_i    => csr_trig,
         step_i       => csr_env_step,
         drag_coeff_i => csr_drag_coeff(15 downto 0),
+        amp_i        => csr_amp(15 downto 0),
 
         sine_i_i     => sine_i,
         sine_q_i     => sine_q,

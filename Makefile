@@ -15,7 +15,7 @@ CLK_FREQ_HZ ?= 100e6
 CLK_PERIODS ?= 4
 FREQ_HZ     ?= 100000
 PHASE_DEG   ?= 0
-AMP_VAL     ?= 2047
+AMP_VAL     ?= 65535
 
 TESTDIR = $(OUTDIR)/test_$(FREQ_HZ)hz_$(PHASE_DEG)deg_$(AMP_VAL)
 

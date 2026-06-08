@@ -35,6 +35,7 @@ package sig_gen_pkg is
             trigger_i    : in  std_logic;
             step_i       : in  std_logic_vector(31 downto 0);
             drag_coeff_i : in  std_logic_vector(15 downto 0);
+            amp_i        : in  std_logic_vector(15 downto 0);
 
             sine_i_i     : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
             sine_q_i     : in  std_logic_vector(OUT_RES_BITS-1 downto 0);

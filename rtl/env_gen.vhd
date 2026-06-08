@@ -11,6 +11,7 @@ entity env_gen is
         trigger_i    : in  std_logic;
         step_i       : in  std_logic_vector(31 downto 0);
         drag_coeff_i : in  std_logic_vector(15 downto 0);
+        amp_i        : in  std_logic_vector(15 downto 0);
 
         sine_i_i     : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
         sine_q_i     : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
@@ -30,6 +31,8 @@ architecture rtl of env_gen is
     signal drag_val  : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
 
     signal addr      : unsigned(ENV_LUT_ADDR_BITS-1 downto 0);
+
+    signal amp_mult   : unsigned(31 downto 0);
 
     signal env_q_mult : signed(31 downto 0);
 
@@ -87,9 +90,11 @@ begin
         end if;
     end process;
 
+    amp_mult <= unsigned(gauss_val) * unsigned(amp_i);
+
     env_q_mult <= signed(drag_val) * signed(drag_coeff_i);
 
-    gauss_sgn <= signed('0' & gauss_val);
+    gauss_sgn <= signed('0' & amp_mult(31 downto 16));
     drag_sgn  <= env_q_mult(31 downto 15);
 
     mul_i_i <= signed(sine_i_i) * gauss_sgn;
