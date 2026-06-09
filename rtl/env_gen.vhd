@@ -32,9 +32,9 @@ architecture rtl of env_gen is
 
     signal addr      : unsigned(ENV_LUT_ADDR_BITS-1 downto 0);
 
-    signal amp_mult   : unsigned(31 downto 0);
+    signal amp_mult   : unsigned(ENV_OUT_RES_BITS+15 downto 0);
 
-    signal env_q_mult : signed(31 downto 0);
+    signal env_q_mult : signed(ENV_OUT_RES_BITS+15 downto 0);
 
     signal gauss_sgn : signed(OUT_RES_BITS downto 0);
     signal drag_sgn  : signed(OUT_RES_BITS downto 0);
@@ -94,8 +94,8 @@ begin
 
     env_q_mult <= signed(drag_val) * signed(drag_coeff_i);
 
-    gauss_sgn <= signed('0' & amp_mult(31 downto 31-OUT_RES_BITS+1));
-    drag_sgn  <= env_q_mult(31 downto 31-OUT_RES_BITS);
+    gauss_sgn <= signed('0' & amp_mult(ENV_OUT_RES_BITS+15 downto ENV_OUT_RES_BITS+15-OUT_RES_BITS+1));
+    drag_sgn  <= env_q_mult(ENV_OUT_RES_BITS+15 downto ENV_OUT_RES_BITS+15-OUT_RES_BITS);
 
     mul_i_i <= signed(sine_i_i) * gauss_sgn;
     mul_q_q <= signed(sine_q_i) * drag_sgn;
