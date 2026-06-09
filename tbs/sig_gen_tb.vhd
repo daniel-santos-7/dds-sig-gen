@@ -3,6 +3,7 @@ use IEEE.std_logic_1164.all;
 use IEEE.math_real.all;
 use work.sig_gen_pkg.all;
 use work.sig_gen_tb_pkg.all;
+use work.sine_lut_pkg.OUT_RES_BITS;
 use IEEE.numeric_std.all;
 
 entity sig_gen_tb is
@@ -46,16 +47,16 @@ architecture tb of sig_gen_tb is
 
     signal wb : wb_bus;
 
-    signal sig_i    : std_logic_vector(15 downto 0);
-    signal sig_q    : std_logic_vector(15 downto 0);
+    signal sig_i    : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal sig_q    : std_logic_vector(OUT_RES_BITS-1 downto 0);
     signal active   : std_logic;
 
     signal mon_cycles : natural := 0;
     signal mon_edges  : natural := 0;
-    signal mon_pre_i  : std_logic_vector(15 downto 0) := (others => '0');
-    signal mon_pre_q  : std_logic_vector(15 downto 0) := (others => '0');
-    signal mon_post_i : std_logic_vector(15 downto 0) := (others => '0');
-    signal mon_post_q : std_logic_vector(15 downto 0) := (others => '0');
+    signal mon_pre_i  : std_logic_vector(OUT_RES_BITS-1 downto 0) := (others => '0');
+    signal mon_pre_q  : std_logic_vector(OUT_RES_BITS-1 downto 0) := (others => '0');
+    signal mon_post_i : std_logic_vector(OUT_RES_BITS-1 downto 0) := (others => '0');
+    signal mon_post_q : std_logic_vector(OUT_RES_BITS-1 downto 0) := (others => '0');
 
     signal p2_arm    : std_logic := '0';
     signal p2_cycles : natural := 0;
@@ -81,8 +82,8 @@ architecture tb of sig_gen_tb is
             ack_o : out std_logic;
             dat_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
             
-            sig_i_o  : out std_logic_vector(15 downto 0);
-            sig_q_o  : out std_logic_vector(15 downto 0);
+            sig_i_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
+            sig_q_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
             active_o : out std_logic
         );
     end component wb_sig_gen;
@@ -169,19 +170,19 @@ begin
             report "GLITCH CHECK FAILED: " & integer'image(mon_edges) & " edges"
             severity error;
 
-        assert abs(to_integer(unsigned(mon_pre_i)) - 32768) < 50
+        assert abs(to_integer(unsigned(mon_pre_i)) - 2**(OUT_RES_BITS-1)) < 50
             report "PRE-PULSE EXTINCTION I FAILED: " & integer'image(to_integer(unsigned(mon_pre_i)))
             severity error;
 
-        assert abs(to_integer(unsigned(mon_pre_q)) - 32768) < 50
+        assert abs(to_integer(unsigned(mon_pre_q)) - 2**(OUT_RES_BITS-1)) < 50
             report "PRE-PULSE EXTINCTION Q FAILED: " & integer'image(to_integer(unsigned(mon_pre_q)))
             severity error;
 
-        assert abs(to_integer(unsigned(mon_post_i)) - 32768) < 50
+        assert abs(to_integer(unsigned(mon_post_i)) - 2**(OUT_RES_BITS-1)) < 50
             report "POST-PULSE EXTINCTION I FAILED: " & integer'image(to_integer(unsigned(mon_post_i)))
             severity error;
 
-        assert abs(to_integer(unsigned(mon_post_q)) - 32768) < 50
+        assert abs(to_integer(unsigned(mon_post_q)) - 2**(OUT_RES_BITS-1)) < 50
             report "POST-PULSE EXTINCTION Q FAILED: " & integer'image(to_integer(unsigned(mon_post_q)))
             severity error;
 

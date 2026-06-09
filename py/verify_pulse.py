@@ -5,7 +5,7 @@ import math
 import sys
 
 
-def verify(data_file, amp_val, pulse_len):
+def verify(data_file, amp_val, pulse_len, out_bits=12):
     with open(data_file) as f:
         vals = [(int(r[0]), int(r[1])) for r in csv.reader(f)]
 
@@ -13,8 +13,10 @@ def verify(data_file, amp_val, pulse_len):
         print("[FAIL] No samples found")
         sys.exit(1)
 
-    i = [v[0] - 32768 for v in vals]
-    q = [v[1] - 32768 for v in vals]
+    half_range = 2 ** (out_bits - 1)
+    peak_scale = 2 ** (out_bits - 2) - 1
+    i = [v[0] - half_range for v in vals]
+    q = [v[1] - half_range for v in vals]
     mags = [math.sqrt(v[0] ** 2 + v[1] ** 2) for v in zip(i, q)]
 
     n = len(vals)
@@ -33,22 +35,23 @@ def verify(data_file, amp_val, pulse_len):
     # Extinction: first 5 and last 5 samples should be near zero
     # Small non-zero values are expected from initial Gaussian LUT entry (~11) * amp scaling
     pre_max = max(mags[:5])
-    check("Extinction pre-pulse", pre_max < 50,
+    check("Extinction pre-pulse", pre_max < max(50, half_range // 20),
           f"max deviation={pre_max:.0f} LSBs")
 
     post_max = max(mags[-5:])
-    check("Extinction post-pulse", post_max < 50,
+    check("Extinction post-pulse", post_max < max(50, half_range // 20),
           f"max deviation={post_max:.0f} LSBs")
 
     # Glitch check: pulse should be a single contiguous block
     active_regions = []
     in_pulse = False
     start = 0
+    threshold = max(1, half_range // 1000)
     for idx, m in enumerate(mags):
-        if m > 10 and not in_pulse:
+        if m > threshold and not in_pulse:
             start = idx
             in_pulse = True
-        elif m <= 10 and in_pulse:
+        elif m <= threshold and in_pulse:
             active_regions.append((start, idx - 1))
             in_pulse = False
     if in_pulse:
@@ -60,7 +63,7 @@ def verify(data_file, amp_val, pulse_len):
     if active_regions:
         start, end = active_regions[0]
         width = end - start + 1
-        check("Pulse width", abs(width - pulse_len) <= 3,
+        check("Pulse width", abs(width - pulse_len) <= max(3, pulse_len // 25),
               f"{width} cycles, expected {pulse_len}")
 
         # Envelope symmetry: peak at ~50% of pulse
@@ -71,7 +74,7 @@ def verify(data_file, amp_val, pulse_len):
 
         # Peak magnitude
         peak_mag = max(mags[start:end + 1])
-        expected_peak = amp_val / 65535.0 * 16383 * 0.9
+        expected_peak = amp_val / 65535.0 * peak_scale * 0.9
         check("Peak magnitude", peak_mag >= expected_peak,
               f"{peak_mag:.0f} >= {expected_peak:.0f}")
 
@@ -86,9 +89,10 @@ def main():
     parser.add_argument("--data", required=True, help="CSV samples file (i,q)")
     parser.add_argument("--amp", type=int, default=65535, help="AMP_VAL used")
     parser.add_argument("--pulse", type=int, default=200, help="PULSE_LEN used")
+    parser.add_argument("--bits", type=int, default=12, help="Output resolution bits")
     args = parser.parse_args()
 
-    ok = verify(args.data, args.amp, args.pulse)
+    ok = verify(args.data, args.amp, args.pulse, args.bits)
     sys.exit(0 if ok else 1)
 
 

@@ -94,8 +94,8 @@ begin
 
     env_q_mult <= signed(drag_val) * signed(drag_coeff_i);
 
-    gauss_sgn <= signed('0' & amp_mult(31 downto 16));
-    drag_sgn  <= env_q_mult(31 downto 15);
+    gauss_sgn <= signed('0' & amp_mult(31 downto 31-OUT_RES_BITS+1));
+    drag_sgn  <= env_q_mult(31 downto 31-OUT_RES_BITS);
 
     mul_i_i <= signed(sine_i_i) * gauss_sgn;
     mul_q_q <= signed(sine_q_i) * drag_sgn;

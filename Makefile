@@ -18,6 +18,7 @@ PHASE_DEG   ?= 0
 AMP_VAL     ?= 65535
 PULSE_LEN   ?= 200
 DRAG_COEFF  ?= 0.5
+OUT_RES_BITS ?= 12
 DRAG_COEFF_INT = $(shell python3 -c "print(int(round($(DRAG_COEFF) * 32768)))")
 
 TESTDIR = $(OUTDIR)/test_$(FREQ_HZ)hz_$(PHASE_DEG)deg_$(AMP_VAL)
@@ -62,7 +63,7 @@ plot: $(VENVDIR) $(SAMPLES_FILE) | $(TESTDIR)
 	@$(VENVDIR)/bin/python3 py/sig_gen_report.py --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --plot $(TESTDIR)
 
 verify: $(VENVDIR) $(SAMPLES_FILE)
-	@$(VENVDIR)/bin/python3 py/verify_pulse.py --data $(SAMPLES_FILE) --amp $(AMP_VAL) --pulse $(PULSE_LEN)
+	@$(VENVDIR)/bin/python3 py/verify_pulse.py --data $(SAMPLES_FILE) --amp $(AMP_VAL) --pulse $(PULSE_LEN) --bits $(OUT_RES_BITS)
 
 clean:
 	@$(GHDL) clean $(GHDL_OPTS)
