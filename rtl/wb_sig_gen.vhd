@@ -48,8 +48,7 @@ architecture rtl of wb_sig_gen is
     signal env_active : std_logic;
 
     signal pha_val : std_logic_vector(PHA_ACC_BITS-1 downto 0);
-    signal addr_q  : std_logic_vector(LUT_ADDR_BITS+1 downto 0);
-    signal addr_i  : std_logic_vector(LUT_ADDR_BITS+1 downto 0);
+    signal addr    : std_logic_vector(LUT_ADDR_BITS+1 downto 0);
     signal sine_q  : std_logic_vector(OUT_RES_BITS-1 downto 0);
     signal sine_i  : std_logic_vector(OUT_RES_BITS-1 downto 0);
 
@@ -132,21 +131,14 @@ begin
         val_o => pha_val
     );
 
-    addr_q <= pha_val(PHA_ACC_BITS-1 downto PHA_ACC_BITS-LUT_ADDR_BITS-2);
-    addr_i <= std_logic_vector(unsigned(addr_q) + to_unsigned(2**LUT_ADDR_BITS, LUT_ADDR_BITS+2));
+    addr <= pha_val(PHA_ACC_BITS-1 downto PHA_ACC_BITS-LUT_ADDR_BITS-2);
 
-    u_sine_lut_i : sine_lut port map (
+    u_sine_cos_lut : sine_cos_lut port map (
         rst_i => rst_i,
         clk_i => clk_i,
-        adr_i => addr_i,
-        sig_o => sine_i
-    );
-
-    u_sine_lut_q : sine_lut port map (
-        rst_i => rst_i,
-        clk_i => clk_i,
-        adr_i => addr_q,
-        sig_o => sine_q
+        adr_i => addr,
+        sin_o => sine_q,
+        cos_o => sine_i
     );
 
     u_env_gen : env_gen port map (

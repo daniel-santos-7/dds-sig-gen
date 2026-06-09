@@ -5,14 +5,15 @@ use work.sine_lut_pkg.OUT_RES_BITS;
 
 package sig_gen_pkg is
 
-    component sine_lut is
+    component sine_cos_lut is
         port (
             rst_i : in  std_logic;
             clk_i : in  std_logic;
             adr_i : in  std_logic_vector(LUT_ADDR_BITS+1 downto 0);
-            sig_o : out std_logic_vector(OUT_RES_BITS-1 downto 0)
+            sin_o : out std_logic_vector(OUT_RES_BITS-1 downto 0);
+            cos_o : out std_logic_vector(OUT_RES_BITS-1 downto 0)
         );
-    end component sine_lut;
+    end component sine_cos_lut;
 
     component pha_acc is
         generic (
