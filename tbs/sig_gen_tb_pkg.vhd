@@ -109,9 +109,9 @@ package body sig_gen_tb_pkg is
         variable step_val : real;
         variable drag_val : integer;
     begin
-        -- ENV_STEP: step size to go 4096 in pulse_len cycles
-        -- Using fractional bits: step = 4096.0 * (2^20) / pulse_len
-        step_val := 4096.0 * (2.0**20) / real(tv.pulse_len);
+        -- ENV_STEP: step size so accumulator reaches 2^32 in pulse_len cycles
+        -- step = 2^32 / pulse_len
+        step_val := (2.0**32) / real(tv.pulse_len);
         
         -- DRAG_COEFF: signed Q1.15
         drag_val := integer(tv.drag_coeff * 32768.0);
