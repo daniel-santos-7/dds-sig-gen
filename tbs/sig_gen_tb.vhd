@@ -216,11 +216,11 @@ begin
         end loop;
 
         -- Verify phase 2 pulse quality
-        assert p2_edges = 2
+        assert p2_edges = 4
             report "PHASE 2 GLITCH CHECK FAILED: " & integer'image(p2_edges) & " edges"
             severity error;
 
-        assert p2_cycles >= PULSE_LEN and p2_cycles <= PULSE_LEN + 2
+        assert p2_cycles >= 2 * PULSE_LEN and p2_cycles <= 2 * PULSE_LEN + 4
             report "PHASE 2 PULSE WIDTH CHECK FAILED: " & integer'image(p2_cycles)
             severity error;
 

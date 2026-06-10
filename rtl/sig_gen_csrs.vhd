@@ -54,7 +54,7 @@ architecture rtl of sig_gen_csrs is
     signal drag_coeff_reg : std_logic_vector(15 downto 0);
     
     signal trig_reg : std_logic;
-    signal delay_reg : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal delay_reg : std_logic_vector(23 downto 0);
 
     function apply_sel (
         cur : std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -126,9 +126,9 @@ begin
                         when REG_TRIG =>
                             if we_i = '1' then
                                 trig_reg <= sel_i(0) and dat_i(0);
-                                delay_reg <= apply_sel(delay_reg, dat_i, sel_i);
+                                delay_reg <= apply_sel(x"00" & delay_reg, dat_i, sel_i)(31 downto 8);
                             end if;
-                            dat_reg <= delay_reg(31 downto 8) & "00000" & pending_i & busy_i & trig_reg;
+                            dat_reg <= delay_reg & "00000" & pending_i & busy_i & trig_reg;
 
                         when others =>
                             dat_reg <= (others => '0');
@@ -148,6 +148,6 @@ begin
     drag_coeff_o <= drag_coeff_reg;
     
     trig_o       <= trig_reg;
-    delay_o      <= delay_reg(23 downto 0);
+    delay_o      <= delay_reg;
 
 end architecture rtl;
