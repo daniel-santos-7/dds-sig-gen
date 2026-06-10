@@ -17,6 +17,7 @@ def main():
     out_res_bits = int(sys.argv[2])
     
     samples = 2 ** lut_addr_bits
+    half_samples = samples // 2
     amplitude = 2 ** (out_res_bits - 1) - 1
     
     # Range from -4 sigma to +4 sigma
@@ -25,7 +26,7 @@ def main():
     gauss_values = []
     drag_values = []
     
-    for i in range(samples):
+    for i in range(half_samples):
         # Normalize i to [-sigma_range, sigma_range]
         t = (i / (samples - 1)) * 2 * sigma_range - sigma_range
         
@@ -59,7 +60,7 @@ package envelope_lut_pkg is
     constant ENV_LUT_ADDR_BITS : natural := {lut_addr_bits};
     constant ENV_OUT_RES_BITS  : natural := {out_res_bits};
 
-    type env_lut_array is array (0 to 2 ** ENV_LUT_ADDR_BITS-1) of std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
+    type env_lut_array is array (0 to 2 ** (ENV_LUT_ADDR_BITS-1) - 1) of std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
 
     constant GAUSS_TABLE : env_lut_array := (
 \t\t{gauss_lut_str}
