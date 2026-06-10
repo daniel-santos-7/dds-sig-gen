@@ -21,9 +21,9 @@ entity sig_gen_csrs is
         
         ftw_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
         pow_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
-        amp_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        amp_o        : out std_logic_vector(15 downto 0);
         env_step_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
-        drag_coeff_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        drag_coeff_o : out std_logic_vector(15 downto 0);
         
         trig_o       : out std_logic;
         delay_o      : out std_logic_vector(23 downto 0);
@@ -49,9 +49,9 @@ architecture rtl of sig_gen_csrs is
     
     signal ftw_reg        : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal pow_reg        : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal amp_reg        : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal amp_reg        : std_logic_vector(15 downto 0);
     signal env_step_reg   : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal drag_coeff_reg : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal drag_coeff_reg : std_logic_vector(15 downto 0);
     
     signal trig_reg : std_logic;
     signal delay_reg : std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -107,9 +107,9 @@ begin
 
                         when REG_AMP =>
                             if we_i = '1' then
-                                amp_reg <= apply_sel(amp_reg, dat_i, sel_i);
+                                amp_reg <= apply_sel(x"0000" & amp_reg, dat_i, sel_i)(15 downto 0);
                             end if;
-                            dat_reg <= amp_reg;
+                            dat_reg <= x"0000" & amp_reg;
 
                         when REG_ENV_STEP =>
                             if we_i = '1' then
@@ -119,9 +119,9 @@ begin
 
                         when REG_DRAG_COEFF =>
                             if we_i = '1' then
-                                drag_coeff_reg <= apply_sel(drag_coeff_reg, dat_i, sel_i);
+                                drag_coeff_reg <= apply_sel(x"0000" & drag_coeff_reg, dat_i, sel_i)(15 downto 0);
                             end if;
-                            dat_reg <= drag_coeff_reg;
+                            dat_reg <= x"0000" & drag_coeff_reg;
 
                         when REG_TRIG =>
                             if we_i = '1' then

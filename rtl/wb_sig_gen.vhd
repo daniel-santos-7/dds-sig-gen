@@ -33,9 +33,9 @@ architecture rtl of wb_sig_gen is
 
     signal csr_ftw        : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal csr_pow        : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal csr_amp        : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal csr_amp        : std_logic_vector(15 downto 0);
     signal csr_env_step   : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal csr_drag_coeff : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal csr_drag_coeff : std_logic_vector(15 downto 0);
     
     signal csr_trig       : std_logic;
     signal csr_delay      : std_logic_vector(23 downto 0);
@@ -146,8 +146,8 @@ begin
         rst_i        => rst_i,
         trigger_i    => trig_pulse,
         step_i       => csr_env_step,
-        drag_coeff_i => csr_drag_coeff(15 downto 0),
-        amp_i        => csr_amp(15 downto 0),
+        drag_coeff_i => csr_drag_coeff,
+        amp_i        => csr_amp,
 
         sine_i_i     => sine_i,
         sine_q_i     => sine_q,

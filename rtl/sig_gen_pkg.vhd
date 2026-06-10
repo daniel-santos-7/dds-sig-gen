@@ -66,9 +66,9 @@ package sig_gen_pkg is
             
             ftw_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
             pow_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
-            amp_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            amp_o        : out std_logic_vector(15 downto 0);
             env_step_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
-            drag_coeff_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            drag_coeff_o : out std_logic_vector(15 downto 0);
             
             trig_o       : out std_logic;
             delay_o      : out std_logic_vector(23 downto 0);
