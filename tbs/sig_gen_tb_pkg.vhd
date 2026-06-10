@@ -7,7 +7,7 @@ use STD.textio.all;
 package sig_gen_tb_pkg is
 
     constant DATA_WIDTH : natural := 32;
-    constant ADDR_WIDTH : natural := 5;
+    constant ADDR_WIDTH : natural := 3;
 
     type test_case_t is record
         freq_hz    : real;
@@ -33,12 +33,12 @@ package sig_gen_tb_pkg is
     procedure write_case_file(file_name : string; tv : test_case_t);
     procedure write_reg_file(file_name : string; regs : reg_values_t);
 
-    constant REG_FTW        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "00000"; -- 0x0
-    constant REG_POW        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "00100"; -- 0x4
-    constant REG_AMP        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "01000"; -- 0x8
-    constant REG_ENV_STEP   : std_logic_vector(ADDR_WIDTH-1 downto 0) := "01100"; -- 0xc
-    constant REG_DRAG_COEFF : std_logic_vector(ADDR_WIDTH-1 downto 0) := "10000"; -- 0x10
-    constant REG_TRIG       : std_logic_vector(ADDR_WIDTH-1 downto 0) := "10100"; -- 0x14
+    constant REG_FTW        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "000"; -- 0x0
+    constant REG_POW        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "001"; -- 0x1
+    constant REG_AMP        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "010"; -- 0x2
+    constant REG_ENV_STEP   : std_logic_vector(ADDR_WIDTH-1 downto 0) := "011"; -- 0x3
+    constant REG_DRAG_COEFF : std_logic_vector(ADDR_WIDTH-1 downto 0) := "100"; -- 0x4
+    constant REG_TRIG       : std_logic_vector(ADDR_WIDTH-1 downto 0) := "101"; -- 0x5
 
     type wb_bus is record
         adr_i : std_logic_vector(ADDR_WIDTH-1 downto 0);

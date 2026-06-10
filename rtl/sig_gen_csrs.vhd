@@ -5,7 +5,7 @@ use IEEE.numeric_std.all;
 entity sig_gen_csrs is
     generic (
         DATA_WIDTH : natural := 32;
-        ADDR_WIDTH : natural := 5
+        ADDR_WIDTH : natural := 3
     );
     port (
         rst_i : in  std_logic;
@@ -38,11 +38,11 @@ architecture rtl of sig_gen_csrs is
     constant BYTE_LANES : natural := DATA_WIDTH / 8;
 
     constant REG_FTW        : integer := 0;
-    constant REG_POW        : integer := 4;
-    constant REG_AMP        : integer := 8;
-    constant REG_ENV_STEP   : integer := 12;
-    constant REG_DRAG_COEFF : integer := 16;
-    constant REG_TRIG       : integer := 20;
+    constant REG_POW        : integer := 1;
+    constant REG_AMP        : integer := 2;
+    constant REG_ENV_STEP   : integer := 3;
+    constant REG_DRAG_COEFF : integer := 4;
+    constant REG_TRIG       : integer := 5;
 
     signal ack_reg : std_logic;
     signal dat_reg : std_logic_vector(DATA_WIDTH-1 downto 0);

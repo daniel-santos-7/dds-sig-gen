@@ -50,7 +50,7 @@ package sig_gen_pkg is
     component sig_gen_csrs is
         generic (
             DATA_WIDTH : natural := 32;
-            ADDR_WIDTH : natural := 5
+            ADDR_WIDTH : natural := 3
         );
         port (
             rst_i : in  std_logic;
@@ -81,7 +81,7 @@ package sig_gen_pkg is
     component wb_sig_gen is
         generic (
             DATA_WIDTH   : natural := 32;
-            ADDR_WIDTH   : natural := 4;
+            ADDR_WIDTH   : natural := 3;
             PHA_ACC_BITS : natural := 32
         );
         port (

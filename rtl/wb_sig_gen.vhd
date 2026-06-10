@@ -8,7 +8,7 @@ use work.sine_lut_pkg.OUT_RES_BITS;
 entity wb_sig_gen is
     generic (
         DATA_WIDTH   : natural := 32;
-        ADDR_WIDTH   : natural := 5;
+        ADDR_WIDTH   : natural := 3;
         PHA_ACC_BITS : natural := 32
     );
     port (
