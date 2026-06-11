@@ -66,13 +66,26 @@ package sig_gen_pkg is
             ftw_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
             pow_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
             amp_o        : out std_logic_vector(15 downto 0);
-            env_step_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
-            drag_coeff_o : out std_logic_vector(15 downto 0);
+            env_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            drag_o : out std_logic_vector(15 downto 0);
             
-            pulse_o  : out std_logic;
-            busy_i   : in  std_logic
+            valid_o  : out std_logic;
+            delay_o  : out std_logic_vector(23 downto 0);
+            ready_i  : in  std_logic
         );
     end component sig_gen_csrs;
+
+    component trig_ctrl is
+        port (
+            clk_i        : in  std_logic;
+            rst_i        : in  std_logic;
+            valid_i      : in  std_logic;
+            delay_i      : in  std_logic_vector(23 downto 0);
+            env_active_i : in  std_logic;
+            pulse_o      : out std_logic;
+            ready_o      : out std_logic
+        );
+    end component trig_ctrl;
 
     component wb_sig_gen is
         generic (

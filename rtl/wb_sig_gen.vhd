@@ -33,9 +33,12 @@ architecture rtl of wb_sig_gen is
     signal csr_ftw        : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal csr_pow        : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal csr_amp        : std_logic_vector(15 downto 0);
-    signal csr_env_step   : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal csr_drag_coeff : std_logic_vector(15 downto 0);
+    signal csr_env   : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal csr_drag : std_logic_vector(15 downto 0);
     
+    signal csr_valid  : std_logic;
+    signal csr_delay  : std_logic_vector(23 downto 0);
+    signal trig_ready : std_logic;
     signal trig_pulse : std_logic;
 
     signal env_active : std_logic;
@@ -64,11 +67,22 @@ begin
         ftw_o        => csr_ftw,
         pow_o        => csr_pow,
         amp_o        => csr_amp,
-        env_step_o   => csr_env_step,
-        drag_coeff_o => csr_drag_coeff,
+        env_o   => csr_env,
+        drag_o => csr_drag,
 
+        valid_o      => csr_valid,
+        delay_o      => csr_delay,
+        ready_i      => trig_ready
+    );
+
+    u_trig_ctrl : trig_ctrl port map (
+        clk_i        => clk_i,
+        rst_i        => rst_i,
+        valid_i      => csr_valid,
+        delay_i      => csr_delay,
+        env_active_i => env_active,
         pulse_o      => trig_pulse,
-        busy_i       => env_active
+        ready_o      => trig_ready
     );
 
     u_pha_acc : pha_acc generic map (
@@ -96,8 +110,8 @@ begin
         clk_i        => clk_i,
         rst_i        => rst_i,
         trigger_i    => trig_pulse,
-        step_i       => csr_env_step,
-        drag_coeff_i => csr_drag_coeff,
+        step_i       => csr_env,
+        drag_coeff_i => csr_drag,
         amp_i        => csr_amp,
 
         sine_i_i     => sine_i,

@@ -34,7 +34,7 @@ architecture tb of sig_gen_tb is
         phase_deg => PHASE_DEG_VAL, 
         amp_val => AMP_VAL_VAL,
         pulse_len => PULSE_LEN,
-        drag_coeff => real(DRAG_COEFF) / 32768.0
+        drag => real(DRAG_COEFF) / 32768.0
     );
     
     constant REGS : reg_values_t  := to_regs(TC);
@@ -207,8 +207,9 @@ begin
         -- Wait for env_active to go high (pulse started)
         wait until rising_edge(clk_i) and active = '1';
 
-        -- Now write TRIG with delay=75 while pulse is active — should pend
-        wb_write(clk_i, wb, REG_TRIG, x"00004B01");  -- delay=75 (0x4B), trig=1
+        -- Now write delay + trigger while pulse is active — should pend
+        wb_write(clk_i, wb, REG_DELAY, x"0000004B");  -- delay=75 (0x4B)
+        wb_write(clk_i, wb, REG_TRIG,  x"00000001");  -- trigger (pendente)
 
         -- Wait for current pulse to finish + delay + next pulse
         for i in 0 to PULSE_LEN + 150 + PULSE_LEN loop
