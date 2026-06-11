@@ -51,8 +51,7 @@ architecture rtl of wb_sig_gen is
 begin
 
     u_sig_gen_csrs : sig_gen_csrs generic map (
-        DATA_WIDTH => DATA_WIDTH,
-        ADDR_WIDTH => ADDR_WIDTH
+        DATA_WIDTH => DATA_WIDTH
     ) port map (
         rst_i => rst_i,
         clk_i => clk_i,

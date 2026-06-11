@@ -49,13 +49,12 @@ package sig_gen_pkg is
 
     component sig_gen_csrs is
         generic (
-            DATA_WIDTH : natural := 32;
-            ADDR_WIDTH : natural := 3
+            DATA_WIDTH : natural := 32
         );
         port (
             rst_i : in  std_logic;
             clk_i : in  std_logic;
-            adr_i : in  std_logic_vector(ADDR_WIDTH-1 downto 0);
+            adr_i : in  std_logic_vector(2 downto 0);
             cyc_i : in  std_logic;
             stb_i : in  std_logic;
             we_i  : in  std_logic;

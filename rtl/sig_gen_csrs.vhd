@@ -3,13 +3,12 @@ use IEEE.std_logic_1164.all;
 
 entity sig_gen_csrs is
     generic (
-        DATA_WIDTH : natural := 32;
-        ADDR_WIDTH : natural := 3
+        DATA_WIDTH : natural := 32
     );
     port (
         rst_i : in  std_logic;
         clk_i : in  std_logic;
-        adr_i : in  std_logic_vector(ADDR_WIDTH-1 downto 0);
+        adr_i : in  std_logic_vector(2 downto 0);
         cyc_i : in  std_logic;
         stb_i : in  std_logic;
         we_i  : in  std_logic;
@@ -34,12 +33,12 @@ end entity sig_gen_csrs;
 
 architecture rtl of sig_gen_csrs is
 
-    constant REG_FTW        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "000";
-    constant REG_POW        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "001";
-    constant REG_AMP        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "010";
-    constant REG_ENV_STEP   : std_logic_vector(ADDR_WIDTH-1 downto 0) := "011";
-    constant REG_DRAG_COEFF : std_logic_vector(ADDR_WIDTH-1 downto 0) := "100";
-    constant REG_TRIG       : std_logic_vector(ADDR_WIDTH-1 downto 0) := "101";
+    constant REG_FTW        : std_logic_vector(2 downto 0) := "000";
+    constant REG_POW        : std_logic_vector(2 downto 0) := "001";
+    constant REG_AMP        : std_logic_vector(2 downto 0) := "010";
+    constant REG_ENV_STEP   : std_logic_vector(2 downto 0) := "011";
+    constant REG_DRAG_COEFF : std_logic_vector(2 downto 0) := "100";
+    constant REG_TRIG       : std_logic_vector(2 downto 0) := "101";
 
     signal ack_reg : std_logic;
     signal dat_reg : std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -74,7 +73,7 @@ begin
 
                 if cyc_i = '1' and stb_i = '1' and ack_reg = '0' then
                     case adr_i is
-                        when "000" =>
+                        when REG_FTW =>
                             if we_i = '1' then
                                 for i in 0 to 3 loop
                                     if sel_i(i) = '1' then
@@ -84,7 +83,7 @@ begin
                             end if;
                             dat_reg <= ftw_reg;
 
-                        when "001" =>
+                        when REG_POW =>
                             if we_i = '1' then
                                 for i in 0 to 3 loop
                                     if sel_i(i) = '1' then
@@ -94,7 +93,7 @@ begin
                             end if;
                             dat_reg <= pow_reg;
 
-                        when "010" =>
+                        when REG_AMP =>
                             if we_i = '1' then
                                 for i in 0 to 1 loop
                                     if sel_i(i) = '1' then
@@ -104,7 +103,7 @@ begin
                             end if;
                             dat_reg <= x"0000" & amp_reg;
 
-                        when "011" =>
+                        when REG_ENV_STEP =>
                             if we_i = '1' then
                                 for i in 0 to 3 loop
                                     if sel_i(i) = '1' then
@@ -114,7 +113,7 @@ begin
                             end if;
                             dat_reg <= env_step_reg;
 
-                        when "100" =>
+                        when REG_DRAG_COEFF =>
                             if we_i = '1' then
                                 for i in 0 to 1 loop
                                     if sel_i(i) = '1' then
@@ -124,7 +123,8 @@ begin
                             end if;
                             dat_reg <= x"0000" & drag_coeff_reg;
 
-                        when "101" =>
+                        when REG_TRIG =>
+
                             if we_i = '1' then
                                 trig_reg <= sel_i(0) and dat_i(0);
                                 for i in 1 to 3 loop
