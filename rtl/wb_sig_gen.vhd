@@ -63,16 +63,14 @@ begin
         dat_i => dat_i,
         ack_o => ack_o,
         dat_o => dat_o,
-        
-        ftw_o        => csr_ftw,
-        pow_o        => csr_pow,
-        amp_o        => csr_amp,
-        env_o   => csr_env,
+        ftw_o => csr_ftw,
+        pow_o => csr_pow,
+        amp_o => csr_amp,
+        env_o => csr_env,
         drag_o => csr_drag,
-
-        valid_o      => csr_valid,
-        delay_o      => csr_delay,
-        ready_i      => trig_ready
+        valid_o => csr_valid,
+        delay_o => csr_delay,
+        ready_i => trig_ready
     );
 
     u_trig_ctrl : trig_ctrl port map (
@@ -81,9 +79,10 @@ begin
         valid_i      => csr_valid,
         delay_i      => csr_delay,
         env_active_i => env_active,
-        pulse_o      => trig_pulse,
         ready_o      => trig_ready
     );
+
+    trig_pulse <= csr_valid and trig_ready;
 
     u_pha_acc : pha_acc generic map (
         PHA_ACC_BITS => PHA_ACC_BITS

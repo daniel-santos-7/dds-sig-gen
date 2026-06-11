@@ -82,7 +82,6 @@ package sig_gen_pkg is
             valid_i      : in  std_logic;
             delay_i      : in  std_logic_vector(23 downto 0);
             env_active_i : in  std_logic;
-            pulse_o      : out std_logic;
             ready_o      : out std_logic
         );
     end component trig_ctrl;
