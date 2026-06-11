@@ -69,25 +69,10 @@ package sig_gen_pkg is
             env_step_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
             drag_coeff_o : out std_logic_vector(15 downto 0);
             
-            trig_o       : out std_logic;
-            delay_o      : out std_logic_vector(23 downto 0);
-
-            busy_i       : in  std_logic;
-            pending_i    : in  std_logic
+            pulse_o  : out std_logic;
+            busy_i   : in  std_logic
         );
     end component sig_gen_csrs;
-
-    component trig_pending_ctrl is
-        port (
-            clk_i        : in  std_logic;
-            rst_i        : in  std_logic;
-            trig_i       : in  std_logic;
-            delay_i      : in  std_logic_vector(23 downto 0);
-            env_active_i : in  std_logic;
-            pulse_o      : out std_logic;
-            pending_o    : out std_logic
-        );
-    end component trig_pending_ctrl;
 
     component wb_sig_gen is
         generic (

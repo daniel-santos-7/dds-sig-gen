@@ -1,5 +1,6 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
 
 entity sig_gen_csrs is
     generic (
@@ -23,11 +24,8 @@ entity sig_gen_csrs is
         env_step_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
         drag_coeff_o : out std_logic_vector(15 downto 0);
         
-        trig_o       : out std_logic;
-        delay_o      : out std_logic_vector(23 downto 0);
-
-        busy_i       : in  std_logic;
-        pending_i    : in  std_logic
+        pulse_o  : out std_logic;
+        busy_i   : in  std_logic
     );
 end entity sig_gen_csrs;
 
@@ -49,10 +47,16 @@ architecture rtl of sig_gen_csrs is
     signal env_step_reg   : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal drag_coeff_reg : std_logic_vector(15 downto 0);
     
-    signal trig_reg : std_logic;
-    signal delay_reg : std_logic_vector(23 downto 0);
+    signal trig_reg       : std_logic;
+    signal delay_reg      : std_logic_vector(23 downto 0);
+    signal trig_pending   : std_logic;
+    signal trig_pulse_del : std_logic;
+    signal env_active_d   : std_logic;
+    signal delay_counter  : unsigned(23 downto 0);
 
 begin
+
+    pulse_o <= (trig_reg and not busy_i and not trig_pending) or trig_pulse_del;
 
     csr_proc : process(clk_i)
     begin
@@ -124,7 +128,6 @@ begin
                             dat_reg <= x"0000" & drag_coeff_reg;
 
                         when REG_TRIG =>
-
                             if we_i = '1' then
                                 trig_reg <= sel_i(0) and dat_i(0);
                                 for i in 1 to 3 loop
@@ -133,7 +136,7 @@ begin
                                     end if;
                                 end loop;
                             end if;
-                            dat_reg <= delay_reg & "00000" & pending_i & busy_i & trig_reg;
+                            dat_reg <= delay_reg & "00000" & trig_pending & busy_i & trig_reg;
 
                         when others =>
                             dat_reg <= (others => '0');
@@ -143,6 +146,40 @@ begin
         end if;
     end process csr_proc;
 
+    pending_proc : process(clk_i)
+    begin
+        if rising_edge(clk_i) then
+            if rst_i = '1' then
+                trig_pending   <= '0';
+                trig_pulse_del <= '0';
+                delay_counter  <= (others => '0');
+                env_active_d   <= '0';
+            else
+                trig_pulse_del <= '0';
+                env_active_d <= busy_i;
+
+                if trig_reg = '1' and busy_i = '1' then
+                    trig_pending <= '1';
+                end if;
+
+                if env_active_d = '1' and busy_i = '0' and trig_pending = '1' then
+                    if unsigned(delay_reg) = 0 then
+                        trig_pulse_del <= '1';
+                        trig_pending   <= '0';
+                    else
+                        delay_counter <= unsigned(delay_reg);
+                    end if;
+                elsif delay_counter > 0 then
+                    delay_counter <= delay_counter - 1;
+                    if delay_counter = 1 then
+                        trig_pulse_del <= '1';
+                        trig_pending   <= '0';
+                    end if;
+                end if;
+            end if;
+        end if;
+    end process pending_proc;
+
     ack_o <= ack_reg;
     dat_o <= dat_reg;
     
@@ -151,8 +188,5 @@ begin
     amp_o        <= amp_reg;
     env_step_o   <= env_step_reg;
     drag_coeff_o <= drag_coeff_reg;
-    
-    trig_o       <= trig_reg;
-    delay_o      <= delay_reg;
 
 end architecture rtl;
