@@ -1,6 +1,5 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
-use IEEE.numeric_std.all;
 use work.sig_gen_pkg.all;
 use work.sine_lut_pkg.LUT_ADDR_BITS;
 use work.sine_lut_pkg.OUT_RES_BITS;
@@ -37,13 +36,10 @@ architecture rtl of wb_sig_gen is
     signal csr_env_step   : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal csr_drag_coeff : std_logic_vector(15 downto 0);
     
-    signal csr_trig       : std_logic;
-    signal csr_delay      : std_logic_vector(23 downto 0);
-    signal trig_pending   : std_logic;
-    signal trig_pulse     : std_logic;
-    signal trig_pulse_del : std_logic;
-    signal env_active_d   : std_logic;
-    signal delay_counter  : unsigned(23 downto 0);
+    signal csr_trig     : std_logic;
+    signal csr_delay    : std_logic_vector(23 downto 0);
+    signal trig_pending : std_logic;
+    signal trig_pulse   : std_logic;
 
     signal env_active : std_logic;
 
@@ -81,44 +77,15 @@ begin
         pending_i    => trig_pending
     );
 
-    trig_pulse <= (csr_trig and not env_active and not trig_pending) or trig_pulse_del;
-
-    env_edge_proc : process(clk_i)
-    begin
-        if rising_edge(clk_i) then
-            env_active_d <= env_active;
-        end if;
-    end process;
-
-    pending_proc : process(clk_i, rst_i)
-    begin
-        if rst_i = '1' then
-            trig_pending   <= '0';
-            delay_counter  <= (others => '0');
-            trig_pulse_del <= '0';
-        elsif rising_edge(clk_i) then
-            trig_pulse_del <= '0';
-
-            if csr_trig = '1' and env_active = '1' then
-                trig_pending <= '1';
-            end if;
-
-            if env_active_d = '1' and env_active = '0' and trig_pending = '1' then
-                if unsigned(csr_delay) = 0 then
-                    trig_pulse_del <= '1';
-                    trig_pending   <= '0';
-                else
-                    delay_counter <= unsigned(csr_delay);
-                end if;
-            elsif delay_counter > 0 then
-                delay_counter <= delay_counter - 1;
-                if delay_counter = 1 then
-                    trig_pulse_del <= '1';
-                    trig_pending   <= '0';
-                end if;
-            end if;
-        end if;
-    end process;
+    u_trig_pending_ctrl : trig_pending_ctrl port map (
+        clk_i        => clk_i,
+        rst_i        => rst_i,
+        trig_i       => csr_trig,
+        delay_i      => csr_delay,
+        env_active_i => env_active,
+        pulse_o      => trig_pulse,
+        pending_o    => trig_pending
+    );
 
     u_pha_acc : pha_acc generic map (
         PHA_ACC_BITS => PHA_ACC_BITS

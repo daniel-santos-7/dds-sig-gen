@@ -78,6 +78,18 @@ package sig_gen_pkg is
         );
     end component sig_gen_csrs;
 
+    component trig_pending_ctrl is
+        port (
+            clk_i        : in  std_logic;
+            rst_i        : in  std_logic;
+            trig_i       : in  std_logic;
+            delay_i      : in  std_logic_vector(23 downto 0);
+            env_active_i : in  std_logic;
+            pulse_o      : out std_logic;
+            pending_o    : out std_logic
+        );
+    end component trig_pending_ctrl;
+
     component wb_sig_gen is
         generic (
             DATA_WIDTH   : natural := 32;
