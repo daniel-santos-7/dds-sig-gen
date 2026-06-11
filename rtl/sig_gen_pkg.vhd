@@ -2,6 +2,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use work.sine_lut_pkg.LUT_ADDR_BITS;
 use work.sine_lut_pkg.OUT_RES_BITS;
+use work.envelope_lut_pkg.ENV_LUT_ADDR_BITS;
 
 package sig_gen_pkg is
 
@@ -33,19 +34,27 @@ package sig_gen_pkg is
         port (
             clk_i        : in  std_logic;
             rst_i        : in  std_logic;
-            trigger_i    : in  std_logic;
-            step_i       : in  std_logic_vector(31 downto 0);
+            addr_i       : in  std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
+            active_i     : in  std_logic;
             drag_coeff_i : in  std_logic_vector(15 downto 0);
             amp_i        : in  std_logic_vector(15 downto 0);
-
-            sine_i_i     : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
-            sine_q_i     : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
-
-            sig_i_o      : out std_logic_vector(OUT_RES_BITS-1 downto 0);
-            sig_q_o      : out std_logic_vector(OUT_RES_BITS-1 downto 0);
-            active_o     : out std_logic
+            gauss_o      : out std_logic_vector(OUT_RES_BITS downto 0);
+            drag_o       : out std_logic_vector(OUT_RES_BITS downto 0)
         );
     end component env_gen;
+
+    component iq_mod is
+        port (
+            clk_i    : in  std_logic;
+            rst_i    : in  std_logic;
+            gauss_i  : in  std_logic_vector(OUT_RES_BITS downto 0);
+            drag_i   : in  std_logic_vector(OUT_RES_BITS downto 0);
+            sine_i_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
+            sine_q_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
+            sig_i_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
+            sig_q_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0)
+        );
+    end component iq_mod;
 
     component sig_gen_csrs is
         generic (
@@ -81,10 +90,34 @@ package sig_gen_pkg is
             rst_i        : in  std_logic;
             valid_i      : in  std_logic;
             delay_i      : in  std_logic_vector(23 downto 0);
-            env_active_i : in  std_logic;
+            step_i       : in  std_logic_vector(31 downto 0);
+            trigger_o    : out std_logic;
+            env_addr_o   : out std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
+            env_active_o : out std_logic;
             ready_o      : out std_logic
         );
     end component trig_ctrl;
+
+    component sig_gen is
+        generic (
+            PHA_ACC_BITS : natural := 32
+        );
+        port (
+            clk_i       : in  std_logic;
+            rst_i       : in  std_logic;
+            csr_ftw     : in  std_logic_vector(31 downto 0);
+            csr_pow     : in  std_logic_vector(31 downto 0);
+            csr_amp     : in  std_logic_vector(15 downto 0);
+            csr_env     : in  std_logic_vector(31 downto 0);
+            csr_drag    : in  std_logic_vector(15 downto 0);
+            csr_valid   : in  std_logic;
+            csr_delay   : in  std_logic_vector(23 downto 0);
+            trig_ready  : out std_logic;
+            sig_i_o     : out std_logic_vector(OUT_RES_BITS-1 downto 0);
+            sig_q_o     : out std_logic_vector(OUT_RES_BITS-1 downto 0);
+            active_o    : out std_logic
+        );
+    end component sig_gen;
 
     component wb_sig_gen is
         generic (

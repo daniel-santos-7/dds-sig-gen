@@ -1,7 +1,6 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use work.sig_gen_pkg.all;
-use work.sine_lut_pkg.LUT_ADDR_BITS;
 use work.sine_lut_pkg.OUT_RES_BITS;
 
 entity wb_sig_gen is
@@ -30,97 +29,56 @@ end entity wb_sig_gen;
 
 architecture rtl of wb_sig_gen is
 
-    signal csr_ftw        : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal csr_pow        : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal csr_amp        : std_logic_vector(15 downto 0);
-    signal csr_env   : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal csr_drag : std_logic_vector(15 downto 0);
-    
-    signal csr_valid  : std_logic;
-    signal csr_delay  : std_logic_vector(23 downto 0);
-    signal trig_ready : std_logic;
-    signal trig_pulse : std_logic;
-
-    signal env_active : std_logic;
-
-    signal pha_val : std_logic_vector(PHA_ACC_BITS-1 downto 0);
-    signal addr    : std_logic_vector(LUT_ADDR_BITS+1 downto 0);
-    signal sine_q  : std_logic_vector(OUT_RES_BITS-1 downto 0);
-    signal sine_i  : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal csr_ftw     : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal csr_pow     : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal csr_amp     : std_logic_vector(15 downto 0);
+    signal csr_env     : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal csr_drag    : std_logic_vector(15 downto 0);
+    signal csr_valid   : std_logic;
+    signal csr_delay   : std_logic_vector(23 downto 0);
+    signal trig_ready  : std_logic;
 
 begin
 
     u_sig_gen_csrs : sig_gen_csrs generic map (
         DATA_WIDTH => DATA_WIDTH
     ) port map (
-        rst_i => rst_i,
-        clk_i => clk_i,
-        adr_i => adr_i,
-        cyc_i => cyc_i,
-        stb_i => stb_i,
-        we_i  => we_i,
-        sel_i => sel_i,
-        dat_i => dat_i,
-        ack_o => ack_o,
-        dat_o => dat_o,
-        ftw_o => csr_ftw,
-        pow_o => csr_pow,
-        amp_o => csr_amp,
-        env_o => csr_env,
-        drag_o => csr_drag,
+        rst_i   => rst_i,
+        clk_i   => clk_i,
+        adr_i   => adr_i,
+        cyc_i   => cyc_i,
+        stb_i   => stb_i,
+        we_i    => we_i,
+        sel_i   => sel_i,
+        dat_i   => dat_i,
+        ack_o   => ack_o,
+        dat_o   => dat_o,
+        ftw_o   => csr_ftw,
+        pow_o   => csr_pow,
+        amp_o   => csr_amp,
+        env_o   => csr_env,
+        drag_o  => csr_drag,
         valid_o => csr_valid,
         delay_o => csr_delay,
         ready_i => trig_ready
     );
 
-    u_trig_ctrl : trig_ctrl port map (
-        clk_i        => clk_i,
-        rst_i        => rst_i,
-        valid_i      => csr_valid,
-        delay_i      => csr_delay,
-        env_active_i => env_active,
-        ready_o      => trig_ready
-    );
-
-    trig_pulse <= csr_valid and trig_ready;
-
-    u_pha_acc : pha_acc generic map (
+    u_sig_gen : sig_gen generic map (
         PHA_ACC_BITS => PHA_ACC_BITS
     ) port map (
-        clk_i => clk_i,
-        rst_i => rst_i,
-        we_i  => trig_pulse,
-        ftw_i => csr_ftw(PHA_ACC_BITS-1 downto 0),
-        pow_i => csr_pow(PHA_ACC_BITS-1 downto 0),
-        val_o => pha_val
+        clk_i      => clk_i,
+        rst_i      => rst_i,
+        csr_ftw    => csr_ftw,
+        csr_pow    => csr_pow,
+        csr_amp    => csr_amp,
+        csr_env    => csr_env,
+        csr_drag   => csr_drag,
+        csr_valid  => csr_valid,
+        csr_delay  => csr_delay,
+        trig_ready => trig_ready,
+        sig_i_o    => sig_i_o,
+        sig_q_o    => sig_q_o,
+        active_o   => active_o
     );
-
-    addr <= pha_val(PHA_ACC_BITS-1 downto PHA_ACC_BITS-LUT_ADDR_BITS-2);
-
-    u_sine_cos_lut : sine_cos_lut port map (
-        rst_i => rst_i,
-        clk_i => clk_i,
-        adr_i => addr,
-        sin_o => sine_q,
-        cos_o => sine_i
-    );
-
-    u_env_gen : env_gen port map (
-        clk_i        => clk_i,
-        rst_i        => rst_i,
-        trigger_i    => trig_pulse,
-        step_i       => csr_env,
-        drag_coeff_i => csr_drag,
-        amp_i        => csr_amp,
-
-        sine_i_i     => sine_i,
-        sine_q_i     => sine_q,
-
-        sig_i_o      => sig_i_o,
-        sig_q_o      => sig_q_o,
-        active_o     => env_active
-    );
-
-    active_o <= env_active;
 
 end architecture rtl;
