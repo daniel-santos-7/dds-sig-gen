@@ -23,7 +23,7 @@ package sig_gen_pkg is
         port (
             clk_i : in  std_logic;
             rst_i : in  std_logic;
-            we_i  : in  std_logic;
+            sync_i : in  std_logic;
             ftw_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
             pow_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
             val_o : out std_logic_vector(PHA_ACC_BITS-1 downto 0)
@@ -91,9 +91,9 @@ package sig_gen_pkg is
             valid_i      : in  std_logic;
             delay_i      : in  std_logic_vector(23 downto 0);
             step_i       : in  std_logic_vector(31 downto 0);
-            trigger_o    : out std_logic;
-            env_addr_o   : out std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
-            env_active_o : out std_logic;
+            sync_o    : out std_logic;
+            addr_o   : out std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
+            active_o : out std_logic;
             ready_o      : out std_logic
         );
     end component env_seq;

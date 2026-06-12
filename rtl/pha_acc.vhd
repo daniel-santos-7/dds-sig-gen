@@ -9,7 +9,7 @@ entity pha_acc is
     port (
         clk_i : in  std_logic;
         rst_i : in  std_logic;
-        we_i  : in  std_logic;
+        sync_i  : in  std_logic;
         ftw_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
         pow_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
         val_o : out std_logic_vector(PHA_ACC_BITS-1 downto 0)
@@ -30,7 +30,7 @@ begin
             if rst_i = '1' then
                 ftw_reg <= (others => '0');
                 pow_reg <= (others => '0');
-            elsif we_i = '1' then
+            elsif sync_i = '1' then
                 ftw_reg <= ftw_i;
                 pow_reg <= pow_i;
             end if;
@@ -42,7 +42,7 @@ begin
         if rising_edge(clk_i) then
             if rst_i = '1' then
                 acc_reg <= (others => '0');
-            elsif we_i = '1' then
+            elsif sync_i = '1' then
                 acc_reg <= (others => '0');
             else
                 acc_reg <= std_logic_vector(unsigned(acc_reg) + unsigned(ftw_reg));

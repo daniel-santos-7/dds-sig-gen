@@ -10,9 +10,9 @@ entity env_seq is
         valid_i      : in  std_logic;
         delay_i      : in  std_logic_vector(23 downto 0);
         step_i       : in  std_logic_vector(31 downto 0);
-        trigger_o    : out std_logic;
-        env_addr_o   : out std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
-        env_active_o : out std_logic;
+        sync_o    : out std_logic;
+        addr_o   : out std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
+        active_o : out std_logic;
         ready_o      : out std_logic
     );
 end entity env_seq;
@@ -72,8 +72,8 @@ begin
     ready       <= '1' when env_active = '0' and delay_done = '1' else '0';
 
     ready_o      <= ready;
-    trigger_o    <= valid_i and ready;
-    env_addr_o   <= std_logic_vector(env_cnt(31 downto 32-ENV_LUT_ADDR_BITS)) when env_active = '1' else (others => '0');
-    env_active_o <= env_active and not env_done;
+    sync_o    <= valid_i and ready;
+    addr_o   <= std_logic_vector(env_cnt(31 downto 32-ENV_LUT_ADDR_BITS)) when env_active = '1' else (others => '0');
+    active_o <= env_active and not env_done;
 
 end architecture rtl;
