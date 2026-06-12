@@ -3,7 +3,7 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 use work.envelope_lut_pkg.ENV_LUT_ADDR_BITS;
 
-entity trig_ctrl is
+entity env_seq is
     port (
         clk_i        : in  std_logic;
         rst_i        : in  std_logic;
@@ -15,9 +15,9 @@ entity trig_ctrl is
         env_active_o : out std_logic;
         ready_o      : out std_logic
     );
-end entity trig_ctrl;
+end entity env_seq;
 
-architecture rtl of trig_ctrl is
+architecture rtl of env_seq is
 
     signal ready      : std_logic;
     signal env_cnt    : unsigned(32 downto 0);

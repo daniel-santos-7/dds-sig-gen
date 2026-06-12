@@ -28,9 +28,9 @@ end entity sig_gen;
 
 architecture rtl of sig_gen is
 
-    signal trig_ctrl_trigger    : std_logic;
-    signal trig_ctrl_env_addr   : std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
-    signal trig_ctrl_env_active : std_logic;
+    signal env_seq_trigger    : std_logic;
+    signal env_seq_env_addr   : std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
+    signal env_seq_env_active : std_logic;
 
     signal env_gen_gauss : std_logic_vector(OUT_RES_BITS downto 0);
     signal env_gen_drag  : std_logic_vector(OUT_RES_BITS downto 0);
@@ -42,15 +42,15 @@ architecture rtl of sig_gen is
 
 begin
 
-    sig_gen_trig_ctrl : trig_ctrl port map (
+    sig_gen_env_seq : env_seq port map (
         clk_i        => clk_i,
         rst_i        => rst_i,
         valid_i      => valid_i,
         delay_i      => delay_i,
         step_i       => env_i,
-        trigger_o    => trig_ctrl_trigger,
-        env_addr_o   => trig_ctrl_env_addr,
-        env_active_o => trig_ctrl_env_active,
+        trigger_o    => env_seq_trigger,
+        env_addr_o   => env_seq_env_addr,
+        env_active_o => env_seq_env_active,
         ready_o      => ready_o
     );
 
@@ -59,7 +59,7 @@ begin
     ) port map (
         clk_i => clk_i,
         rst_i => rst_i,
-        we_i  => trig_ctrl_trigger,
+        we_i  => env_seq_trigger,
         ftw_i => ftw_i,
         pow_i => pow_i,
         val_o => pha_acc_val
@@ -78,8 +78,8 @@ begin
     sig_gen_env_gen : env_gen port map (
         clk_i        => clk_i,
         rst_i        => rst_i,
-        addr_i       => trig_ctrl_env_addr,
-        active_i     => trig_ctrl_env_active,
+        addr_i       => env_seq_env_addr,
+        active_i     => env_seq_env_active,
         drag_coeff_i => drag_i,
         amp_i        => amp_i,
         gauss_o      => env_gen_gauss,
@@ -97,6 +97,6 @@ begin
         sig_q_o => sig_q_o
     );
 
-    active_o <= trig_ctrl_env_active;
+    active_o <= env_seq_env_active;
 
 end architecture rtl;

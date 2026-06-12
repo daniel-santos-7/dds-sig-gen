@@ -84,7 +84,7 @@ package sig_gen_pkg is
         );
     end component sig_gen_csrs;
 
-    component trig_ctrl is
+    component env_seq is
         port (
             clk_i        : in  std_logic;
             rst_i        : in  std_logic;
@@ -96,7 +96,7 @@ package sig_gen_pkg is
             env_active_o : out std_logic;
             ready_o      : out std_logic
         );
-    end component trig_ctrl;
+    end component env_seq;
 
     component sig_gen is
         generic (
