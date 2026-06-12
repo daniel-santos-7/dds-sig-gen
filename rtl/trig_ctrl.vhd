@@ -72,7 +72,7 @@ begin
     ready       <= '1' when env_active = '0' and delay_done = '1' else '0';
 
     ready_o      <= ready;
-    trigger_o    <= valid_i and ready_o;
+    trigger_o    <= valid_i and ready;
     env_addr_o   <= std_logic_vector(env_cnt(31 downto 32-ENV_LUT_ADDR_BITS)) when env_active = '1' else (others => '0');
     env_active_o <= env_active and not env_done;
 
