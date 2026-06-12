@@ -8,9 +8,9 @@ entity env_gen is
     port (
         clk_i        : in  std_logic;
         rst_i        : in  std_logic;
-        addr_i       : in  std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
+        adr_i        : in  std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
         active_i     : in  std_logic;
-        drag_coeff_i : in  std_logic_vector(15 downto 0);
+        drag_i       : in  std_logic_vector(15 downto 0);
         amp_i        : in  std_logic_vector(15 downto 0);
         gauss_o      : out std_logic_vector(OUT_RES_BITS downto 0);
         drag_o       : out std_logic_vector(OUT_RES_BITS downto 0)
@@ -36,7 +36,7 @@ architecture rtl of env_gen is
 
 begin
 
-    addr <= unsigned(addr_i);
+    addr <= unsigned(adr_i);
 
     mirror_addr <= to_unsigned(2**ENV_LUT_ADDR_BITS - 1, ENV_LUT_ADDR_BITS) - addr;
     eff_addr    <= addr(ENV_LUT_ADDR_BITS-2 downto 0) when addr(ENV_LUT_ADDR_BITS-1) = '0'
@@ -60,7 +60,7 @@ begin
     drag_val  <= std_logic_vector(-signed(drag_raw)) when drag_neg_s = '1' else drag_raw;
 
     amp_mult <= unsigned(gauss_val) * unsigned(amp_i);
-    env_q_mult <= signed(drag_val) * signed(drag_coeff_i);
+    env_q_mult <= signed(drag_val) * signed(drag_i);
 
     gauss_o <= '0' & std_logic_vector(amp_mult(ENV_OUT_RES_BITS+15 downto ENV_OUT_RES_BITS+15-OUT_RES_BITS+1));
     drag_o  <= std_logic_vector(env_q_mult(ENV_OUT_RES_BITS+15 downto ENV_OUT_RES_BITS+15-OUT_RES_BITS));

@@ -44,7 +44,7 @@ begin
     sin_mux <= std_logic_vector(unsigned(not sin_val) + 1) when sin_neg = '1' else sin_val;
     cos_mux <= std_logic_vector(unsigned(not cos_val) + 1) when cos_neg = '1' else cos_val;
 
-    reg_proc : process(rst_i, clk_i)
+    reg_proc : process(clk_i)
     begin
         if rising_edge(clk_i) then
             if rst_i = '1' then

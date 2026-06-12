@@ -34,9 +34,9 @@ package sig_gen_pkg is
         port (
             clk_i        : in  std_logic;
             rst_i        : in  std_logic;
-            addr_i       : in  std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
+            adr_i        : in  std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
             active_i     : in  std_logic;
-            drag_coeff_i : in  std_logic_vector(15 downto 0);
+            drag_i       : in  std_logic_vector(15 downto 0);
             amp_i        : in  std_logic_vector(15 downto 0);
             gauss_o      : out std_logic_vector(OUT_RES_BITS downto 0);
             drag_o       : out std_logic_vector(OUT_RES_BITS downto 0)

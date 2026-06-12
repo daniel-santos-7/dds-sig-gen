@@ -78,9 +78,9 @@ begin
     sig_gen_env_gen : env_gen port map (
         clk_i        => clk_i,
         rst_i        => rst_i,
-        addr_i       => env_seq_addr,
+        adr_i        => env_seq_addr,
         active_i     => env_seq_active,
-        drag_coeff_i => drag_i,
+        drag_i       => drag_i,
         amp_i        => amp_i,
         gauss_o      => env_gen_gauss,
         drag_o       => env_gen_drag
