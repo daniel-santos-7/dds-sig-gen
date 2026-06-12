@@ -40,7 +40,7 @@ architecture rtl of wb_sig_gen is
 
 begin
 
-    u_sig_gen_csrs : sig_gen_csrs generic map (
+    csrs : sig_gen_csrs generic map (
         DATA_WIDTH => DATA_WIDTH
     ) port map (
         rst_i   => rst_i,
@@ -63,7 +63,7 @@ begin
         ready_i => trig_ready
     );
 
-    u_sig_gen : sig_gen generic map (
+    dds : sig_gen generic map (
         PHA_ACC_BITS => PHA_ACC_BITS
     ) port map (
         clk_i      => clk_i,

@@ -3,7 +3,7 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 use work.sine_lut_pkg.all;
 
-entity sine_cos_lut is
+entity sin_pac is
     port (
         rst_i : in  std_logic;
         clk_i : in  std_logic;
@@ -11,9 +11,9 @@ entity sine_cos_lut is
         sin_o : out std_logic_vector(OUT_RES_BITS-1 downto 0);
         cos_o : out std_logic_vector(OUT_RES_BITS-1 downto 0)
     );
-end entity sine_cos_lut;
+end entity sin_pac;
 
-architecture rtl of sine_cos_lut is
+architecture rtl of sin_pac is
 
     signal sin_pointer : std_logic_vector(LUT_ADDR_BITS-1 downto 0);
     signal cos_pointer : std_logic_vector(LUT_ADDR_BITS-1 downto 0);

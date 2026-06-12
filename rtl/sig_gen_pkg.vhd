@@ -6,7 +6,7 @@ use work.envelope_lut_pkg.ENV_LUT_ADDR_BITS;
 
 package sig_gen_pkg is
 
-    component sine_cos_lut is
+    component sin_pac is
         port (
             rst_i : in  std_logic;
             clk_i : in  std_logic;
@@ -14,7 +14,7 @@ package sig_gen_pkg is
             sin_o : out std_logic_vector(OUT_RES_BITS-1 downto 0);
             cos_o : out std_logic_vector(OUT_RES_BITS-1 downto 0)
         );
-    end component sine_cos_lut;
+    end component sin_pac;
 
     component pha_acc is
         generic (

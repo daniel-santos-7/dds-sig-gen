@@ -28,17 +28,17 @@ end entity sig_gen;
 
 architecture rtl of sig_gen is
 
-    signal trig_pulse : std_logic;
-    signal env_addr   : std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
-    signal env_active : std_logic;
+    signal trig_ctrl_trigger    : std_logic;
+    signal trig_ctrl_env_addr   : std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
+    signal trig_ctrl_env_active : std_logic;
 
     signal env_gen_gauss : std_logic_vector(OUT_RES_BITS downto 0);
     signal env_gen_drag  : std_logic_vector(OUT_RES_BITS downto 0);
 
-    signal pha_val : std_logic_vector(PHA_ACC_BITS-1 downto 0);
-    signal addr    : std_logic_vector(LUT_ADDR_BITS+1 downto 0);
-    signal sin_i  : std_logic_vector(OUT_RES_BITS-1 downto 0);
-    signal cos_i  : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal pha_acc_val  : std_logic_vector(PHA_ACC_BITS-1 downto 0);
+    signal sin_pac_addr : std_logic_vector(LUT_ADDR_BITS+1 downto 0);
+    signal sin_pac_sin  : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal sin_pac_cos  : std_logic_vector(OUT_RES_BITS-1 downto 0);
 
 begin
 
@@ -48,9 +48,9 @@ begin
         valid_i      => csr_valid,
         delay_i      => csr_delay,
         step_i       => csr_env,
-        trigger_o    => trig_pulse,
-        env_addr_o   => env_addr,
-        env_active_o => env_active,
+        trigger_o    => trig_ctrl_trigger,
+        env_addr_o   => trig_ctrl_env_addr,
+        env_active_o => trig_ctrl_env_active,
         ready_o      => trig_ready
     );
 
@@ -59,27 +59,27 @@ begin
     ) port map (
         clk_i => clk_i,
         rst_i => rst_i,
-        we_i  => trig_pulse,
+        we_i  => trig_ctrl_trigger,
         ftw_i => csr_ftw(PHA_ACC_BITS-1 downto 0),
         pow_i => csr_pow(PHA_ACC_BITS-1 downto 0),
-        val_o => pha_val
+        val_o => pha_acc_val
     );
 
-    addr <= pha_val(PHA_ACC_BITS-1 downto PHA_ACC_BITS-LUT_ADDR_BITS-2);
+    sin_pac_addr <= pha_acc_val(PHA_ACC_BITS-1 downto PHA_ACC_BITS-LUT_ADDR_BITS-2);
 
-    sig_gen_sine_cos_lut : sine_cos_lut port map (
+    sig_gen_sin_pac : sin_pac port map (
         rst_i => rst_i,
         clk_i => clk_i,
-        adr_i => addr,
-        sin_o => sin_i,
-        cos_o => cos_i
+        adr_i => sin_pac_addr,
+        sin_o => sin_pac_sin,
+        cos_o => sin_pac_cos
     );
 
     sig_gen_env_gen : env_gen port map (
         clk_i        => clk_i,
         rst_i        => rst_i,
-        addr_i       => env_addr,
-        active_i     => env_active,
+        addr_i       => trig_ctrl_env_addr,
+        active_i     => trig_ctrl_env_active,
         drag_coeff_i => csr_drag,
         amp_i        => csr_amp,
         gauss_o      => env_gen_gauss,
@@ -91,12 +91,12 @@ begin
         rst_i   => rst_i,
         gauss_i => env_gen_gauss,
         drag_i  => env_gen_drag,
-        sin_i   => sin_i,
-        cos_i   => cos_i,
+        sin_i   => sin_pac_sin,
+        cos_i   => sin_pac_cos,
         sig_i_o => sig_i_o,
         sig_q_o => sig_q_o
     );
 
-    active_o <= env_active;
+    active_o <= trig_ctrl_env_active;
 
 end architecture rtl;
