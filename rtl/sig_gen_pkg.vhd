@@ -49,8 +49,8 @@ package sig_gen_pkg is
             rst_i    : in  std_logic;
             gauss_i  : in  std_logic_vector(OUT_RES_BITS downto 0);
             drag_i   : in  std_logic_vector(OUT_RES_BITS downto 0);
-            sine_i_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
-            sine_q_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
+            sin_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
+            cos_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
             sig_i_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
             sig_q_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0)
         );

@@ -9,8 +9,8 @@ entity iq_mod is
         rst_i    : in  std_logic;
         gauss_i  : in  std_logic_vector(OUT_RES_BITS downto 0);
         drag_i   : in  std_logic_vector(OUT_RES_BITS downto 0);
-        sine_i_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
-        sine_q_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
+        sin_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
+        cos_i : in  std_logic_vector(OUT_RES_BITS-1 downto 0);
         sig_i_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
         sig_q_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0)
     );
@@ -37,10 +37,10 @@ begin
     gauss_sgn <= signed(gauss_i);
     drag_sgn  <= signed(drag_i);
 
-    mul_i_i <= signed(sine_i_i) * gauss_sgn;
-    mul_q_q <= signed(sine_q_i) * drag_sgn;
-    mul_i_q <= signed(sine_i_i) * drag_sgn;
-    mul_q_i <= signed(sine_q_i) * gauss_sgn;
+    mul_i_i <= signed(sin_i) * gauss_sgn;
+    mul_q_q <= signed(cos_i) * drag_sgn;
+    mul_i_q <= signed(sin_i) * drag_sgn;
+    mul_q_i <= signed(cos_i) * gauss_sgn;
 
     sum_i <= mul_i_i - mul_q_q;
     sum_q <= mul_q_i + mul_i_q;

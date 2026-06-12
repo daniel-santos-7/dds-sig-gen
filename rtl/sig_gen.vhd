@@ -37,8 +37,8 @@ architecture rtl of sig_gen is
 
     signal pha_val : std_logic_vector(PHA_ACC_BITS-1 downto 0);
     signal addr    : std_logic_vector(LUT_ADDR_BITS+1 downto 0);
-    signal sine_q  : std_logic_vector(OUT_RES_BITS-1 downto 0);
-    signal sine_i  : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal sin_i  : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal cos_i  : std_logic_vector(OUT_RES_BITS-1 downto 0);
 
 begin
 
@@ -71,8 +71,8 @@ begin
         rst_i => rst_i,
         clk_i => clk_i,
         adr_i => addr,
-        sin_o => sine_q,
-        cos_o => sine_i
+        sin_o => sin_i,
+        cos_o => cos_i
     );
 
     u_env_gen : env_gen port map (
@@ -87,14 +87,14 @@ begin
     );
 
     u_iq_mod : iq_mod port map (
-        clk_i    => clk_i,
-        rst_i    => rst_i,
-        gauss_i  => gauss_sgn,
-        drag_i   => drag_sgn,
-        sine_i_i => sine_i,
-        sine_q_i => sine_q,
-        sig_i_o  => sig_i_o,
-        sig_q_o  => sig_q_o
+        clk_i   => clk_i,
+        rst_i   => rst_i,
+        gauss_i => gauss_sgn,
+        drag_i  => drag_sgn,
+        sin_i   => sin_i,
+        cos_i   => cos_i,
+        sig_i_o => sig_i_o,
+        sig_q_o => sig_q_o
     );
 
     active_o <= env_active;
