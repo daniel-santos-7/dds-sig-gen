@@ -105,14 +105,14 @@ package sig_gen_pkg is
         port (
             clk_i       : in  std_logic;
             rst_i       : in  std_logic;
-            csr_ftw     : in  std_logic_vector(31 downto 0);
-            csr_pow     : in  std_logic_vector(31 downto 0);
-            csr_amp     : in  std_logic_vector(15 downto 0);
-            csr_env     : in  std_logic_vector(31 downto 0);
-            csr_drag    : in  std_logic_vector(15 downto 0);
-            csr_valid   : in  std_logic;
-            csr_delay   : in  std_logic_vector(23 downto 0);
-            trig_ready  : out std_logic;
+            ftw_i       : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            pow_i       : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            amp_i       : in  std_logic_vector(15 downto 0);
+            env_i       : in  std_logic_vector(31 downto 0);
+            drag_i      : in  std_logic_vector(15 downto 0);
+            valid_i     : in  std_logic;
+            delay_i     : in  std_logic_vector(23 downto 0);
+            ready_o     : out std_logic;
             sig_i_o     : out std_logic_vector(OUT_RES_BITS-1 downto 0);
             sig_q_o     : out std_logic_vector(OUT_RES_BITS-1 downto 0);
             active_o    : out std_logic

@@ -10,19 +10,19 @@ entity sig_gen is
         PHA_ACC_BITS : natural := 32
     );
     port (
-        clk_i       : in  std_logic;
-        rst_i       : in  std_logic;
-        csr_ftw     : in  std_logic_vector(31 downto 0);
-        csr_pow     : in  std_logic_vector(31 downto 0);
-        csr_amp     : in  std_logic_vector(15 downto 0);
-        csr_env     : in  std_logic_vector(31 downto 0);
-        csr_drag    : in  std_logic_vector(15 downto 0);
-        csr_valid   : in  std_logic;
-        csr_delay   : in  std_logic_vector(23 downto 0);
-        trig_ready  : out std_logic;
-        sig_i_o     : out std_logic_vector(OUT_RES_BITS-1 downto 0);
-        sig_q_o     : out std_logic_vector(OUT_RES_BITS-1 downto 0);
-        active_o    : out std_logic
+        clk_i    : in  std_logic;
+        rst_i    : in  std_logic;
+        ftw_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+        pow_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+        amp_i    : in  std_logic_vector(15 downto 0);
+        env_i    : in  std_logic_vector(31 downto 0);
+        drag_i   : in  std_logic_vector(15 downto 0);
+        valid_i  : in  std_logic;
+        delay_i  : in  std_logic_vector(23 downto 0);
+        ready_o  : out std_logic;
+        sig_i_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
+        sig_q_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
+        active_o : out std_logic
     );
 end entity sig_gen;
 
@@ -45,13 +45,13 @@ begin
     sig_gen_trig_ctrl : trig_ctrl port map (
         clk_i        => clk_i,
         rst_i        => rst_i,
-        valid_i      => csr_valid,
-        delay_i      => csr_delay,
-        step_i       => csr_env,
+        valid_i      => valid_i,
+        delay_i      => delay_i,
+        step_i       => env_i,
         trigger_o    => trig_ctrl_trigger,
         env_addr_o   => trig_ctrl_env_addr,
         env_active_o => trig_ctrl_env_active,
-        ready_o      => trig_ready
+        ready_o      => ready_o
     );
 
     sig_gen_pha_acc : pha_acc generic map (
@@ -60,8 +60,8 @@ begin
         clk_i => clk_i,
         rst_i => rst_i,
         we_i  => trig_ctrl_trigger,
-        ftw_i => csr_ftw(PHA_ACC_BITS-1 downto 0),
-        pow_i => csr_pow(PHA_ACC_BITS-1 downto 0),
+        ftw_i => ftw_i,
+        pow_i => pow_i,
         val_o => pha_acc_val
     );
 
@@ -80,8 +80,8 @@ begin
         rst_i        => rst_i,
         addr_i       => trig_ctrl_env_addr,
         active_i     => trig_ctrl_env_active,
-        drag_coeff_i => csr_drag,
-        amp_i        => csr_amp,
+        drag_coeff_i => drag_i,
+        amp_i        => amp_i,
         gauss_o      => env_gen_gauss,
         drag_o       => env_gen_drag
     );
