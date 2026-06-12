@@ -32,8 +32,8 @@ architecture rtl of sig_gen is
     signal env_addr   : std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
     signal env_active : std_logic;
 
-    signal gauss_sgn : std_logic_vector(OUT_RES_BITS downto 0);
-    signal drag_sgn  : std_logic_vector(OUT_RES_BITS downto 0);
+    signal env_gen_gauss : std_logic_vector(OUT_RES_BITS downto 0);
+    signal env_gen_drag  : std_logic_vector(OUT_RES_BITS downto 0);
 
     signal pha_val : std_logic_vector(PHA_ACC_BITS-1 downto 0);
     signal addr    : std_logic_vector(LUT_ADDR_BITS+1 downto 0);
@@ -42,7 +42,7 @@ architecture rtl of sig_gen is
 
 begin
 
-    u_trig_ctrl : trig_ctrl port map (
+    sig_gen_trig_ctrl : trig_ctrl port map (
         clk_i        => clk_i,
         rst_i        => rst_i,
         valid_i      => csr_valid,
@@ -54,7 +54,7 @@ begin
         ready_o      => trig_ready
     );
 
-    u_pha_acc : pha_acc generic map (
+    sig_gen_pha_acc : pha_acc generic map (
         PHA_ACC_BITS => PHA_ACC_BITS
     ) port map (
         clk_i => clk_i,
@@ -67,7 +67,7 @@ begin
 
     addr <= pha_val(PHA_ACC_BITS-1 downto PHA_ACC_BITS-LUT_ADDR_BITS-2);
 
-    u_sine_cos_lut : sine_cos_lut port map (
+    sig_gen_sine_cos_lut : sine_cos_lut port map (
         rst_i => rst_i,
         clk_i => clk_i,
         adr_i => addr,
@@ -75,22 +75,22 @@ begin
         cos_o => cos_i
     );
 
-    u_env_gen : env_gen port map (
+    sig_gen_env_gen : env_gen port map (
         clk_i        => clk_i,
         rst_i        => rst_i,
         addr_i       => env_addr,
         active_i     => env_active,
         drag_coeff_i => csr_drag,
         amp_i        => csr_amp,
-        gauss_o      => gauss_sgn,
-        drag_o       => drag_sgn
+        gauss_o      => env_gen_gauss,
+        drag_o       => env_gen_drag
     );
-
-    u_iq_mod : iq_mod port map (
+    
+    sig_gen_iq_mod : iq_mod port map (
         clk_i   => clk_i,
         rst_i   => rst_i,
-        gauss_i => gauss_sgn,
-        drag_i  => drag_sgn,
+        gauss_i => env_gen_gauss,
+        drag_i  => env_gen_drag,
         sin_i   => sin_i,
         cos_i   => cos_i,
         sig_i_o => sig_i_o,
