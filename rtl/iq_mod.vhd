@@ -58,7 +58,7 @@ begin
         end if;
     end process out_reg_proc;
 
-    sig_i_o <= not sig_i_reg(OUT_RES_BITS-1) & sig_i_reg(OUT_RES_BITS-2 downto 0);
-    sig_q_o <= not sig_q_reg(OUT_RES_BITS-1) & sig_q_reg(OUT_RES_BITS-2 downto 0);
+    sig_i_o <= sig_i_reg;
+    sig_q_o <= sig_q_reg;
 
 end architecture rtl;

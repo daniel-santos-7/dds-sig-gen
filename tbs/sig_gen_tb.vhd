@@ -170,20 +170,20 @@ begin
             report "GLITCH CHECK FAILED: " & integer'image(mon_edges) & " edges"
             severity error;
 
-        assert abs(to_integer(unsigned(mon_pre_i)) - 2**(OUT_RES_BITS-1)) < 50
-            report "PRE-PULSE EXTINCTION I FAILED: " & integer'image(to_integer(unsigned(mon_pre_i)))
+        assert abs(to_integer(signed(mon_pre_i))) < 50
+            report "PRE-PULSE EXTINCTION I FAILED: " & integer'image(to_integer(signed(mon_pre_i)))
             severity error;
 
-        assert abs(to_integer(unsigned(mon_pre_q)) - 2**(OUT_RES_BITS-1)) < 50
-            report "PRE-PULSE EXTINCTION Q FAILED: " & integer'image(to_integer(unsigned(mon_pre_q)))
+        assert abs(to_integer(signed(mon_pre_q))) < 50
+            report "PRE-PULSE EXTINCTION Q FAILED: " & integer'image(to_integer(signed(mon_pre_q)))
             severity error;
 
-        assert abs(to_integer(unsigned(mon_post_i)) - 2**(OUT_RES_BITS-1)) < 50
-            report "POST-PULSE EXTINCTION I FAILED: " & integer'image(to_integer(unsigned(mon_post_i)))
+        assert abs(to_integer(signed(mon_post_i))) < 50
+            report "POST-PULSE EXTINCTION I FAILED: " & integer'image(to_integer(signed(mon_post_i)))
             severity error;
 
-        assert abs(to_integer(unsigned(mon_post_q)) - 2**(OUT_RES_BITS-1)) < 50
-            report "POST-PULSE EXTINCTION Q FAILED: " & integer'image(to_integer(unsigned(mon_post_q)))
+        assert abs(to_integer(signed(mon_post_q))) < 50
+            report "POST-PULSE EXTINCTION Q FAILED: " & integer'image(to_integer(signed(mon_post_q)))
             severity error;
 
         report "VHDL assertions: all passed";

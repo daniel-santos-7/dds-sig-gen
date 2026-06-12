@@ -15,8 +15,9 @@ def verify(data_file, amp_val, pulse_len, out_bits=12):
 
     half_range = 2 ** (out_bits - 1)
     peak_scale = 2 ** (out_bits - 2) - 1
-    i = [v[0] - half_range for v in vals]
-    q = [v[1] - half_range for v in vals]
+    def from_twos(v): return v if v < half_range else v - 2 * half_range
+    i = [from_twos(v[0]) for v in vals]
+    q = [from_twos(v[1]) for v in vals]
     mags = [math.sqrt(v[0] ** 2 + v[1] ** 2) for v in zip(i, q)]
 
     n = len(vals)
