@@ -77,7 +77,7 @@ begin
                 delay_reg <= (others => '0');
                 valid_reg <= '0';
             else
-                -- Clear autonomously when trig_ctrl accepts the trigger
+                -- Clear autonomously when env_seq accepts the trigger
                 if valid_reg = '1' and ready_i = '1' then
                     valid_reg <= '0';
                 end if;
