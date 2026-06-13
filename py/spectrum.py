@@ -1,10 +1,13 @@
+import os
+
 import numpy as np
 from scipy.signal import periodogram
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-class Spectrum:
+
+class Channel:
     def __init__(self, values, clk_frequency):
         n = len(values)
         if n < 4:
@@ -62,21 +65,91 @@ class Spectrum:
         p = self.total_power - self.fundamental_power - self.harmonic_power - self.spur_power
         return p if p > 0 else 1e-30
 
-    def report(self):
-        print("Spectrum")
-        print(f"  Fundamental   {self.fundamental_power:>13.4e}")
-        print(f"  Harmonic      {self.harmonic_power:>13.4e}")
-        print(f"  Spur          {self.spur_power:>13.4e}")
-        print(f"  Noise         {self.noise_power:>13.4e}")
-        print(f"  Total         {self.total_power:>13.4e}")
+    @property
+    def thd_db(self):
+        p_fund = self.fundamental_power
+        p_harm = self.harmonic_power
+        return 10 * np.log10(p_harm / p_fund) if p_fund > 0 else -float('inf')
 
-    def plot(self, path):
-        fig, ax = plt.subplots(figsize=(12, 5))
-        ax.plot(self._freqs / 1e6, 10 * np.log10(self._power + 1e-30), linewidth=0.8)
-        ax.set_xlabel("Frequency (MHz)")
+    @property
+    def sfdr_db(self):
+        return 10 * np.log10(self.fundamental_power / self.spur_power)
+
+    @property
+    def snr_db(self):
+        return 10 * np.log10(self.fundamental_power / self.noise_power)
+
+    @property
+    def sinad_db(self):
+        p_fund = self.fundamental_power
+        p_dist = self.total_power - p_fund
+        return 10 * np.log10(p_fund / p_dist) if p_dist > 0 else float('inf')
+
+    @property
+    def enob(self):
+        return (self.sinad_db - 1.76) / 6.02
+
+    def report_lines(self, label):
+        freq_mhz = self.fund_freq / 1e6
+        return [
+            f"  Channel {label}:",
+            f"    Fundamental   {self.fundamental_power:>13.4e}  ({freq_mhz:.3f} MHz)",
+            f"    Harmonic      {self.harmonic_power:>13.4e}",
+            f"    Spur          {self.spur_power:>13.4e}",
+            f"    Noise         {self.noise_power:>13.4e}",
+            f"    Total         {self.total_power:>13.4e}",
+            f"    THD           {self.thd_db:>13.2f} dB",
+            f"    SFDR          {self.sfdr_db:>13.2f} dB",
+            f"    SNR           {self.snr_db:>13.2f} dB",
+            f"    SINAD         {self.sinad_db:>13.2f} dB",
+            f"    ENOB          {self.enob:>13.2f} bits",
+        ]
+
+    def plot(self, ax=None, color=None, title="Spectrum"):
+        ax = ax or plt.subplots(figsize=(12, 5))[1]
+        ax.plot(self._freqs / 1e6, 10 * np.log10(self._power + 1e-30), linewidth=0.8, color=color)
         ax.set_ylabel("Power (dB)")
-        ax.set_title("Spectrum")
+        ax.set_title(title)
         ax.grid(True, alpha=0.3)
+
+
+class Spectrum:
+    def __init__(self, i_values, q_values, clk_frequency):
+        self._i = Channel(i_values, clk_frequency)
+        self._q = Channel(q_values, clk_frequency)
+
+    @classmethod
+    def from_file(cls, path, clk):
+        values = np.loadtxt(path, delimiter=",")
+        if values.ndim > 1:
+            i_values = values[:, 0]
+            q_values = values[:, 1]
+        else:
+            i_values = values
+            q_values = np.zeros_like(values)
+        return cls(i_values, q_values, clk)
+
+    @property
+    def i(self):
+        return self._i
+
+    @property
+    def q(self):
+        return self._q
+
+    def __str__(self):
+        lines = ["Spectrum", ""]
+        lines += self._i.report_lines("I")
+        lines += [""]
+        lines += self._q.report_lines("Q")
+        return "\n".join(lines)
+
+    def plot(self, output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        fig, (ax_i, ax_q) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
+        self._i.plot(ax=ax_i, color="#1f77b4", title="Spectrum — Channel I")
+        self._q.plot(ax=ax_q, color="#2ca02c", title="Spectrum — Channel Q")
+        ax_q.set_xlabel("Frequency (MHz)")
         fig.tight_layout()
-        fig.savefig(path, dpi=150)
+        fig.savefig(os.path.join(output_dir, "spectrum.png"), dpi=150)
         plt.close(fig)

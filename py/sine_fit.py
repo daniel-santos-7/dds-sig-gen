@@ -97,6 +97,17 @@ class Channel:
 
 
 class IQFit:
+    @classmethod
+    def from_file(cls, path, clk, freq, pulse_len=None):
+        values = np.loadtxt(path, delimiter=",")
+        if values.ndim > 1:
+            i_values = values[:, 0]
+            q_values = values[:, 1]
+        else:
+            i_values = values
+            q_values = np.zeros_like(values)
+        return cls(i_values, q_values, clk, freq, pulse_len)
+
     def __init__(self, i_values, q_values, clk_frequency, freq0, pulse_len=None):
         n = len(i_values)
         if n < 4:
@@ -156,7 +167,9 @@ class IQFit:
             lines.append("Jitter                  unavailable")
         return "\n".join(lines)
 
-    def plot(self, path):
+    def plot(self, output_dir):
+        import os
+        os.makedirs(output_dir, exist_ok=True)
         t_us = self._t * 1e6
         i_fit = self._i.model_values()
         q_fit = self._q.model_values()
@@ -182,5 +195,5 @@ class IQFit:
 
         fig.suptitle(f"IQ Fit (Gaussian envelope + DRAG, {self._i.freq:.3f} Hz)")
         fig.tight_layout()
-        fig.savefig(path, dpi=150)
+        fig.savefig(os.path.join(output_dir, "fit_compare.png"), dpi=150)
         plt.close(fig)

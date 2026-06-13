@@ -33,6 +33,17 @@ class ChannelParam:
 
 
 class SigGenParam:
+    @classmethod
+    def from_file(cls, path, clk, freq=None, pulse_len=None):
+        values = np.loadtxt(path, delimiter=",")
+        if values.ndim > 1:
+            i_values = values[:, 0]
+            q_values = values[:, 1]
+        else:
+            i_values = values
+            q_values = np.zeros_like(values)
+        return cls(i_values, q_values, clk, freq, pulse_len)
+
     def __init__(self, i_values, q_values, clk_frequency, freq0=None, pulse_len=None):
         self.i = ChannelParam(i_values, clk_frequency, freq0)
         self.q = ChannelParam(q_values, clk_frequency, freq0)
@@ -123,7 +134,9 @@ class SigGenParam:
         ]
         return "\n".join(lines)
 
-    def plot(self, path):
+    def plot(self, output_dir):
+        import os
+        os.makedirs(output_dir, exist_ok=True)
         t_us = self._t * 1e6
         fig, (ax_i, ax_q) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
         ax_i.step(t_us, self.i.values, linewidth=0.5, where="post",
@@ -141,5 +154,5 @@ class SigGenParam:
         ax_q.grid(True, alpha=0.3)
         fig.suptitle(f"IQ Samples ({self.freq:.3f} Hz)")
         fig.tight_layout()
-        fig.savefig(path, dpi=150)
+        fig.savefig(os.path.join(output_dir, "params_compare.png"), dpi=150)
         plt.close(fig)
