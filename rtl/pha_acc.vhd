@@ -7,12 +7,12 @@ entity pha_acc is
         PHA_ACC_BITS : natural := 32
     );
     port (
-        clk_i : in  std_logic;
-        rst_i : in  std_logic;
-        sync_i  : in  std_logic;
-        ftw_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
-        pow_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
-        val_o : out std_logic_vector(PHA_ACC_BITS-1 downto 0)
+        clk_i  : in  std_logic;
+        rst_i  : in  std_logic;
+        sync_i : in  std_logic;
+        ftw_i  : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+        pow_i  : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+        val_o  : out std_logic_vector(PHA_ACC_BITS-1 downto 0)
     );
 end entity pha_acc;
 
