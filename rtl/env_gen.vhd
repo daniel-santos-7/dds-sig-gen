@@ -55,7 +55,7 @@ begin
     amp_mult <= unsigned(gauss) * unsigned(amp_i);
     env_q_mult <= signed(drag) * signed('0' & amp_i) * signed(drag_i);
 
-    gauss_o <= '0' & std_logic_vector(amp_mult(ENV_OUT_RES_BITS+15 downto ENV_OUT_RES_BITS+15-OUT_RES_BITS+1));
-    drag_o  <= std_logic_vector(env_q_mult(ENV_OUT_RES_BITS+31 downto ENV_OUT_RES_BITS+31-OUT_RES_BITS));
+    gauss_o <= '0' & std_logic_vector(amp_mult(ENV_OUT_RES_BITS+14 downto ENV_OUT_RES_BITS+15-OUT_RES_BITS));
+    drag_o  <= std_logic_vector(env_q_mult(ENV_OUT_RES_BITS+30 downto ENV_OUT_RES_BITS+31-OUT_RES_BITS-1));
 
 end architecture rtl;

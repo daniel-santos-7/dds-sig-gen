@@ -246,9 +246,9 @@ package body sig_gen_tb_pkg is
     begin
         for i in 0 to count-1 loop
             wait until rising_edge(clk);
-            write(l, to_integer(unsigned(sig_i)));
+            write(l, to_integer(signed(sig_i)));
             write(l, string'(","));
-            write(l, to_integer(unsigned(sig_q)));
+            write(l, to_integer(signed(sig_q)));
             writeline(f, l);
         end loop;
     end procedure write_iq_sample;
