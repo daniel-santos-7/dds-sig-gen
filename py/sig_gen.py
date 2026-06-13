@@ -2,46 +2,10 @@
 import argparse
 import sys
 
-from gen_lut_pkg import generate_env_pkg, generate_sine_pkg
+from gen_lut_pkg import generate_pkg
 from sig_gen_param import SigGenParam
 from sine_fit import IQFit
 from spectrum import Spectrum
-
-
-def write_output(text, path=None):
-    if path:
-        with open(path, "w") as f:
-            f.write(text)
-            f.write("\n")
-    else:
-        print(text)
-
-
-def main(args):
-    if args.command == "fit":
-        fit = IQFit.from_file(args.data, args.clk, args.freq, args.pulse_len)
-        write_output(str(fit), args.output)
-        if args.plot:
-            fit.plot(args.plot)
-
-    elif args.command == "params":
-        param = SigGenParam.from_file(args.data, args.clk, args.freq, args.pulse_len)
-        write_output(str(param), args.output)
-        if args.plot:
-            param.plot(args.plot)
-
-    elif args.command == "spectrum":
-        spec = Spectrum.from_file(args.data, args.clk)
-        write_output(str(spec), args.output)
-        if args.plot:
-            spec.plot(args.plot)
-
-    elif args.command == "gen-sine-lut":
-        print(generate_sine_pkg(args.lut_addr_bits, args.out_res_bits, args.initial_phase, args.final_phase))
-
-    elif args.command == "gen-env-lut":
-        print(generate_env_pkg(args.lut_addr_bits, args.out_res_bits))
-
 
 def create_parser():
     parser = argparse.ArgumentParser(description="DDS Signal Generator tools")
@@ -69,18 +33,46 @@ def create_parser():
     sp.add_argument("--output", default=None)
     sp.add_argument("--plot", default=None)
 
-    gs = subparsers.add_parser("gen-sine-lut", help="generate sine LUT VHDL package")
-    gs.add_argument("lut_addr_bits", type=int, nargs="?", default=10)
-    gs.add_argument("out_res_bits", type=int, nargs="?", default=12)
-    gs.add_argument("initial_phase", type=int, nargs="?", default=0)
-    gs.add_argument("final_phase", type=int, nargs="?", default=90)
-
-    ge = subparsers.add_parser("gen-env-lut", help="generate envelope LUT VHDL package")
-    ge.add_argument("lut_addr_bits", type=int, nargs="?", default=10)
-    ge.add_argument("out_res_bits", type=int, nargs="?", default=16)
+    gl = subparsers.add_parser("gen-lut", help="generate LUT VHDL package")
+    gl.add_argument("--type", required=True, choices=["sine", "env"])
+    gl.add_argument("--addr-bits", type=int, default=10)
+    gl.add_argument("--res-bits", type=int, default=12)
+    gl.add_argument("--init-phase", type=int, default=0)
+    gl.add_argument("--final-phase", type=int, default=90)
 
     return parser.parse_args()
 
+def write_output(text, path=None):
+    if path:
+        with open(path, "w") as f:
+            f.write(text)
+            f.write("\n")
+    else:
+        print(text)
+
+def main(args):
+    if args.command == "params":
+        param = SigGenParam.from_file(args.data, args.clk, args.freq, args.pulse_len)
+        write_output(str(param), args.output)
+        if args.plot: param.plot(args.plot)
+        return
+    
+    if args.command == "fit":
+        fit = IQFit.from_file(args.data, args.clk, args.freq, args.pulse_len)
+        write_output(str(fit), args.output)
+        if args.plot: fit.plot(args.plot)
+        return
+
+    if args.command == "spectrum":
+        spec = Spectrum.from_file(args.data, args.clk)
+        write_output(str(spec), args.output)
+        if args.plot: spec.plot(args.plot)
+        return
+        
+    if args.command == "gen-lut":
+        print(generate_pkg(args.type, args.addr_bits, args.res_bits, args.init_phase, args.final_phase))
+        return
 
 if __name__ == "__main__":
-    main(create_parser())
+    args = create_parser()
+    main(args)

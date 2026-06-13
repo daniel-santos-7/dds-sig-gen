@@ -55,10 +55,10 @@ $(VENVDIR): py/requirements.txt
 	$(VENVDIR)/bin/python3 -m pip install -r $<
 
 rtl/sine_lut_pkg.vhd: py/gen_lut_pkg.py py/sig_gen.py
-	python3 py/sig_gen.py gen-sine-lut $(LUT_ADDR_BITS) $(OUT_RES_BITS) $(INITIAL_PHASE) $(FINAL_PHASE) > $@
+	python3 py/sig_gen.py gen-lut --type sine --addr-bits $(LUT_ADDR_BITS) --res-bits $(OUT_RES_BITS) --init-phase $(INITIAL_PHASE) --final-phase $(FINAL_PHASE) > $@
 
 rtl/envelope_lut_pkg.vhd: py/gen_lut_pkg.py py/sig_gen.py
-	python3 py/sig_gen.py gen-env-lut $(ENV_LUT_ADDR_BITS) $(ENV_OUT_RES_BITS) > $@
+	python3 py/sig_gen.py gen-lut --type env --addr-bits $(ENV_LUT_ADDR_BITS) --res-bits $(ENV_OUT_RES_BITS) > $@
 
 luts: $(LUT_PKGS)
 

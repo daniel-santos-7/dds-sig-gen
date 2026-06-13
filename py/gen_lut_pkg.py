@@ -9,6 +9,12 @@ def _int_to_vhdl_hex_str(integer: int, bits: int) -> str:
     return f'x"{value:0{hex_digits}x}"'
 
 
+def generate_pkg(lut_type, lut_addr_bits=10, out_res_bits=12, initial_phase=0, final_phase=90):
+    if lut_type == "sine":
+        return generate_sine_pkg(lut_addr_bits, out_res_bits, initial_phase, final_phase)
+    return generate_env_pkg(lut_addr_bits, out_res_bits)
+
+
 def generate_sine_pkg(lut_addr_bits=10, out_res_bits=12, initial_phase=0, final_phase=90):
     samples = 2 ** lut_addr_bits
     amplitude = 2 ** (out_res_bits - 1) - 1
