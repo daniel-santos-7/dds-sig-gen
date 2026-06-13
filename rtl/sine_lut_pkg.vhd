@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 
 package sine_lut_pkg is
-    
+
     constant LUT_ADDR_BITS : natural := 10;
 
     constant OUT_RES_BITS  : natural := 12;

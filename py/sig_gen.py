@@ -3,9 +3,14 @@ import argparse
 import sys
 
 from gen_lut_pkg import generate_pkg
-from sig_gen_param import SigGenParam
-from sine_fit import IQFit
-from spectrum import Spectrum
+
+def load_iq_data(path):
+    import numpy as np
+    values = np.loadtxt(path, delimiter=",")
+    if values.ndim > 1:
+        return values[:, 0], values[:, 1]
+    return values, np.zeros_like(values)
+
 
 def create_parser():
     parser = argparse.ArgumentParser(description="DDS Signal Generator tools")
@@ -19,10 +24,9 @@ def create_parser():
     fp.add_argument("--output", default=None)
     fp.add_argument("--plot", default=None)
 
-    pp = subparsers.add_parser("params", help="estimate I/Q parameters from samples")
+    pp = subparsers.add_parser("raw", help="estimate raw I/Q parameters from samples")
     pp.add_argument("--data", required=True)
     pp.add_argument("--clk", type=float, required=True)
-    pp.add_argument("--freq", type=float, default=None, help="expected frequency (optional, FFT if omitted)")
     pp.add_argument("--pulse-len", type=int, default=None, help="pulse length in clock cycles (optional, sigma estimate)")
     pp.add_argument("--output", default=None)
     pp.add_argument("--plot", default=None)
@@ -51,20 +55,26 @@ def write_output(text, path=None):
         print(text)
 
 def main(args):
-    if args.command == "params":
-        param = SigGenParam.from_file(args.data, args.clk, args.freq, args.pulse_len)
+    if args.command in ("raw", "fit", "spectrum"):
+        i_values, q_values = load_iq_data(args.data)
+
+    if args.command == "raw":
+        from raw import Raw
+        param = Raw(i_values, q_values, args.clk, args.pulse_len)
         write_output(str(param), args.output)
         if args.plot: param.plot(args.plot)
         return
     
     if args.command == "fit":
-        fit = IQFit.from_file(args.data, args.clk, args.freq, args.pulse_len)
+        from sine_fit import IQFit
+        fit = IQFit(i_values, q_values, args.clk, args.freq, args.pulse_len)
         write_output(str(fit), args.output)
         if args.plot: fit.plot(args.plot)
         return
 
     if args.command == "spectrum":
-        spec = Spectrum.from_file(args.data, args.clk)
+        from spectrum import Spectrum
+        spec = Spectrum(i_values, q_values, args.clk)
         write_output(str(spec), args.output)
         if args.plot: spec.plot(args.plot)
         return

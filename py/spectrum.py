@@ -118,17 +118,6 @@ class Spectrum:
         self._i = Channel(i_values, clk_frequency)
         self._q = Channel(q_values, clk_frequency)
 
-    @classmethod
-    def from_file(cls, path, clk):
-        values = np.loadtxt(path, delimiter=",")
-        if values.ndim > 1:
-            i_values = values[:, 0]
-            q_values = values[:, 1]
-        else:
-            i_values = values
-            q_values = np.zeros_like(values)
-        return cls(i_values, q_values, clk)
-
     @property
     def i(self):
         return self._i

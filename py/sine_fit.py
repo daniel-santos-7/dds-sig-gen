@@ -3,7 +3,7 @@ from scipy.optimize import curve_fit
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from sig_gen_param import SigGenParam
+from raw import Raw
 
 
 def _i_model(t, A, sigma, t0, freq, phase, beta, offset):
@@ -97,17 +97,6 @@ class Channel:
 
 
 class IQFit:
-    @classmethod
-    def from_file(cls, path, clk, freq, pulse_len=None):
-        values = np.loadtxt(path, delimiter=",")
-        if values.ndim > 1:
-            i_values = values[:, 0]
-            q_values = values[:, 1]
-        else:
-            i_values = values
-            q_values = np.zeros_like(values)
-        return cls(i_values, q_values, clk, freq, pulse_len)
-
     def __init__(self, i_values, q_values, clk_frequency, freq0, pulse_len=None):
         n = len(i_values)
         if n < 4:
@@ -123,10 +112,13 @@ class IQFit:
             )
 
         self._t = np.arange(n) / clk_frequency
-        est = SigGenParam(i_values, q_values, clk_frequency, freq0, pulse_len)
+        est = Raw(i_values, q_values, clk_frequency, pulse_len)
+        mag = np.sqrt(est.i.values ** 2 + est.q.values ** 2)
+        env_amp = float(np.max(mag) - np.min(mag))
+        env_center = float(est.i._t[np.argmax(mag)])
 
-        p0_i = [est.amp, est.sigma, est.center, est.freq, est.phase, est.beta, est.off_i]
-        p0_q = [est.amp, est.sigma, est.center, est.freq, est.phase, est.beta, est.off_q]
+        p0_i = [env_amp, est.i.sigma, env_center, est.i.freq, est.i.phase, est.i.beta, est.i.offset]
+        p0_q = [env_amp, est.i.sigma, env_center, est.i.freq, est.i.phase, est.i.beta, est.q.offset]
 
         self._i = Channel(i_values, self._t, _i_model, p0_i, "I")
         self._q = Channel(q_values, self._t, _q_model, p0_q, "Q")

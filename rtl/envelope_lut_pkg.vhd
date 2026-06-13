@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 
 package envelope_lut_pkg is
-    
+
     constant ENV_LUT_ADDR_BITS : natural := 10;
     constant ENV_OUT_RES_BITS  : natural := 16;
 
@@ -1039,4 +1039,3 @@ package envelope_lut_pkg is
 	);
 
 end package envelope_lut_pkg;
-
