@@ -45,7 +45,7 @@ GHDL_RUNOPTS += -gSAMPLES_FILE=$(SAMPLES_FILE)
 GHDL_RUNOPTS += -gCASE_FILE=$(TEST_CASE_FILE)
 GHDL_RUNOPTS += -gREG_FILE=$(REG_VALUES_FILE)
 
-.PHONY: run analyze plot verify clean distclean luts
+.PHONY: run fit params spectrum clean distclean luts
 
 $(WORKDIR) $(OUTDIR) $(TESTDIR):
 	@mkdir -p $@
@@ -71,14 +71,14 @@ luts: $(LUT_PKGS)
 run: .make | $(OUTDIR) $(TESTDIR)
 	@$(GHDL) run $(TBS_TOP) $(GHDL_RUNOPTS)
 
-analyze: $(VENVDIR) $(SAMPLES_FILE) | $(TESTDIR)
-	@$(VENVDIR)/bin/python3 py/sig_gen.py analyze --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --output $(TESTDIR)/analysis.txt
+fit: $(VENVDIR) $(SAMPLES_FILE)
+	@$(VENVDIR)/bin/python3 py/sig_gen.py fit --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --freq $(FREQ_HZ) --pulse-len $(PULSE_LEN) --output $(TESTDIR)/fit.txt --plot $(TESTDIR)
 
-plot: $(VENVDIR) $(SAMPLES_FILE) | $(TESTDIR)
-	@$(VENVDIR)/bin/python3 py/sig_gen.py plot --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --dir $(TESTDIR)
+params: $(VENVDIR) $(SAMPLES_FILE)
+	@$(VENVDIR)/bin/python3 py/sig_gen.py params --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --freq $(FREQ_HZ) --pulse-len $(PULSE_LEN) --output $(TESTDIR)/params.txt --plot $(TESTDIR)
 
-verify: $(VENVDIR) $(SAMPLES_FILE)
-	@$(VENVDIR)/bin/python3 py/sig_gen.py verify --data $(SAMPLES_FILE) --amp $(AMP_VAL) --pulse $(PULSE_LEN) --bits $(OUT_RES_BITS)
+spectrum: $(VENVDIR) $(SAMPLES_FILE)
+	@$(VENVDIR)/bin/python3 py/sig_gen.py spectrum --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --output $(TESTDIR)/spectrum.txt --plot $(TESTDIR)
 
 clean:
 	@$(GHDL) clean $(GHDL_OPTS)
