@@ -10,17 +10,16 @@ entity wb_sig_gen is
         PHA_ACC_BITS : natural := 32
     );
     port (
-        rst_i : in  std_logic;
-        clk_i : in  std_logic;
-        adr_i : in  std_logic_vector(ADDR_WIDTH-1 downto 0);
-        cyc_i : in  std_logic;
-        stb_i : in  std_logic;
-        we_i  : in  std_logic;
-        sel_i : in  std_logic_vector(DATA_WIDTH/8-1 downto 0);
-        dat_i : in  std_logic_vector(DATA_WIDTH-1 downto 0);
-        ack_o : out std_logic;
-        dat_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
-        
+        rst_i    : in  std_logic;
+        clk_i    : in  std_logic;
+        adr_i    : in  std_logic_vector(ADDR_WIDTH-1 downto 0);
+        cyc_i    : in  std_logic;
+        stb_i    : in  std_logic;
+        we_i     : in  std_logic;
+        sel_i    : in  std_logic_vector(DATA_WIDTH/8-1 downto 0);
+        dat_i    : in  std_logic_vector(DATA_WIDTH-1 downto 0);
+        ack_o    : out std_logic;
+        dat_o    : out std_logic_vector(DATA_WIDTH-1 downto 0);
         sig_i_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
         sig_q_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
         active_o : out std_logic
@@ -66,19 +65,19 @@ begin
     dds : sig_gen generic map (
         PHA_ACC_BITS => PHA_ACC_BITS
     ) port map (
-        clk_i      => clk_i,
-        rst_i      => rst_i,
-        ftw_i      => csr_ftw(PHA_ACC_BITS-1 downto 0),
-        pow_i      => csr_pow(PHA_ACC_BITS-1 downto 0),
-        amp_i      => csr_amp,
-        env_i      => csr_env,
-        drag_i     => csr_drag,
-        valid_i    => csr_valid,
-        delay_i    => csr_delay,
-        ready_o    => trig_ready,
-        sig_i_o    => sig_i_o,
-        sig_q_o    => sig_q_o,
-        active_o   => active_o
+        clk_i    => clk_i,
+        rst_i    => rst_i,
+        ftw_i    => csr_ftw(PHA_ACC_BITS-1 downto 0),
+        pow_i    => csr_pow(PHA_ACC_BITS-1 downto 0),
+        amp_i    => csr_amp,
+        env_i    => csr_env,
+        drag_i   => csr_drag,
+        valid_i  => csr_valid,
+        delay_i  => csr_delay,
+        ready_o  => trig_ready,
+        sig_i_o  => sig_i_o,
+        sig_q_o  => sig_q_o,
+        active_o => active_o
     );
 
 end architecture rtl;
