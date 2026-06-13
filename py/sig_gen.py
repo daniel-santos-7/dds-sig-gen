@@ -25,7 +25,6 @@ def create_parser():
     fp = subparsers.add_parser("fit", help="fit sine wave with Gaussian envelope to I/Q samples")
     fp.add_argument("--data", required=True)
     fp.add_argument("--clk", type=float, required=True)
-    fp.add_argument("--freq", type=float, required=True)
     fp.add_argument("--output", default=None)
     fp.add_argument("--plot", default=None)
 
@@ -65,7 +64,7 @@ def main(args):
     
     if args.command == "fit":
         from sine_fit import IQFit
-        fit = IQFit(i_values, q_values, args.clk, args.freq)
+        fit = IQFit(i_values, q_values, args.clk)
         write_output(str(fit), args.output)
         if args.plot: fit.plot(args.plot)
         return

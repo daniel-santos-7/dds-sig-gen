@@ -97,22 +97,22 @@ class Channel:
 
 
 class IQFit:
-    def __init__(self, i_values, q_values, clk_frequency, freq0):
+    def __init__(self, i_values, q_values, clk_frequency):
         n = len(i_values)
         if n < 4:
             raise ValueError("not enough samples for analysis")
 
+        self._t = np.arange(n) / clk_frequency
+        est = Raw(i_values, q_values, clk_frequency)
+
         window_us = n / clk_frequency * 1e6
-        ncycles = window_us * freq0 * 1e-6
+        ncycles = window_us * est.i.freq * 1e-6
         if ncycles < 1.0:
             raise ValueError(
                 f"Data window ({window_us:.1f} µs) contains only {ncycles:.2f} cycle(s) "
-                f"at {freq0} Hz. Need at least ~1 full cycle for a reliable fit. "
+                f"at {est.i.freq:.0f} Hz. Need at least ~1 full cycle for a reliable fit. "
                 "Use higher FREQ_HZ or increase CLK_PERIODS."
             )
-
-        self._t = np.arange(n) / clk_frequency
-        est = Raw(i_values, q_values, clk_frequency)
         mag = np.sqrt(est.i.values ** 2 + est.q.values ** 2)
         env_amp = float(np.max(mag) - np.min(mag))
         env_center = float(est.i._t[np.argmax(mag)])

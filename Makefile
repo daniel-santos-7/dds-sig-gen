@@ -45,7 +45,7 @@ GHDL_RUNOPTS += -gSAMPLES_FILE=$(SAMPLES_FILE)
 GHDL_RUNOPTS += -gCASE_FILE=$(TEST_CASE_FILE)
 GHDL_RUNOPTS += -gREG_FILE=$(REG_VALUES_FILE)
 
-.PHONY: run fit raw spectrum clean distclean luts
+.PHONY: run analyze fit raw spectrum clean distclean luts
 
 $(WORKDIR) $(OUTDIR) $(TESTDIR):
 	@mkdir -p $@
@@ -71,8 +71,10 @@ luts: $(LUT_PKGS)
 run: .make | $(OUTDIR) $(TESTDIR)
 	@$(GHDL) run $(TBS_TOP) $(GHDL_RUNOPTS)
 
+analyze: fit raw spectrum
+
 fit: $(VENVDIR) $(SAMPLES_FILE)
-	@$(VENVDIR)/bin/python3 py/sig_gen.py fit --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --freq $(FREQ_HZ) --output $(TESTDIR)/fit.txt --plot $(TESTDIR)
+	@$(VENVDIR)/bin/python3 py/sig_gen.py fit --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --output $(TESTDIR)/fit.txt --plot $(TESTDIR)
 
 raw: $(VENVDIR) $(SAMPLES_FILE)
 	@$(VENVDIR)/bin/python3 py/sig_gen.py raw --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --output $(TESTDIR)/raw.txt --plot $(TESTDIR)
