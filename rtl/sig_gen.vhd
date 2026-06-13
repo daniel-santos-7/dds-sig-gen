@@ -28,7 +28,7 @@ end entity sig_gen;
 
 architecture rtl of sig_gen is
 
-    signal env_seq_sync    : std_logic;
+    signal env_seq_sync   : std_logic;
     signal env_seq_addr   : std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
     signal env_seq_active : std_logic;
 
@@ -76,14 +76,14 @@ begin
     );
 
     sig_gen_env_gen : env_gen port map (
-        clk_i        => clk_i,
-        rst_i        => rst_i,
-        adr_i        => env_seq_addr,
-        active_i     => env_seq_active,
-        drag_i       => drag_i,
-        amp_i        => amp_i,
-        gauss_o      => env_gen_gauss,
-        drag_o       => env_gen_drag
+        clk_i    => clk_i,
+        rst_i    => rst_i,
+        adr_i    => env_seq_addr,
+        active_i => env_seq_active,
+        drag_i   => drag_i,
+        amp_i    => amp_i,
+        gauss_o  => env_gen_gauss,
+        drag_o   => env_gen_drag
     );
     
     sig_gen_iq_mod : iq_mod port map (
