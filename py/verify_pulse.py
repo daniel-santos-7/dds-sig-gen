@@ -85,17 +85,4 @@ def verify(data_file, amp_val, pulse_len, out_bits=12):
     return fail_count == 0
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Verify pulse envelope quality")
-    parser.add_argument("--data", required=True, help="CSV samples file (i,q)")
-    parser.add_argument("--amp", type=int, default=65535, help="AMP_VAL used")
-    parser.add_argument("--pulse", type=int, default=200, help="PULSE_LEN used")
-    parser.add_argument("--bits", type=int, default=12, help="Output resolution bits")
-    args = parser.parse_args()
 
-    ok = verify(args.data, args.amp, args.pulse, args.bits)
-    sys.exit(0 if ok else 1)
-
-
-if __name__ == "__main__":
-    main()

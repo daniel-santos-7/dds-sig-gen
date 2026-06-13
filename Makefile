@@ -19,6 +19,11 @@ AMP_VAL     ?= 65535
 PULSE_LEN   ?= 200
 DRAG_COEFF  ?= 0.5
 OUT_RES_BITS ?= 12
+LUT_ADDR_BITS ?= 10
+ENV_LUT_ADDR_BITS ?= 10
+ENV_OUT_RES_BITS ?= 16
+INITIAL_PHASE ?= 0
+FINAL_PHASE ?= 90
 DRAG_COEFF_INT = $(shell python3 -c "print(int(round($(DRAG_COEFF) * 32768)))")
 
 TESTDIR = $(OUTDIR)/test_$(FREQ_HZ)hz_$(PHASE_DEG)deg_$(AMP_VAL)
@@ -26,6 +31,8 @@ TESTDIR = $(OUTDIR)/test_$(FREQ_HZ)hz_$(PHASE_DEG)deg_$(AMP_VAL)
 SAMPLES_FILE    = $(TESTDIR)/samples.txt
 TEST_CASE_FILE  = $(TESTDIR)/test_case.txt
 REG_VALUES_FILE = $(TESTDIR)/reg_values.txt
+
+LUT_PKGS = rtl/sine_lut_pkg.vhd rtl/envelope_lut_pkg.vhd
 
 GHDL_RUNOPTS = --wave=$(OUTDIR)/sig_gen_tb.ghw --ieee-asserts=disable
 GHDL_RUNOPTS += -gNUM_PERIODS=$(CLK_PERIODS)
@@ -38,7 +45,7 @@ GHDL_RUNOPTS += -gSAMPLES_FILE=$(SAMPLES_FILE)
 GHDL_RUNOPTS += -gCASE_FILE=$(TEST_CASE_FILE)
 GHDL_RUNOPTS += -gREG_FILE=$(REG_VALUES_FILE)
 
-.PHONY: run analyze plot verify clean distclean
+.PHONY: run analyze plot verify clean distclean luts
 
 $(WORKDIR) $(OUTDIR) $(TESTDIR):
 	@mkdir -p $@
@@ -47,7 +54,15 @@ $(VENVDIR): py/requirements.txt
 	@python3 -m venv $(VENVDIR)
 	$(VENVDIR)/bin/python3 -m pip install -r $<
 
-.import: $(RTL_SRC) $(TBS_SRC) | $(WORKDIR)
+rtl/sine_lut_pkg.vhd: py/gen_sine_lut_pkg.py py/sig_gen.py
+	python3 py/sig_gen.py gen-sine-lut $(LUT_ADDR_BITS) $(OUT_RES_BITS) $(INITIAL_PHASE) $(FINAL_PHASE) > $@
+
+rtl/envelope_lut_pkg.vhd: py/gen_envelope_lut_pkg.py py/sig_gen.py
+	python3 py/sig_gen.py gen-env-lut $(ENV_LUT_ADDR_BITS) $(ENV_OUT_RES_BITS) > $@
+
+luts: $(LUT_PKGS)
+
+.import: $(RTL_SRC) $(TBS_SRC) $(LUT_PKGS) | $(WORKDIR)
 	@$(GHDL) import $(GHDL_OPTS) $^ | tee $@
 
 .make: .import
@@ -57,13 +72,13 @@ run: .make | $(OUTDIR) $(TESTDIR)
 	@$(GHDL) run $(TBS_TOP) $(GHDL_RUNOPTS)
 
 analyze: $(VENVDIR) $(SAMPLES_FILE) | $(TESTDIR)
-	@$(VENVDIR)/bin/python3 py/sig_gen_report.py --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --output $(TESTDIR)/analysis.txt
+	@$(VENVDIR)/bin/python3 py/sig_gen.py analyze --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --output $(TESTDIR)/analysis.txt
 
 plot: $(VENVDIR) $(SAMPLES_FILE) | $(TESTDIR)
-	@$(VENVDIR)/bin/python3 py/sig_gen_report.py --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --plot $(TESTDIR)
+	@$(VENVDIR)/bin/python3 py/sig_gen.py plot --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --dir $(TESTDIR)
 
 verify: $(VENVDIR) $(SAMPLES_FILE)
-	@$(VENVDIR)/bin/python3 py/verify_pulse.py --data $(SAMPLES_FILE) --amp $(AMP_VAL) --pulse $(PULSE_LEN) --bits $(OUT_RES_BITS)
+	@$(VENVDIR)/bin/python3 py/sig_gen.py verify --data $(SAMPLES_FILE) --amp $(AMP_VAL) --pulse $(PULSE_LEN) --bits $(OUT_RES_BITS)
 
 clean:
 	@$(GHDL) clean $(GHDL_OPTS)

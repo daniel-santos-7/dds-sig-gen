@@ -60,31 +60,4 @@ def generate_plots(directory, values, clk):
         write_report(os.path.join(directory, "analysis.txt"), values, clk)
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Analyze and/or plot sig_gen samples.")
-    parser.add_argument("--data", required=True)
-    parser.add_argument("--clk", type=float, required=True)
-    parser.add_argument("--output", metavar="FILE", help="Write analysis report to FILE")
-    parser.add_argument("--plot", metavar="DIR", help="Generate plots + analysis.txt in DIR")
-    args = parser.parse_args()
 
-    if not args.output and not args.plot:
-        parser.error("at least one of --output or --plot is required")
-
-    try:
-        values = np.loadtxt(args.data, delimiter=",")
-    except ValueError:
-        values = np.loadtxt(args.data)
-
-    if args.output:
-        if values.ndim > 1:
-            write_report(args.output, values[:, 0], args.clk)
-        else:
-            write_report(args.output, values, args.clk)
-
-    if args.plot:
-        generate_plots(args.plot, values, args.clk)
-
-
-if __name__ == "__main__":
-    main()
