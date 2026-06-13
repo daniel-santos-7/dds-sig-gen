@@ -16,20 +16,18 @@ def create_parser():
     parser = argparse.ArgumentParser(description="DDS Signal Generator tools")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
+    pp = subparsers.add_parser("raw", help="estimate raw I/Q parameters from samples")
+    pp.add_argument("--data", required=True)
+    pp.add_argument("--clk", type=float, required=True)
+    pp.add_argument("--output", default=None)
+    pp.add_argument("--plot", default=None)
+
     fp = subparsers.add_parser("fit", help="fit sine wave with Gaussian envelope to I/Q samples")
     fp.add_argument("--data", required=True)
     fp.add_argument("--clk", type=float, required=True)
     fp.add_argument("--freq", type=float, required=True)
-    fp.add_argument("--pulse-len", type=int, default=None, help="pulse length in clock cycles (optional, sigma estimate)")
     fp.add_argument("--output", default=None)
     fp.add_argument("--plot", default=None)
-
-    pp = subparsers.add_parser("raw", help="estimate raw I/Q parameters from samples")
-    pp.add_argument("--data", required=True)
-    pp.add_argument("--clk", type=float, required=True)
-    pp.add_argument("--pulse-len", type=int, default=None, help="pulse length in clock cycles (optional, sigma estimate)")
-    pp.add_argument("--output", default=None)
-    pp.add_argument("--plot", default=None)
 
     sp = subparsers.add_parser("spectrum", help="compute spectrum and spectral metrics")
     sp.add_argument("--data", required=True)
@@ -60,14 +58,14 @@ def main(args):
 
     if args.command == "raw":
         from raw import Raw
-        param = Raw(i_values, q_values, args.clk, args.pulse_len)
+        param = Raw(i_values, q_values, args.clk)
         write_output(str(param), args.output)
         if args.plot: param.plot(args.plot)
         return
     
     if args.command == "fit":
         from sine_fit import IQFit
-        fit = IQFit(i_values, q_values, args.clk, args.freq, args.pulse_len)
+        fit = IQFit(i_values, q_values, args.clk, args.freq)
         write_output(str(fit), args.output)
         if args.plot: fit.plot(args.plot)
         return

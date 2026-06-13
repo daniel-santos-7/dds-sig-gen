@@ -72,10 +72,10 @@ run: .make | $(OUTDIR) $(TESTDIR)
 	@$(GHDL) run $(TBS_TOP) $(GHDL_RUNOPTS)
 
 fit: $(VENVDIR) $(SAMPLES_FILE)
-	@$(VENVDIR)/bin/python3 py/sig_gen.py fit --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --freq $(FREQ_HZ) --pulse-len $(PULSE_LEN) --output $(TESTDIR)/fit.txt --plot $(TESTDIR)
+	@$(VENVDIR)/bin/python3 py/sig_gen.py fit --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --freq $(FREQ_HZ) --output $(TESTDIR)/fit.txt --plot $(TESTDIR)
 
 raw: $(VENVDIR) $(SAMPLES_FILE)
-	@$(VENVDIR)/bin/python3 py/sig_gen.py raw --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --pulse-len $(PULSE_LEN) --output $(TESTDIR)/raw.txt --plot $(TESTDIR)
+	@$(VENVDIR)/bin/python3 py/sig_gen.py raw --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --output $(TESTDIR)/raw.txt --plot $(TESTDIR)
 
 spectrum: $(VENVDIR) $(SAMPLES_FILE)
 	@$(VENVDIR)/bin/python3 py/sig_gen.py spectrum --data $(SAMPLES_FILE) --clk $(CLK_FREQ_HZ) --output $(TESTDIR)/spectrum.txt --plot $(TESTDIR)

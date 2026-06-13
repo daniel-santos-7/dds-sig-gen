@@ -5,10 +5,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 class Channel:
-    def __init__(self, values, clk_frequency, pulse_len=None):
+    def __init__(self, values, clk_frequency):
         self._values = values.astype(np.float64)
         self._clk_frequency = clk_frequency
-        self._pulse_len = pulse_len
         n = len(values)
         self._t = np.arange(n) / clk_frequency
 
@@ -32,8 +31,6 @@ class Channel:
 
     @property
     def sigma(self):
-        if self._pulse_len is not None:
-            return self._pulse_len / (8.0 * self._clk_frequency)
         ac = np.abs(self._values - np.mean(self._values))
         half = np.max(ac) / 2
         above = np.where(ac > half)[0]
@@ -85,9 +82,9 @@ class Channel:
 
 class Raw:
     
-    def __init__(self, i_values, q_values, clk_frequency, pulse_len=None):
-        self.i = Channel(i_values, clk_frequency, pulse_len)
-        self.q = Channel(q_values, clk_frequency, pulse_len)
+    def __init__(self, i_values, q_values, clk_frequency):
+        self.i = Channel(i_values, clk_frequency)
+        self.q = Channel(q_values, clk_frequency)
 
     def __str__(self):
         mag = np.sqrt(self.i.values ** 2 + self.q.values ** 2)

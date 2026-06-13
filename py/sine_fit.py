@@ -97,7 +97,7 @@ class Channel:
 
 
 class IQFit:
-    def __init__(self, i_values, q_values, clk_frequency, freq0, pulse_len=None):
+    def __init__(self, i_values, q_values, clk_frequency, freq0):
         n = len(i_values)
         if n < 4:
             raise ValueError("not enough samples for analysis")
@@ -112,7 +112,7 @@ class IQFit:
             )
 
         self._t = np.arange(n) / clk_frequency
-        est = Raw(i_values, q_values, clk_frequency, pulse_len)
+        est = Raw(i_values, q_values, clk_frequency)
         mag = np.sqrt(est.i.values ** 2 + est.q.values ** 2)
         env_amp = float(np.max(mag) - np.min(mag))
         env_center = float(est.i._t[np.argmax(mag)])
