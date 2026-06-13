@@ -28,18 +28,18 @@ end entity wb_sig_gen;
 
 architecture rtl of wb_sig_gen is
 
-    signal csr_ftw     : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal csr_pow     : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal csr_amp     : std_logic_vector(15 downto 0);
-    signal csr_env     : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal csr_drag    : std_logic_vector(15 downto 0);
-    signal csr_valid   : std_logic;
-    signal csr_delay   : std_logic_vector(23 downto 0);
-    signal trig_ready  : std_logic;
+    signal ftw    : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal pow    : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal amp    : std_logic_vector(15 downto 0);
+    signal env    : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal drag   : std_logic_vector(15 downto 0);
+    signal valid  : std_logic;
+    signal delay  : std_logic_vector(23 downto 0);
+    signal ready  : std_logic;
 
 begin
 
-    csrs : sig_gen_csrs generic map (
+    wb_sig_gen_sig_gen_csrs : sig_gen_csrs generic map (
         DATA_WIDTH => DATA_WIDTH
     ) port map (
         rst_i   => rst_i,
@@ -52,29 +52,29 @@ begin
         dat_i   => dat_i,
         ack_o   => ack_o,
         dat_o   => dat_o,
-        ftw_o   => csr_ftw,
-        pow_o   => csr_pow,
-        amp_o   => csr_amp,
-        env_o   => csr_env,
-        drag_o  => csr_drag,
-        valid_o => csr_valid,
-        delay_o => csr_delay,
-        ready_i => trig_ready
+        ftw_o   => ftw,
+        pow_o   => pow,
+        amp_o   => amp,
+        env_o   => env,
+        drag_o  => drag,
+        valid_o => valid,
+        delay_o => delay,
+        ready_i => ready
     );
 
-    dds : sig_gen generic map (
+    wb_sig_gen_sig_gen : sig_gen generic map (
         PHA_ACC_BITS => PHA_ACC_BITS
     ) port map (
         clk_i    => clk_i,
         rst_i    => rst_i,
-        ftw_i    => csr_ftw(PHA_ACC_BITS-1 downto 0),
-        pow_i    => csr_pow(PHA_ACC_BITS-1 downto 0),
-        amp_i    => csr_amp,
-        env_i    => csr_env,
-        drag_i   => csr_drag,
-        valid_i  => csr_valid,
-        delay_i  => csr_delay,
-        ready_o  => trig_ready,
+        ftw_i    => ftw(PHA_ACC_BITS-1 downto 0),
+        pow_i    => pow(PHA_ACC_BITS-1 downto 0),
+        amp_i    => amp,
+        env_i    => env,
+        drag_i   => drag,
+        valid_i  => valid,
+        delay_i  => delay,
+        ready_o  => ready,
         sig_i_o  => sig_i_o,
         sig_q_o  => sig_q_o,
         active_o => active_o
