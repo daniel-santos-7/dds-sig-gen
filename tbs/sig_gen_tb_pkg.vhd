@@ -76,17 +76,17 @@ package sig_gen_tb_pkg is
         constant regs : reg_values_t
     );
 
-    procedure write_iq_sample (
-        signal clk : in std_logic;
-        constant file_name : in string;
-        signal sig_i : in std_logic_vector;
-        signal sig_q : in std_logic_vector;
-        constant count : in natural
-    );
-
     procedure wb_reset (
         signal clk : in std_logic;
         signal rst : out std_logic
+    );
+
+    procedure save_samples (
+        signal clk        : in  std_logic;
+        constant file_name : in  string;
+        signal sig_i      : in  std_logic_vector;
+        signal sig_q      : in  std_logic_vector;
+        signal active     : in  std_logic
     );
 
 end package sig_gen_tb_pkg;
@@ -234,25 +234,6 @@ package body sig_gen_tb_pkg is
         wb_write(clk, wb, REG_TRIG, WRITE_COMMAND);
     end procedure wb_write_config;
 
-    procedure write_iq_sample (
-        signal clk : in std_logic;
-        constant file_name : in string;
-        signal sig_i : in std_logic_vector;
-        signal sig_q : in std_logic_vector;
-        constant count : in natural
-    ) is
-        file f : text open write_mode is file_name;
-        variable l : line;
-    begin
-        for i in 0 to count-1 loop
-            wait until rising_edge(clk);
-            write(l, to_integer(signed(sig_i)));
-            write(l, string'(","));
-            write(l, to_integer(signed(sig_q)));
-            writeline(f, l);
-        end loop;
-    end procedure write_iq_sample;
-
     procedure wb_reset (
         signal clk : in std_logic;
         signal rst : out std_logic
@@ -263,5 +244,29 @@ package body sig_gen_tb_pkg is
         wait until rising_edge(clk);
         rst <= '0';
     end procedure wb_reset;
+
+    procedure save_samples (
+        signal clk        : in  std_logic;
+        constant file_name : in  string;
+        signal sig_i      : in  std_logic_vector;
+        signal sig_q      : in  std_logic_vector;
+        signal active     : in  std_logic
+    ) is
+        file f : text open write_mode is file_name;
+        variable l : line;
+        variable prev : std_logic := '0';
+    begin
+        loop
+            wait until rising_edge(clk);
+            if active = '1' then
+                write(l, to_integer(signed(sig_i)));
+                write(l, string'(","));
+                write(l, to_integer(signed(sig_q)));
+                writeline(f, l);
+            end if;
+            exit when prev = '1' and active = '0';
+            prev := active;
+        end loop;
+    end procedure save_samples;
 
 end package body sig_gen_tb_pkg;

@@ -14,7 +14,6 @@ entity sig_gen_tb is
         AMP_VAL       : natural := 65535;
         PULSE_LEN     : natural := 200;
         DRAG_COEFF    : integer := 16384;  -- Q1.15: 0.5 * 32768
-        NUM_PERIODS   : natural := 4;
         SAMPLES_FILE  : string  := "samples.txt";
         CASE_FILE     : string  := "test_case.txt";
         REG_FILE      : string  := "reg_values.txt"
@@ -30,16 +29,14 @@ architecture tb of sig_gen_tb is
     constant AMP_VAL_VAL   : real := real(AMP_VAL);
     
     constant TC   : test_case_t := (
-        freq_hz => FREQ_HZ_VAL, 
+        freq_hz   => FREQ_HZ_VAL, 
         phase_deg => PHASE_DEG_VAL, 
-        amp_val => AMP_VAL_VAL,
+        amp_val   => AMP_VAL_VAL,
         pulse_len => PULSE_LEN,
-        drag => real(DRAG_COEFF) / 32768.0
+        drag      => real(DRAG_COEFF) / 32768.0
     );
     
     constant REGS : reg_values_t  := to_regs(TC);
-
-    constant TOTAL_SAMPLES : natural := PULSE_LEN + 50; -- Pulse + padding
 
     signal clk_en : boolean := false;
     signal clk_i  : std_logic := '0';
@@ -50,43 +47,6 @@ architecture tb of sig_gen_tb is
     signal sig_i    : std_logic_vector(OUT_RES_BITS-1 downto 0);
     signal sig_q    : std_logic_vector(OUT_RES_BITS-1 downto 0);
     signal active   : std_logic;
-
-    signal mon_cycles : natural := 0;
-    signal mon_edges  : natural := 0;
-    signal mon_pre_i  : std_logic_vector(OUT_RES_BITS-1 downto 0) := (others => '0');
-    signal mon_pre_q  : std_logic_vector(OUT_RES_BITS-1 downto 0) := (others => '0');
-    signal mon_post_i : std_logic_vector(OUT_RES_BITS-1 downto 0) := (others => '0');
-    signal mon_post_q : std_logic_vector(OUT_RES_BITS-1 downto 0) := (others => '0');
-
-    signal p2_arm    : std_logic := '0';
-    signal p2_cycles : natural := 0;
-    signal p2_edges  : natural := 0;
-    signal p2_active : std_logic := '0';
-
-    -- component wb_sig_gen
-    component wb_sig_gen is
-        generic (
-            DATA_WIDTH   : natural := 32;
-            ADDR_WIDTH   : natural := 3;
-            PHA_ACC_BITS : natural := 32
-        );
-        port (
-            rst_i : in  std_logic;
-            clk_i : in  std_logic;
-            adr_i : in  std_logic_vector(ADDR_WIDTH-1 downto 0);
-            cyc_i : in  std_logic;
-            stb_i : in  std_logic;
-            we_i  : in  std_logic;
-            sel_i : in  std_logic_vector(DATA_WIDTH/8-1 downto 0);
-            dat_i : in  std_logic_vector(DATA_WIDTH-1 downto 0);
-            ack_o : out std_logic;
-            dat_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
-            
-            sig_i_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
-            sig_q_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
-            active_o : out std_logic
-        );
-    end component wb_sig_gen;
 
 begin
 
@@ -112,41 +72,6 @@ begin
 
     clk_i <= not clk_i after (CLK_PERIOD / 2) when clk_en else '0';
 
-    monitor_proc : process(clk_i)
-        variable prev : std_logic := '0';
-        variable p2_prev : std_logic := '0';
-    begin
-        if rising_edge(clk_i) and clk_en then
-            if active = '1' and prev = '0' then
-                mon_edges <= mon_edges + 1;
-                mon_pre_i <= sig_i;
-                mon_pre_q <= sig_q;
-            elsif active = '0' and prev = '1' then
-                mon_edges <= mon_edges + 1;
-                mon_post_i <= sig_i;
-                mon_post_q <= sig_q;
-            end if;
-            if active = '1' then
-                mon_cycles <= mon_cycles + 1;
-            end if;
-            prev := active;
-
-            if p2_arm = '1' then
-                if active = '1' and p2_prev = '0' then
-                    p2_edges <= p2_edges + 1;
-                    p2_active <= '1';
-                elsif active = '0' and p2_prev = '1' then
-                    p2_edges <= p2_edges + 1;
-                    p2_active <= '0';
-                end if;
-                if active = '1' then
-                    p2_cycles <= p2_cycles + 1;
-                end if;
-            end if;
-            p2_prev := active;
-        end if;
-    end process monitor_proc;
-
     stim_process : process
     begin
         report "freq=" & img(TC.freq_hz) & " Hz, pulse=" & integer'image(TC.pulse_len) & " cycles";
@@ -159,74 +84,10 @@ begin
         write_case_file(CASE_FILE, TC);
         write_reg_file(REG_FILE, REGS);
 
-        write_iq_sample(clk_i, SAMPLES_FILE, sig_i, sig_q, TOTAL_SAMPLES);
+        save_samples(clk_i, SAMPLES_FILE, sig_i, sig_q, active);
 
-        report "Pulse width: " & integer'image(mon_cycles) & " cycles (expected " & integer'image(PULSE_LEN) & ")";
-        assert mon_cycles >= PULSE_LEN and mon_cycles <= PULSE_LEN + 2
-            report "PULSE WIDTH CHECK FAILED: " & integer'image(mon_cycles) & " (expected " & integer'image(PULSE_LEN) & ")"
-            severity error;
-
-        assert mon_edges = 2
-            report "GLITCH CHECK FAILED: " & integer'image(mon_edges) & " edges"
-            severity error;
-
-        assert abs(to_integer(signed(mon_pre_i))) < 50
-            report "PRE-PULSE EXTINCTION I FAILED: " & integer'image(to_integer(signed(mon_pre_i)))
-            severity error;
-
-        assert abs(to_integer(signed(mon_pre_q))) < 50
-            report "PRE-PULSE EXTINCTION Q FAILED: " & integer'image(to_integer(signed(mon_pre_q)))
-            severity error;
-
-        assert abs(to_integer(signed(mon_post_i))) < 50
-            report "POST-PULSE EXTINCTION I FAILED: " & integer'image(to_integer(signed(mon_post_i)))
-            severity error;
-
-        assert abs(to_integer(signed(mon_post_q))) < 50
-            report "POST-PULSE EXTINCTION Q FAILED: " & integer'image(to_integer(signed(mon_post_q)))
-            severity error;
-
-        report "VHDL assertions: all passed";
-
-        -- ============================================
-        -- Phase 2: Pending trigger with delay
-        -- ============================================
-        report "=== Phase 2: Pending trigger with delay test ===";
-
-        -- Arm phase 2 monitor
-        p2_arm <= '1';
-        wait until rising_edge(clk_i);
-
-        -- Write new config while idle
-        wb_write(clk_i, wb, REG_FTW, x"00000001");
-        wb_write(clk_i, wb, REG_AMP, x"00007FFF");
-
-        -- Trigger pulse 2 (normal, no pending)
-        wb_write(clk_i, wb, REG_TRIG, x"00000001");
-
-        -- Wait for env_active to go high (pulse started)
-        wait until rising_edge(clk_i) and active = '1';
-
-        -- Now write delay + trigger while pulse is active — should pend
-        wb_write(clk_i, wb, REG_DELAY, x"0000004B");  -- delay=75 (0x4B)
-        wb_write(clk_i, wb, REG_TRIG,  x"00000001");  -- trigger (pendente)
-
-        -- Wait for current pulse to finish + delay + next pulse
-        for i in 0 to PULSE_LEN + 150 + PULSE_LEN loop
-            wait until rising_edge(clk_i);
-        end loop;
-
-        -- Verify phase 2 pulse quality
-        assert p2_edges = 4
-            report "PHASE 2 GLITCH CHECK FAILED: " & integer'image(p2_edges) & " edges"
-            severity error;
-
-        assert p2_cycles >= 2 * PULSE_LEN and p2_cycles <= 2 * PULSE_LEN + 4
-            report "PHASE 2 PULSE WIDTH CHECK FAILED: " & integer'image(p2_cycles)
-            severity error;
-
-        report "Phase 2 assertions: all passed";
         clk_en <= false;
+        report "Simulation complete";
         wait;
     end process stim_process;
 

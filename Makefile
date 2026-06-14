@@ -12,7 +12,6 @@ RTL_TOP = sig_gen
 TBS_TOP = sig_gen_tb
 
 CLK_FREQ_HZ ?= 100e6
-CLK_PERIODS ?= 4
 FREQ_HZ     ?= 100000
 PHASE_DEG   ?= 0
 AMP_VAL     ?= 65535
@@ -35,7 +34,6 @@ REG_VALUES_FILE = $(TESTDIR)/reg_values.txt
 LUT_PKGS = rtl/sine_lut_pkg.vhd rtl/envelope_lut_pkg.vhd
 
 GHDL_RUNOPTS = --wave=$(OUTDIR)/sig_gen_tb.ghw --ieee-asserts=disable
-GHDL_RUNOPTS += -gNUM_PERIODS=$(CLK_PERIODS)
 GHDL_RUNOPTS += -gFREQ_HZ=$(FREQ_HZ)
 GHDL_RUNOPTS += -gPHASE_DEG=$(PHASE_DEG)
 GHDL_RUNOPTS += -gAMP_VAL=$(AMP_VAL)
