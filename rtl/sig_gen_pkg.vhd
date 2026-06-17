@@ -119,26 +119,6 @@ package sig_gen_pkg is
         );
     end component sig_gen;
 
-    component seq_ctrl is
-        port (
-            clk_i       : in  std_logic;
-            rst_i       : in  std_logic;
-            cpu_addr_i  : in  std_logic_vector(2 downto 0);
-            cpu_wdata_i : in  std_logic_vector(31 downto 0);
-            cpu_we_i    : in  std_logic;
-            cpu_rdata_o : out std_logic_vector(31 downto 0);
-            ftw_o       : out std_logic_vector(31 downto 0);
-            pow_o       : out std_logic_vector(31 downto 0);
-            amp_o       : out std_logic_vector(15 downto 0);
-            env_o       : out std_logic_vector(31 downto 0);
-            drag_o      : out std_logic_vector(15 downto 0);
-            delay_o     : out std_logic_vector(23 downto 0);
-            valid_o     : out std_logic;
-            ready_i     : in  std_logic;
-            busy_o      : out std_logic
-        );
-    end component seq_ctrl;
-
     component wb_sig_gen is
         generic (
             DATA_WIDTH   : natural := 32;
