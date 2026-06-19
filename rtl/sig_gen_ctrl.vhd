@@ -31,14 +31,13 @@ end entity sig_gen_ctrl;
 
 architecture rtl of sig_gen_ctrl is
 
-    type state_t is (IDLE, ACTIVE);
+    type state_t is (IDLE, ACTIVE, DELAY);
     signal state_reg : state_t;
 
     signal delay_cnt_reg : unsigned(23 downto 0);
     signal delay_done    : std_logic;
-    signal delay_val     : std_logic_vector(23 downto 0);
+    signal ready    : std_logic;
     signal sync    : std_logic;
-    signal ready         : std_logic;
 
 begin
 
@@ -55,16 +54,43 @@ begin
                         end if;
 
                     when ACTIVE =>
-                        if valid_i = '0' then
-                            state_reg <= IDLE;
+                        if done_i = '1' then
+                            if valid_i = '1' then
+                                state_reg <= DELAY;
+                            else
+                                state_reg <= IDLE;
+                            end if;
+                        end if;
+
+                    when DELAY =>
+                        if delay_done = '1' then
+                            if valid_i = '1' then
+                                state_reg <= ACTIVE;
+                            else
+                                state_reg <= IDLE;
+                            end if;
                         end if;
                 end case;
             end if;
         end if;
     end process ctrl_fsm;
 
-    ready <= '1' when state_reg = ACTIVE and done_i = '1' and delay_done = '1' else '0';
-    sync  <= ready and valid_i;
+    ctrl_output : process(state_reg, start_i, done_i, delay_done)
+    begin
+        case state_reg is
+            when IDLE =>
+                en_o  <= '0';
+                ready <= start_i;
+            when ACTIVE =>
+                en_o  <= '1';
+                ready <= done_i and delay_done;
+            when DELAY =>
+                en_o  <= '0';
+                ready <= delay_done;
+        end case;
+    end process ctrl_output;
+
+    sync  <= valid_i and ready;
 
     param_reg : process(clk_i)
     begin
@@ -75,14 +101,12 @@ begin
                 amp_o   <= (others => '0');
                 env_o   <= (others => '0');
                 drag_o  <= (others => '0');
-                delay_val <= (others => '0');
-            elsif start_i = '1' and state_reg = IDLE then
+            elsif sync = '1' then
                 ftw_o   <= ftw_i;
                 pow_o   <= pow_i;
                 amp_o   <= amp_i;
                 env_o   <= env_i;
                 drag_o  <= drag_i;
-                delay_val <= delay_i;
             end if;
         end if;
     end process param_reg;
@@ -93,8 +117,8 @@ begin
             if rst_i = '1' then
                 delay_cnt_reg <= (others => '0');
             elsif sync = '1' then
-                delay_cnt_reg <= unsigned(delay_val);
-            elsif done_i = '1' and delay_done = '0' then
+                delay_cnt_reg <= unsigned(delay_i);
+            elsif state_reg = DELAY and delay_done = '0' then
                 delay_cnt_reg <= delay_cnt_reg - 1;
             end if;
         end if;
@@ -102,8 +126,8 @@ begin
 
     delay_done <= '1' when delay_cnt_reg = 0 else '0';
 
+    clr_o   <= done_i;
+
     ready_o <= ready;
-    en_o    <= '1' when state_reg = ACTIVE and done_i = '0' else '0';
-    clr_o   <= sync;
 
 end architecture rtl;

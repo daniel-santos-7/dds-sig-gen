@@ -35,12 +35,10 @@ begin
         if rising_edge(clk_i) then
             if rst_i = '1' then
                 acc_reg <= (others => '0');
+            elsif clr_i = '1' then
+                acc_reg <= (others => '0');
             elsif en_i = '1' then
-                if clr_i = '1' then
-                    acc_reg <= (others => '0');
-                else
-                    acc_reg <= acc_reg + ftw;
-                end if;
+                acc_reg <= acc_reg + ftw;
             end if;
         end if;
     end process acc_reg_proc;

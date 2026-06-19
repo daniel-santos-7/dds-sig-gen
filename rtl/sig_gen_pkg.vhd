@@ -127,18 +127,19 @@ package sig_gen_pkg is
 
     component sig_gen is
         generic (
-            PHA_ACC_BITS : natural := 32
+            PHA_ACC_BITS : natural := 32;
+            FIFO_DEPTH   : natural := 8
         );
         port (
             clk_i       : in  std_logic;
             rst_i       : in  std_logic;
             start_i     : in  std_logic;
+            valid_i     : in  std_logic;
             ftw_i       : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
             pow_i       : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
             amp_i       : in  std_logic_vector(15 downto 0);
             env_i       : in  std_logic_vector(31 downto 0);
             drag_i      : in  std_logic_vector(15 downto 0);
-            valid_i     : in  std_logic;
             delay_i     : in  std_logic_vector(23 downto 0);
             ready_o     : out std_logic;
             sig_i_o     : out std_logic_vector(OUT_RES_BITS-1 downto 0);
@@ -146,6 +147,33 @@ package sig_gen_pkg is
             active_o    : out std_logic
         );
     end component sig_gen;
+
+    component pulse_fifo is
+        generic (
+            FIFO_DEPTH   : natural := 8;
+            PHA_ACC_BITS : natural := 32
+        );
+        port (
+            clk_i   : in  std_logic;
+            rst_i   : in  std_logic;
+            valid_i : in  std_logic;
+            ftw_i   : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            pow_i   : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            amp_i   : in  std_logic_vector(15 downto 0);
+            env_i   : in  std_logic_vector(31 downto 0);
+            drag_i  : in  std_logic_vector(15 downto 0);
+            delay_i : in  std_logic_vector(23 downto 0);
+            ready_o : out std_logic;
+            ready_i : in  std_logic;
+            valid_o : out std_logic;
+            ftw_o   : out std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            pow_o   : out std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            amp_o   : out std_logic_vector(15 downto 0);
+            env_o   : out std_logic_vector(31 downto 0);
+            drag_o  : out std_logic_vector(15 downto 0);
+            delay_o : out std_logic_vector(23 downto 0)
+        );
+    end component pulse_fifo;
 
     component wb_sig_gen is
         generic (

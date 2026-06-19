@@ -19,30 +19,24 @@ architecture rtl of env_seq is
 
     signal env_cnt_inc  : unsigned(32 downto 0);
     signal env_cnt_val  : unsigned(32 downto 0);
-    signal env_cnt_reg  : unsigned(32 downto 0);
+    signal env_cnt_reg  : unsigned(31 downto 0);
     signal env_cnt_done : std_logic;
 
 begin
 
     env_cnt_inc  <= unsigned('0' & step_i);
-    env_cnt_val  <= env_cnt_reg + env_cnt_inc;
-    env_cnt_done <= env_cnt_reg(32);
+    env_cnt_val  <= ('0' & env_cnt_reg) + env_cnt_inc;
+    env_cnt_done <= env_cnt_val(32);
 
     env_cnt_reg_proc : process(clk_i)
     begin
         if rising_edge(clk_i) then
             if rst_i = '1' then
-                env_cnt_reg <= (32 => '1', others => '0');
-            elsif en_i = '1' then
-                if clr_i = '1' then
-                    env_cnt_reg <= (others => '0');
-                elsif env_cnt_done = '0' then
-                    if env_cnt_val(32) = '1' then
-                        env_cnt_reg <= (32 => env_cnt_val(32), others => '0');
-                    else
-                        env_cnt_reg <= env_cnt_val;
-                    end if;
-                end if;
+                env_cnt_reg <= (others => '0');
+            elsif clr_i = '1' then
+                env_cnt_reg <= (others => '0');
+            elsif en_i = '1' and env_cnt_done = '0' then
+                env_cnt_reg <= env_cnt_val(31 downto 0);
             end if;
         end if;
     end process env_cnt_reg_proc;

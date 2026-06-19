@@ -1,5 +1,6 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
 use work.sig_gen_pkg.all;
 use work.sine_lut_pkg.LUT_ADDR_BITS;
 use work.sine_lut_pkg.OUT_RES_BITS;
@@ -7,18 +8,19 @@ use work.envelope_lut_pkg.ENV_LUT_ADDR_BITS;
 
 entity sig_gen is
     generic (
-        PHA_ACC_BITS : natural := 32
+        PHA_ACC_BITS : natural := 32;
+        FIFO_DEPTH   : natural := 8
     );
     port (
         clk_i    : in  std_logic;
         rst_i    : in  std_logic;
         start_i  : in  std_logic;
+        valid_i  : in  std_logic;
         ftw_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
         pow_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
         amp_i    : in  std_logic_vector(15 downto 0);
         env_i    : in  std_logic_vector(31 downto 0);
         drag_i   : in  std_logic_vector(15 downto 0);
-        valid_i  : in  std_logic;
         delay_i  : in  std_logic_vector(23 downto 0);
         ready_o  : out std_logic;
         sig_i_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
@@ -29,25 +31,59 @@ end entity sig_gen;
 
 architecture rtl of sig_gen is
 
-    signal ctrl_sync        : std_logic;
-    signal ctrl_active      : std_logic;
-    signal env_seq_addr     : std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
-    signal env_seq_done    : std_logic;
+    signal pulse_fifo_ftw      : std_logic_vector(PHA_ACC_BITS-1 downto 0);
+    signal pulse_fifo_pow      : std_logic_vector(PHA_ACC_BITS-1 downto 0);
+    signal pulse_fifo_amp      : std_logic_vector(15 downto 0);
+    signal pulse_fifo_env      : std_logic_vector(31 downto 0);
+    signal pulse_fifo_drag     : std_logic_vector(15 downto 0);
+    signal pulse_fifo_delay    : std_logic_vector(23 downto 0);
+    signal pulse_fifo_valid : std_logic;
 
-    signal ctrl_ftw         : std_logic_vector(PHA_ACC_BITS-1 downto 0);
-    signal ctrl_pow         : std_logic_vector(PHA_ACC_BITS-1 downto 0);
-    signal ctrl_amp         : std_logic_vector(15 downto 0);
-    signal ctrl_env         : std_logic_vector(31 downto 0);
-    signal ctrl_drag        : std_logic_vector(15 downto 0);
+    signal ctrl_sync     : std_logic;
+    signal ctrl_active   : std_logic;
+    signal env_seq_addr  : std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
+    signal env_seq_done  : std_logic;
 
-    signal env_gen_gauss   : std_logic_vector(OUT_RES_BITS downto 0);
-    signal env_gen_drag    : std_logic_vector(OUT_RES_BITS downto 0);
+    signal ctrl_ftw      : std_logic_vector(PHA_ACC_BITS-1 downto 0);
+    signal ctrl_pow      : std_logic_vector(PHA_ACC_BITS-1 downto 0);
+    signal ctrl_amp      : std_logic_vector(15 downto 0);
+    signal ctrl_env      : std_logic_vector(31 downto 0);
+    signal ctrl_drag     : std_logic_vector(15 downto 0);
 
-    signal pha_acc_addr    : std_logic_vector(LUT_ADDR_BITS+1 downto 0);
-    signal sin_pac_sin     : std_logic_vector(OUT_RES_BITS-1 downto 0);
-    signal sin_pac_cos     : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal env_gen_gauss : std_logic_vector(OUT_RES_BITS downto 0);
+    signal env_gen_drag  : std_logic_vector(OUT_RES_BITS downto 0);
+
+    signal pha_acc_addr  : std_logic_vector(LUT_ADDR_BITS+1 downto 0);
+    signal sin_pac_sin   : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal sin_pac_cos   : std_logic_vector(OUT_RES_BITS-1 downto 0);
+
+    signal ctrl_ready    : std_logic;
 
 begin
+
+    sig_gen_pulse_fifo : pulse_fifo generic map (
+        FIFO_DEPTH   => FIFO_DEPTH,
+        PHA_ACC_BITS => PHA_ACC_BITS
+    ) port map (
+        clk_i   => clk_i,
+        rst_i   => rst_i,
+        valid_i => valid_i,
+        ftw_i   => ftw_i,
+        pow_i   => pow_i,
+        amp_i   => amp_i,
+        env_i   => env_i,
+        drag_i  => drag_i,
+        delay_i => delay_i,
+        ready_o => ready_o,
+        ready_i => ctrl_ready,
+        valid_o => pulse_fifo_valid,
+        ftw_o   => pulse_fifo_ftw,
+        pow_o   => pulse_fifo_pow,
+        amp_o   => pulse_fifo_amp,
+        env_o   => pulse_fifo_env,
+        drag_o  => pulse_fifo_drag,
+        delay_o => pulse_fifo_delay
+    );
 
     sig_gen_sig_gen_ctrl : sig_gen_ctrl generic map (
         PHA_ACC_BITS => PHA_ACC_BITS
@@ -55,16 +91,16 @@ begin
         clk_i   => clk_i,
         rst_i   => rst_i,
         start_i => start_i,
-        valid_i => valid_i,
+        valid_i => pulse_fifo_valid,
         done_i  => env_seq_done,
-        ftw_i   => ftw_i,
-        pow_i   => pow_i,
-        amp_i   => amp_i,
-        env_i   => env_i,
-        drag_i  => drag_i,
-        delay_i => delay_i,
+        ftw_i   => pulse_fifo_ftw,
+        pow_i   => pulse_fifo_pow,
+        amp_i   => pulse_fifo_amp,
+        env_i   => pulse_fifo_env,
+        drag_i  => pulse_fifo_drag,
+        delay_i => pulse_fifo_delay,
         clr_o   => ctrl_sync,
-        ready_o => ready_o,
+        ready_o => ctrl_ready,
         ftw_o   => ctrl_ftw,
         pow_o   => ctrl_pow,
         amp_o   => ctrl_amp,
@@ -113,7 +149,7 @@ begin
         gauss_o  => env_gen_gauss,
         drag_o   => env_gen_drag
     );
-    
+
     sig_gen_iq_mod : iq_mod port map (
         clk_i   => clk_i,
         rst_i   => rst_i,

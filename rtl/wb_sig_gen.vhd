@@ -34,9 +34,9 @@ architecture rtl of wb_sig_gen is
     signal env    : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal drag   : std_logic_vector(15 downto 0);
     signal valid  : std_logic;
+    signal start  : std_logic;
     signal delay  : std_logic_vector(23 downto 0);
     signal ready  : std_logic;
-    signal start  : std_logic;
 
 begin
 
