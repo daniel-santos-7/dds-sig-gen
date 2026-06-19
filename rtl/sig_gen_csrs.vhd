@@ -23,8 +23,9 @@ entity sig_gen_csrs is
         env_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
         delay_o : out std_logic_vector(23 downto 0);
         valid_o : out std_logic;
-        start_o : out std_logic;
-        ready_i : in  std_logic
+        start_o      : out std_logic;
+        ready_i      : in  std_logic;
+        pend_i : in  std_logic_vector(3 downto 0)
     );
 end entity sig_gen_csrs;
 
@@ -145,7 +146,7 @@ begin
                         when REG_AMP   => dat_reg <= drag_reg & amp_reg;
                         when REG_ENV   => dat_reg <= env_reg;
                         when REG_DELAY => dat_reg <= x"00" & delay_reg;
-                        when REG_TRIG  => dat_reg <= (others => '0'); dat_reg(1) <= ready_i; dat_reg(0) <= valid_reg;
+                        when REG_TRIG  => dat_reg <= (others => '0'); dat_reg(7 downto 4) <= pend_i; dat_reg(1) <= ready_i; dat_reg(0) <= valid_reg;
                         when REG_CTRL  => dat_reg <= (others => '0'); dat_reg(0) <= start_reg;
                         when others    => dat_reg <= (others => '0');
                     end case;

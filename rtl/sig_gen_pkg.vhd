@@ -82,7 +82,8 @@ package sig_gen_pkg is
             valid_o  : out std_logic;
             start_o  : out std_logic;
             delay_o  : out std_logic_vector(23 downto 0);
-            ready_i  : in  std_logic
+            ready_i  : in  std_logic;
+            pend_i   : in  std_logic_vector(3 downto 0)
         );
     end component sig_gen_csrs;
 
@@ -142,6 +143,7 @@ package sig_gen_pkg is
             drag_i      : in  std_logic_vector(15 downto 0);
             delay_i     : in  std_logic_vector(23 downto 0);
             ready_o     : out std_logic;
+            pend_o      : out std_logic_vector(3 downto 0);
             sig_i_o     : out std_logic_vector(OUT_RES_BITS-1 downto 0);
             sig_q_o     : out std_logic_vector(OUT_RES_BITS-1 downto 0);
             active_o    : out std_logic
@@ -171,7 +173,8 @@ package sig_gen_pkg is
             amp_o   : out std_logic_vector(15 downto 0);
             env_o   : out std_logic_vector(31 downto 0);
             drag_o  : out std_logic_vector(15 downto 0);
-            delay_o : out std_logic_vector(23 downto 0)
+            delay_o : out std_logic_vector(23 downto 0);
+            pend_o  : out std_logic_vector(3 downto 0)
         );
     end component pulse_fifo;
 

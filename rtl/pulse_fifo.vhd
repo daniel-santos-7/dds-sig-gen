@@ -17,9 +17,10 @@ entity pulse_fifo is
         env_i   : in  std_logic_vector(31 downto 0);
         drag_i  : in  std_logic_vector(15 downto 0);
         delay_i : in  std_logic_vector(23 downto 0);
-        ready_o : out std_logic;
-        ready_i : in  std_logic;
-        valid_o : out std_logic;
+        ready_o     : out std_logic;
+        ready_i     : in  std_logic;
+        valid_o     : out std_logic;
+        pend_o : out std_logic_vector(3 downto 0);
         ftw_o   : out std_logic_vector(PHA_ACC_BITS-1 downto 0);
         pow_o   : out std_logic_vector(PHA_ACC_BITS-1 downto 0);
         amp_o   : out std_logic_vector(15 downto 0);
@@ -114,5 +115,7 @@ begin
     env_o   <= rd_data(DATA_WIDTH-2*PHA_ACC_BITS-17 downto DATA_WIDTH-2*PHA_ACC_BITS-48);
     drag_o  <= rd_data(DATA_WIDTH-2*PHA_ACC_BITS-49 downto DATA_WIDTH-2*PHA_ACC_BITS-64);
     delay_o <= rd_data(DATA_WIDTH-2*PHA_ACC_BITS-65 downto 0);
+
+    pend_o <= std_logic_vector(resize(fifo_count_reg, pend_o'length));
 
 end architecture rtl;
