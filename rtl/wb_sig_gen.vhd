@@ -36,6 +36,7 @@ architecture rtl of wb_sig_gen is
     signal valid  : std_logic;
     signal delay  : std_logic_vector(23 downto 0);
     signal ready  : std_logic;
+    signal start  : std_logic;
 
 begin
 
@@ -58,6 +59,7 @@ begin
         env_o   => env,
         drag_o  => drag,
         valid_o => valid,
+        start_o => start,
         delay_o => delay,
         ready_i => ready
     );
@@ -67,6 +69,7 @@ begin
     ) port map (
         clk_i    => clk_i,
         rst_i    => rst_i,
+        start_i  => start,
         ftw_i    => ftw(PHA_ACC_BITS-1 downto 0),
         pow_i    => pow(PHA_ACC_BITS-1 downto 0),
         amp_i    => amp,

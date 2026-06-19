@@ -21,12 +21,13 @@ package sig_gen_pkg is
             PHA_ACC_BITS : natural := 32
         );
         port (
-            clk_i : in  std_logic;
-            rst_i : in  std_logic;
-            sync_i : in  std_logic;
-            ftw_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
-            pow_i : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
-            val_o : out std_logic_vector(PHA_ACC_BITS-1 downto 0)
+            clk_i  : in  std_logic;
+            rst_i  : in  std_logic;
+            clr_i : in  std_logic;
+            en_i  : in  std_logic;
+            ftw_i  : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            pow_i  : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            adr_o  : out std_logic_vector(LUT_ADDR_BITS+1 downto 0)
         );
     end component pha_acc;
 
@@ -79,6 +80,7 @@ package sig_gen_pkg is
             drag_o : out std_logic_vector(15 downto 0);
             
             valid_o  : out std_logic;
+            start_o  : out std_logic;
             delay_o  : out std_logic_vector(23 downto 0);
             ready_i  : in  std_logic
         );
@@ -86,17 +88,42 @@ package sig_gen_pkg is
 
     component env_seq is
         port (
-            clk_i        : in  std_logic;
-            rst_i        : in  std_logic;
-            valid_i      : in  std_logic;
-            delay_i      : in  std_logic_vector(23 downto 0);
-            step_i       : in  std_logic_vector(31 downto 0);
-            sync_o    : out std_logic;
+            clk_i    : in  std_logic;
+            rst_i    : in  std_logic;
+            clr_i    : in  std_logic;
+            en_i     : in  std_logic;
+            step_i   : in  std_logic_vector(31 downto 0);
             addr_o   : out std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
-            active_o : out std_logic;
-            ready_o      : out std_logic
+            done_o   : out std_logic
         );
     end component env_seq;
+
+    component sig_gen_ctrl is
+        generic (
+            PHA_ACC_BITS : natural := 32
+        );
+        port (
+            clk_i    : in  std_logic;
+            rst_i    : in  std_logic;
+            start_i  : in  std_logic;
+            valid_i  : in  std_logic;
+            done_i   : in  std_logic;
+            ftw_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            pow_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            amp_i    : in  std_logic_vector(15 downto 0);
+            env_i    : in  std_logic_vector(31 downto 0);
+            drag_i   : in  std_logic_vector(15 downto 0);
+            delay_i  : in  std_logic_vector(23 downto 0);
+            clr_o    : out std_logic;
+            ready_o  : out std_logic;
+            ftw_o    : out std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            pow_o    : out std_logic_vector(PHA_ACC_BITS-1 downto 0);
+            amp_o    : out std_logic_vector(15 downto 0);
+            env_o    : out std_logic_vector(31 downto 0);
+            drag_o   : out std_logic_vector(15 downto 0);
+            en_o     : out std_logic
+        );
+    end component sig_gen_ctrl;
 
     component sig_gen is
         generic (
@@ -105,6 +132,7 @@ package sig_gen_pkg is
         port (
             clk_i       : in  std_logic;
             rst_i       : in  std_logic;
+            start_i     : in  std_logic;
             ftw_i       : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
             pow_i       : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
             amp_i       : in  std_logic_vector(15 downto 0);

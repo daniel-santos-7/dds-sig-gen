@@ -22,6 +22,7 @@ entity sig_gen_csrs is
         env_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
         drag_o  : out std_logic_vector(15 downto 0);
         valid_o : out std_logic;
+        start_o : out std_logic;
         delay_o : out std_logic_vector(23 downto 0);
         ready_i : in  std_logic
     );
@@ -36,6 +37,7 @@ architecture rtl of sig_gen_csrs is
     constant REG_DRAG  : std_logic_vector(2 downto 0) := "100";
     constant REG_DELAY : std_logic_vector(2 downto 0) := "101";
     constant REG_TRIG  : std_logic_vector(2 downto 0) := "110";
+    constant REG_CTRL  : std_logic_vector(2 downto 0) := "111";
 
     signal csr_req : std_logic;
     signal ack_reg : std_logic;
@@ -48,6 +50,7 @@ architecture rtl of sig_gen_csrs is
     signal drag_reg : std_logic_vector(15 downto 0);
     
     signal valid_reg : std_logic;
+    signal start_reg : std_logic;
     signal delay_reg : std_logic_vector(23 downto 0);
 
 begin
@@ -76,6 +79,7 @@ begin
                 drag_reg  <= (others => '0');
                 delay_reg <= (others => '0');
                 valid_reg <= '0';
+                start_reg <= '0';
             else
                 -- Clear autonomously when env_seq accepts the trigger
                 if valid_reg = '1' and ready_i = '1' then
@@ -125,6 +129,10 @@ begin
                             if sel_i(0) = '1' and dat_i(0) = '1' then
                                 valid_reg <= '1';
                             end if;
+                        when REG_CTRL =>
+                            if sel_i(0) = '1' then
+                                start_reg <= dat_i(0);
+                            end if;
                         when others =>
                             null;
                     end case;
@@ -148,6 +156,7 @@ begin
                         when REG_DRAG  => dat_reg <= x"0000" & drag_reg;
                         when REG_TRIG  => dat_reg <= x"000000" & "00000" & '0' & ready_i & valid_reg;
                         when REG_DELAY => dat_reg <= x"00" & delay_reg;
+                        when REG_CTRL  => dat_reg <= (others => '0'); dat_reg(0) <= start_reg;
                         when others    => dat_reg <= (others => '0');
                     end case;
                 end if;
@@ -163,6 +172,7 @@ begin
     amp_o   <= amp_reg;
     env_o   <= env_reg;
     drag_o  <= drag_reg;
+    start_o <= start_reg;
     delay_o <= delay_reg;
     valid_o <= valid_reg;
 

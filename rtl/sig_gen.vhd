@@ -12,6 +12,7 @@ entity sig_gen is
     port (
         clk_i    : in  std_logic;
         rst_i    : in  std_logic;
+        start_i  : in  std_logic;
         ftw_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
         pow_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
         amp_i    : in  std_logic_vector(15 downto 0);
@@ -28,30 +29,58 @@ end entity sig_gen;
 
 architecture rtl of sig_gen is
 
-    signal env_seq_sync   : std_logic;
-    signal env_seq_addr   : std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
-    signal env_seq_active : std_logic;
+    signal ctrl_sync        : std_logic;
+    signal ctrl_active      : std_logic;
+    signal env_seq_addr     : std_logic_vector(ENV_LUT_ADDR_BITS-1 downto 0);
+    signal env_seq_done    : std_logic;
 
-    signal env_gen_gauss : std_logic_vector(OUT_RES_BITS downto 0);
-    signal env_gen_drag  : std_logic_vector(OUT_RES_BITS downto 0);
+    signal ctrl_ftw         : std_logic_vector(PHA_ACC_BITS-1 downto 0);
+    signal ctrl_pow         : std_logic_vector(PHA_ACC_BITS-1 downto 0);
+    signal ctrl_amp         : std_logic_vector(15 downto 0);
+    signal ctrl_env         : std_logic_vector(31 downto 0);
+    signal ctrl_drag        : std_logic_vector(15 downto 0);
 
-    signal pha_acc_val  : std_logic_vector(PHA_ACC_BITS-1 downto 0);
-    signal sin_pac_addr : std_logic_vector(LUT_ADDR_BITS+1 downto 0);
-    signal sin_pac_sin  : std_logic_vector(OUT_RES_BITS-1 downto 0);
-    signal sin_pac_cos  : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal env_gen_gauss   : std_logic_vector(OUT_RES_BITS downto 0);
+    signal env_gen_drag    : std_logic_vector(OUT_RES_BITS downto 0);
+
+    signal pha_acc_addr    : std_logic_vector(LUT_ADDR_BITS+1 downto 0);
+    signal sin_pac_sin     : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal sin_pac_cos     : std_logic_vector(OUT_RES_BITS-1 downto 0);
 
 begin
+
+    sig_gen_sig_gen_ctrl : sig_gen_ctrl generic map (
+        PHA_ACC_BITS => PHA_ACC_BITS
+    ) port map (
+        clk_i   => clk_i,
+        rst_i   => rst_i,
+        start_i => start_i,
+        valid_i => valid_i,
+        done_i  => env_seq_done,
+        ftw_i   => ftw_i,
+        pow_i   => pow_i,
+        amp_i   => amp_i,
+        env_i   => env_i,
+        drag_i  => drag_i,
+        delay_i => delay_i,
+        clr_o   => ctrl_sync,
+        ready_o => ready_o,
+        ftw_o   => ctrl_ftw,
+        pow_o   => ctrl_pow,
+        amp_o   => ctrl_amp,
+        env_o   => ctrl_env,
+        drag_o  => ctrl_drag,
+        en_o    => ctrl_active
+    );
 
     sig_gen_env_seq : env_seq port map (
         clk_i    => clk_i,
         rst_i    => rst_i,
-        valid_i  => valid_i,
-        delay_i  => delay_i,
-        step_i   => env_i,
-        sync_o   => env_seq_sync,
+        clr_i    => ctrl_sync,
+        en_i     => ctrl_active,
+        step_i   => ctrl_env,
         addr_o   => env_seq_addr,
-        active_o => env_seq_active,
-        ready_o  => ready_o
+        done_o   => env_seq_done
     );
 
     sig_gen_pha_acc : pha_acc generic map (
@@ -59,18 +88,17 @@ begin
     ) port map (
         clk_i  => clk_i,
         rst_i  => rst_i,
-        sync_i => env_seq_sync,
-        ftw_i  => ftw_i,
-        pow_i  => pow_i,
-        val_o  => pha_acc_val
+        clr_i  => ctrl_sync,
+        en_i   => ctrl_active,
+        ftw_i  => ctrl_ftw,
+        pow_i  => ctrl_pow,
+        adr_o  => pha_acc_addr
     );
-
-    sin_pac_addr <= pha_acc_val(PHA_ACC_BITS-1 downto PHA_ACC_BITS-LUT_ADDR_BITS-2);
 
     sig_gen_sin_pac : sin_pac port map (
         rst_i => rst_i,
         clk_i => clk_i,
-        adr_i => sin_pac_addr,
+        adr_i => pha_acc_addr,
         sin_o => sin_pac_sin,
         cos_o => sin_pac_cos
     );
@@ -79,9 +107,9 @@ begin
         clk_i    => clk_i,
         rst_i    => rst_i,
         adr_i    => env_seq_addr,
-        active_i => env_seq_active,
-        drag_i   => drag_i,
-        amp_i    => amp_i,
+        active_i => ctrl_active,
+        drag_i   => ctrl_drag,
+        amp_i    => ctrl_amp,
         gauss_o  => env_gen_gauss,
         drag_o   => env_gen_drag
     );
@@ -97,6 +125,6 @@ begin
         sig_q_o => sig_q_o
     );
 
-    active_o <= env_seq_active;
+    active_o <= ctrl_active;
 
 end architecture rtl;
