@@ -38,6 +38,7 @@ architecture rtl of sig_gen_ctrl is
     signal delay_done    : std_logic;
     signal ready    : std_logic;
     signal sync    : std_logic;
+    signal delay_cnt_en : std_logic;
 
 begin
 
@@ -55,10 +56,10 @@ begin
 
                     when ACTIVE =>
                         if done_i = '1' then
-                            if valid_i = '1' then
-                                state_reg <= DELAY;
-                            else
+                            if delay_done = '1' then
                                 state_reg <= IDLE;
+                            else
+                                state_reg <= DELAY;
                             end if;
                         end if;
 
@@ -79,14 +80,17 @@ begin
     begin
         case state_reg is
             when IDLE =>
-                en_o  <= '0';
-                ready <= start_i;
+                en_o         <= '0';
+                ready        <= start_i;
+                delay_cnt_en <= '0';
             when ACTIVE =>
-                en_o  <= '1';
-                ready <= done_i and delay_done;
+                en_o         <= '1';
+                ready        <= done_i and delay_done;
+                delay_cnt_en <= done_i and not delay_done;
             when DELAY =>
-                en_o  <= '0';
-                ready <= delay_done;
+                en_o         <= '0';
+                ready        <= delay_done;
+                delay_cnt_en <= not delay_done;
         end case;
     end process ctrl_output;
 
@@ -118,7 +122,7 @@ begin
                 delay_cnt_reg <= (others => '0');
             elsif sync = '1' then
                 delay_cnt_reg <= unsigned(delay_i);
-            elsif state_reg = DELAY and delay_done = '0' then
+            elsif delay_cnt_en = '1' then
                 delay_cnt_reg <= delay_cnt_reg - 1;
             end if;
         end if;
@@ -127,7 +131,6 @@ begin
     delay_done <= '1' when delay_cnt_reg = 0 else '0';
 
     clr_o   <= done_i;
-
     ready_o <= ready;
 
 end architecture rtl;
