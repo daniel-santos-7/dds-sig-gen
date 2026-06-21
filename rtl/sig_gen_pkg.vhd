@@ -128,8 +128,7 @@ package sig_gen_pkg is
 
     component sig_gen is
         generic (
-            PHA_ACC_BITS : natural := 32;
-            FIFO_DEPTH   : natural := 8
+            PHA_ACC_BITS : natural := 32
         );
         port (
             clk_i       : in  std_logic;
@@ -143,7 +142,6 @@ package sig_gen_pkg is
             drag_i      : in  std_logic_vector(15 downto 0);
             delay_i     : in  std_logic_vector(23 downto 0);
             ready_o     : out std_logic;
-            pend_o      : out std_logic_vector(3 downto 0);
             sig_i_o     : out std_logic_vector(OUT_RES_BITS-1 downto 0);
             sig_q_o     : out std_logic_vector(OUT_RES_BITS-1 downto 0);
             active_o    : out std_logic

@@ -37,7 +37,7 @@ architecture rtl of wb_sig_gen is
     signal start  : std_logic;
     signal delay  : std_logic_vector(23 downto 0);
     signal ready      : std_logic;
-    signal pend : std_logic_vector(3 downto 0);
+    signal pend : std_logic_vector(3 downto 0) := (others => '0');
 
 begin
 
@@ -80,7 +80,6 @@ begin
         valid_i      => valid,
         delay_i      => delay,
         ready_o      => ready,
-        pend_o => pend,
         sig_i_o      => sig_i_o,
         sig_q_o      => sig_q_o,
         active_o     => active_o
