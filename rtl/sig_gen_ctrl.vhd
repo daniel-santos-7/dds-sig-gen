@@ -9,7 +9,6 @@ entity sig_gen_ctrl is
     port (
         clk_i    : in  std_logic;
         rst_i    : in  std_logic;
-        start_i  : in  std_logic;
         valid_i  : in  std_logic;
         done_i   : in  std_logic;
         ftw_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
@@ -50,18 +49,14 @@ begin
             else
                 case state_reg is
                     when IDLE =>
-                        if start_i = '1' then
+                        if valid_i = '1' then
                             state_reg <= ACTIVE;
                         end if;
 
                     when ACTIVE =>
                         if done_i = '1' then
                             if delay_done = '1' then
-                                if valid_i = '1' then
-                                    state_reg <= ACTIVE;
-                                else
-                                    state_reg <= IDLE;
-                                end if;
+                                state_reg <= IDLE;
                             else
                                 state_reg <= DELAY;
                             end if;
@@ -69,31 +64,27 @@ begin
 
                     when DELAY =>
                         if delay_done = '1' then
-                            if valid_i = '1' then
-                                state_reg <= ACTIVE;
-                            else
-                                state_reg <= IDLE;
-                            end if;
+                            state_reg <= IDLE;
                         end if;
                 end case;
             end if;
         end if;
     end process ctrl_fsm;
 
-    ctrl_output : process(state_reg, start_i, done_i, delay_done)
+    ctrl_output : process(state_reg, done_i, delay_done)
     begin
         case state_reg is
             when IDLE =>
                 en_o         <= '0';
-                ready        <= start_i;
+                ready        <= '1';
                 delay_cnt_en <= '0';
             when ACTIVE =>
                 en_o         <= '1';
-                ready        <= done_i and delay_done;
+                ready        <= '0';
                 delay_cnt_en <= done_i and not delay_done;
             when DELAY =>
                 en_o         <= '0';
-                ready        <= delay_done;
+                ready        <= '0';
                 delay_cnt_en <= not delay_done;
         end case;
     end process ctrl_output;

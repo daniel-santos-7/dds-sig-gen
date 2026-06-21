@@ -80,10 +80,8 @@ package sig_gen_pkg is
             drag_o : out std_logic_vector(15 downto 0);
             
             valid_o  : out std_logic;
-            start_o  : out std_logic;
             delay_o  : out std_logic_vector(23 downto 0);
-            ready_i  : in  std_logic;
-            pend_i   : in  std_logic_vector(3 downto 0)
+            ready_i  : in  std_logic
         );
     end component sig_gen_csrs;
 
@@ -106,7 +104,6 @@ package sig_gen_pkg is
         port (
             clk_i    : in  std_logic;
             rst_i    : in  std_logic;
-            start_i  : in  std_logic;
             valid_i  : in  std_logic;
             done_i   : in  std_logic;
             ftw_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
@@ -133,7 +130,6 @@ package sig_gen_pkg is
         port (
             clk_i       : in  std_logic;
             rst_i       : in  std_logic;
-            start_i     : in  std_logic;
             valid_i     : in  std_logic;
             ftw_i       : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
             pow_i       : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);

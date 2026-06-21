@@ -13,7 +13,6 @@ entity sig_gen is
     port (
         clk_i    : in  std_logic;
         rst_i    : in  std_logic;
-        start_i  : in  std_logic;
         valid_i  : in  std_logic;
         ftw_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
         pow_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
@@ -57,7 +56,6 @@ begin
     ) port map (
         clk_i   => clk_i,
         rst_i   => rst_i,
-        start_i => start_i,
         valid_i => valid_i,
         done_i  => env_seq_done,
         ftw_i   => ftw_i,

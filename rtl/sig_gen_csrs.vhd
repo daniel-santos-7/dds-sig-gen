@@ -23,9 +23,7 @@ entity sig_gen_csrs is
         env_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
         delay_o : out std_logic_vector(23 downto 0);
         valid_o : out std_logic;
-        start_o      : out std_logic;
-        ready_i      : in  std_logic;
-        pend_i : in  std_logic_vector(3 downto 0)
+        ready_i : in  std_logic
     );
 end entity sig_gen_csrs;
 
@@ -37,7 +35,6 @@ architecture rtl of sig_gen_csrs is
     constant REG_ENV   : std_logic_vector(2 downto 0) := "011";
     constant REG_DELAY : std_logic_vector(2 downto 0) := "100";
     constant REG_TRIG  : std_logic_vector(2 downto 0) := "101";
-    constant REG_CTRL  : std_logic_vector(2 downto 0) := "110";
 
     signal csr_req : std_logic;
     signal ack_reg : std_logic;
@@ -50,7 +47,6 @@ architecture rtl of sig_gen_csrs is
     signal env_reg   : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal delay_reg : std_logic_vector(23 downto 0);
     signal valid_reg : std_logic;
-    signal start_reg : std_logic;
 
 begin
 
@@ -80,10 +76,10 @@ begin
                 env_reg   <= (others => '0');
                 delay_reg <= (others => '0');
                 valid_reg <= '0';
-                start_reg <= '0';
             else
-                valid_reg <= '0';
-                start_reg <= '0';
+                if ready_i = '1' then
+                    valid_reg <= '0';
+                end if;
                 if csr_req = '1' and ack_reg = '0' and we_i = '1' then
                     case adr_i is
                         when REG_FTW =>
@@ -123,8 +119,6 @@ begin
                             end loop;
                         when REG_TRIG =>
                             valid_reg <= dat_i(0);
-                        when REG_CTRL =>
-                            start_reg <= dat_i(0);
                         when others =>
                             null;
                     end case;
@@ -146,8 +140,7 @@ begin
                         when REG_AMP   => dat_reg <= drag_reg & amp_reg;
                         when REG_ENV   => dat_reg <= env_reg;
                         when REG_DELAY => dat_reg <= x"00" & delay_reg;
-                        when REG_TRIG  => dat_reg <= (others => '0'); dat_reg(7 downto 4) <= pend_i; dat_reg(1) <= ready_i; dat_reg(0) <= valid_reg;
-                        when REG_CTRL  => dat_reg <= (others => '0'); dat_reg(0) <= start_reg;
+                        when REG_TRIG  => dat_reg <= (others => '0'); dat_reg(1) <= ready_i; dat_reg(0) <= valid_reg;
                         when others    => dat_reg <= (others => '0');
                     end case;
                 end if;
@@ -165,6 +158,5 @@ begin
     env_o   <= env_reg;
     delay_o <= delay_reg;
     valid_o <= valid_reg;
-    start_o <= start_reg;
 
 end architecture rtl;
