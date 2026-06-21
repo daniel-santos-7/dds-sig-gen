@@ -57,7 +57,11 @@ begin
                     when ACTIVE =>
                         if done_i = '1' then
                             if delay_done = '1' then
-                                state_reg <= IDLE;
+                                if valid_i = '1' then
+                                    state_reg <= ACTIVE;
+                                else
+                                    state_reg <= IDLE;
+                                end if;
                             else
                                 state_reg <= DELAY;
                             end if;
