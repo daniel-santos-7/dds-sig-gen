@@ -47,8 +47,8 @@ begin
         end if;
     end process mult_pipe_proc;
 
-    sig_i <= sin_gauss_reg - cos_drag_reg;
-    sig_q <= cos_gauss_reg + sin_drag_reg;
+    sig_i <= cos_gauss_reg - sin_drag_reg;
+    sig_q <= sin_gauss_reg + cos_drag_reg;
 
     sig_reg_proc : process(clk_i)
     begin
