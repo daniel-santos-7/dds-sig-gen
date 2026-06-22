@@ -21,8 +21,8 @@ architecture rtl of sin_pac is
     signal sin_neg : std_logic;
     signal cos_neg : std_logic;
 
-    signal sin_val : std_logic_vector(OUT_RES_BITS-1 downto 0);
-    signal cos_val : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal sin_val_reg : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal cos_val_reg : std_logic_vector(OUT_RES_BITS-1 downto 0);
 
     signal sin_mux : std_logic_vector(OUT_RES_BITS-1 downto 0);
     signal cos_mux : std_logic_vector(OUT_RES_BITS-1 downto 0);
@@ -38,11 +38,21 @@ begin
     sin_neg <= adr_i(LUT_ADDR_BITS + 1);
     cos_neg <= adr_i(LUT_ADDR_BITS + 1) xor adr_i(LUT_ADDR_BITS);
 
-    sin_val <= SINE_TABLE(to_integer(unsigned(sin_pointer)));
-    cos_val <= SINE_TABLE(to_integer(unsigned(cos_pointer)));
+    val_reg_proc : process(clk_i)
+    begin
+        if rising_edge(clk_i) then
+            if rst_i = '1' then
+                sin_val_reg <= (others => '0');
+                cos_val_reg <= (others => '0');
+            else
+                sin_val_reg <= SINE_TABLE(to_integer(unsigned(sin_pointer)));
+                cos_val_reg <= SINE_TABLE(to_integer(unsigned(cos_pointer)));
+            end if;
+        end if;
+    end process val_reg_proc;
 
-    sin_mux <= std_logic_vector(unsigned(not sin_val) + 1) when sin_neg = '1' else sin_val;
-    cos_mux <= std_logic_vector(unsigned(not cos_val) + 1) when cos_neg = '1' else cos_val;
+    sin_mux <= std_logic_vector(unsigned(not sin_val_reg) + 1) when sin_neg = '1' else sin_val_reg;
+    cos_mux <= std_logic_vector(unsigned(not cos_val_reg) + 1) when cos_neg = '1' else cos_val_reg;
 
     reg_proc : process(clk_i)
     begin

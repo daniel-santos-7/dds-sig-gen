@@ -29,7 +29,10 @@ architecture rtl of env_gen is
     signal drag  : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
 
     signal amp_mult   : unsigned(ENV_OUT_RES_BITS+15 downto 0);
-    signal env_q_mult : signed(ENV_OUT_RES_BITS+32 downto 0);
+    signal env_q_mult : signed(ENV_OUT_RES_BITS+15 downto 0);
+
+    signal gauss_out_reg : std_logic_vector(OUT_RES_BITS downto 0);
+    signal drag_out_reg  : std_logic_vector(OUT_RES_BITS downto 0);
 
 begin
 
@@ -53,9 +56,22 @@ begin
     drag  <= std_logic_vector(-signed(drag_reg)) when lut_pha = '1' else drag_reg;
 
     amp_mult <= unsigned(gauss) * unsigned(amp_i);
-    env_q_mult <= signed(drag) * signed('0' & amp_i) * signed(drag_i);
+    env_q_mult <= signed(drag) * signed(drag_i);
 
-    gauss_o <= '0' & std_logic_vector(amp_mult(ENV_OUT_RES_BITS+14 downto ENV_OUT_RES_BITS+15-OUT_RES_BITS));
-    drag_o  <= std_logic_vector(env_q_mult(ENV_OUT_RES_BITS+30 downto ENV_OUT_RES_BITS+31-OUT_RES_BITS-1));
+    out_reg_proc: process(clk_i)
+    begin
+        if rising_edge(clk_i) then
+            if rst_i = '1' then
+                gauss_out_reg <= (others => '0');
+                drag_out_reg  <= (others => '0');
+            else
+                gauss_out_reg <= '0' & std_logic_vector(amp_mult(ENV_OUT_RES_BITS+14 downto ENV_OUT_RES_BITS+15-OUT_RES_BITS));
+                drag_out_reg  <= std_logic_vector(env_q_mult(ENV_OUT_RES_BITS+14 downto ENV_OUT_RES_BITS+15-OUT_RES_BITS-1));
+            end if;
+        end if;
+    end process out_reg_proc;
+
+    gauss_o <= gauss_out_reg;
+    drag_o  <= drag_out_reg;
 
 end architecture rtl;

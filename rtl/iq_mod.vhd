@@ -21,10 +21,10 @@ architecture rtl of iq_mod is
     signal gauss : signed(OUT_RES_BITS downto 0);
     signal drag  : signed(OUT_RES_BITS downto 0);
 
-    signal sin_gauss : signed(2*OUT_RES_BITS downto 0);
-    signal cos_drag  : signed(2*OUT_RES_BITS downto 0);
-    signal sin_drag  : signed(2*OUT_RES_BITS downto 0);
-    signal cos_gauss : signed(2*OUT_RES_BITS downto 0);
+    signal sin_gauss_reg : signed(2*OUT_RES_BITS downto 0);
+    signal cos_drag_reg  : signed(2*OUT_RES_BITS downto 0);
+    signal sin_drag_reg  : signed(2*OUT_RES_BITS downto 0);
+    signal cos_gauss_reg : signed(2*OUT_RES_BITS downto 0);
 
     signal sig_i : signed(2*OUT_RES_BITS downto 0);
     signal sig_q : signed(2*OUT_RES_BITS downto 0);
@@ -37,13 +37,18 @@ begin
     gauss <= signed(gauss_i);
     drag  <= signed(drag_i);
 
-    sin_gauss <= signed(sin_i) * gauss;
-    cos_drag  <= signed(cos_i) * drag;
-    sin_drag  <= signed(sin_i) * drag;
-    cos_gauss <= signed(cos_i) * gauss;
+    mult_pipe_proc : process(clk_i)
+    begin
+        if rising_edge(clk_i) then
+            sin_gauss_reg <= signed(sin_i) * gauss;
+            cos_drag_reg  <= signed(cos_i) * drag;
+            sin_drag_reg  <= signed(sin_i) * drag;
+            cos_gauss_reg <= signed(cos_i) * gauss;
+        end if;
+    end process mult_pipe_proc;
 
-    sig_i <= sin_gauss - cos_drag;
-    sig_q <= cos_gauss + sin_drag;
+    sig_i <= sin_gauss_reg - cos_drag_reg;
+    sig_q <= cos_gauss_reg + sin_drag_reg;
 
     sig_reg_proc : process(clk_i)
     begin
