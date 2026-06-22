@@ -33,6 +33,9 @@ architecture rtl of sin_pac is
     signal sin_reg : std_logic_vector(OUT_RES_BITS-1 downto 0);
     signal cos_reg : std_logic_vector(OUT_RES_BITS-1 downto 0);
 
+    signal sin_pipe_reg : std_logic_vector(OUT_RES_BITS-1 downto 0);
+    signal cos_pipe_reg : std_logic_vector(OUT_RES_BITS-1 downto 0);
+
 begin
 
     sin_pointer <= not adr_i(LUT_ADDR_BITS-1 downto 0) when adr_i(LUT_ADDR_BITS) = '1' else adr_i(LUT_ADDR_BITS-1 downto 0);
@@ -83,7 +86,20 @@ begin
         end if;
     end process reg_proc;
 
-    sin_o <= sin_reg;
-    cos_o <= cos_reg;
+    pipe_reg_proc : process(clk_i)
+    begin
+        if rising_edge(clk_i) then
+            if rst_i = '1' then
+                sin_pipe_reg <= (others => '0');
+                cos_pipe_reg <= (others => '0');
+            else
+                sin_pipe_reg <= sin_reg;
+                cos_pipe_reg <= cos_reg;
+            end if;
+        end if;
+    end process pipe_reg_proc;
+
+    sin_o <= sin_pipe_reg;
+    cos_o <= cos_pipe_reg;
 
 end architecture rtl;
