@@ -25,6 +25,8 @@ architecture rtl of env_gen is
     signal gauss_reg : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
     signal drag_reg  : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
 
+    signal lut_pha_reg : std_logic;
+
     signal gauss : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
     signal drag  : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
 
@@ -38,6 +40,17 @@ begin
 
     lut_pha <= adr_i(ENV_LUT_ADDR_BITS-1);
     lut_adr  <= not unsigned(adr_i(ENV_LUT_ADDR_BITS-2 downto 0)) when lut_pha = '1' else unsigned(adr_i(ENV_LUT_ADDR_BITS-2 downto 0));
+
+    phase_proc : process(clk_i)
+    begin
+        if rising_edge(clk_i) then
+            if rst_i = '1' then
+                lut_pha_reg <= '0';
+            else
+                lut_pha_reg <= lut_pha;
+            end if;
+        end if;
+    end process phase_proc;
 
     reg_proc: process(clk_i)
     begin
@@ -53,7 +66,7 @@ begin
     end process reg_proc;
 
     gauss <= gauss_reg;
-    drag  <= std_logic_vector(-signed(drag_reg)) when lut_pha = '1' else drag_reg;
+    drag  <= std_logic_vector(-signed(drag_reg)) when lut_pha_reg = '1' else drag_reg;
 
     amp_mult <= unsigned(gauss) * unsigned(amp_i);
     env_q_mult <= signed(drag) * signed(drag_i);

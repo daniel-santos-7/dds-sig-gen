@@ -24,6 +24,9 @@ architecture rtl of sin_pac is
     signal sin_val_reg : std_logic_vector(OUT_RES_BITS-1 downto 0);
     signal cos_val_reg : std_logic_vector(OUT_RES_BITS-1 downto 0);
 
+    signal sin_neg_reg : std_logic;
+    signal cos_neg_reg : std_logic;
+
     signal sin_mux : std_logic_vector(OUT_RES_BITS-1 downto 0);
     signal cos_mux : std_logic_vector(OUT_RES_BITS-1 downto 0);
 
@@ -51,8 +54,21 @@ begin
         end if;
     end process val_reg_proc;
 
-    sin_mux <= std_logic_vector(unsigned(not sin_val_reg) + 1) when sin_neg = '1' else sin_val_reg;
-    cos_mux <= std_logic_vector(unsigned(not cos_val_reg) + 1) when cos_neg = '1' else cos_val_reg;
+    neg_reg_proc : process(clk_i)
+    begin
+        if rising_edge(clk_i) then
+            if rst_i = '1' then
+                sin_neg_reg <= '0';
+                cos_neg_reg <= '0';
+            else
+                sin_neg_reg <= sin_neg;
+                cos_neg_reg <= cos_neg;
+            end if;
+        end if;
+    end process neg_reg_proc;
+
+    sin_mux <= std_logic_vector(unsigned(not sin_val_reg) + 1) when sin_neg_reg = '1' else sin_val_reg;
+    cos_mux <= std_logic_vector(unsigned(not cos_val_reg) + 1) when cos_neg_reg = '1' else cos_val_reg;
 
     reg_proc : process(clk_i)
     begin
