@@ -32,9 +32,10 @@ architecture rtl of sig_gen_csrs is
     constant REG_FTW   : std_logic_vector(2 downto 0) := "000";
     constant REG_POW   : std_logic_vector(2 downto 0) := "001";
     constant REG_AMP   : std_logic_vector(2 downto 0) := "010";
-    constant REG_ENV   : std_logic_vector(2 downto 0) := "011";
-    constant REG_DELAY : std_logic_vector(2 downto 0) := "100";
-    constant REG_TRIG  : std_logic_vector(2 downto 0) := "101";
+    constant REG_DRAG  : std_logic_vector(2 downto 0) := "011";
+    constant REG_ENV   : std_logic_vector(2 downto 0) := "100";
+    constant REG_DELAY : std_logic_vector(2 downto 0) := "101";
+    constant REG_TRIG  : std_logic_vector(2 downto 0) := "110";
 
     signal csr_req : std_logic;
     signal ack_reg : std_logic;
@@ -100,9 +101,10 @@ begin
                                     amp_reg(8*i+7 downto 8*i) <= dat_i(8*i+7 downto 8*i);
                                 end if;
                             end loop;
-                            for i in 2 to 3 loop
+                        when REG_DRAG =>
+                            for i in 0 to 1 loop
                                 if sel_i(i) = '1' then
-                                    drag_reg(8*(i-2)+7 downto 8*(i-2)) <= dat_i(8*i+7 downto 8*i);
+                                    drag_reg(8*i+7 downto 8*i) <= dat_i(8*i+7 downto 8*i);
                                 end if;
                             end loop;
                         when REG_ENV =>
@@ -137,7 +139,8 @@ begin
                     case adr_i is
                         when REG_FTW   => dat_reg <= ftw_reg;
                         when REG_POW   => dat_reg <= pow_reg;
-                        when REG_AMP   => dat_reg <= drag_reg & amp_reg;
+                        when REG_AMP   => dat_reg <= x"0000" & amp_reg;
+                        when REG_DRAG  => dat_reg <= x"0000" & drag_reg;
                         when REG_ENV   => dat_reg <= env_reg;
                         when REG_DELAY => dat_reg <= x"00" & delay_reg;
                         when REG_TRIG  => dat_reg <= (others => '0'); dat_reg(1) <= ready_i; dat_reg(0) <= valid_reg;
