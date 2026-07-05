@@ -32,6 +32,10 @@ package sig_gen_pkg is
     end component pha_acc;
 
     component env_gen is
+        generic (
+            DRAG_DERIV_EN : boolean := false;
+            DRAG_K_SHIFT  : natural := 6
+        );
         port (
             clk_i        : in  std_logic;
             rst_i        : in  std_logic;
