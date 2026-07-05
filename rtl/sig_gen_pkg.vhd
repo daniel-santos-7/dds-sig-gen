@@ -33,7 +33,7 @@ package sig_gen_pkg is
 
     component env_gen is
         generic (
-            DRAG_DERIV_EN : boolean := false;
+            DRAG_DERIV_EN : boolean := true;
             DRAG_K_SHIFT  : natural := 6
         );
         port (

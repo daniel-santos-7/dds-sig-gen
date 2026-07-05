@@ -104,7 +104,10 @@ begin
         cos_o => sin_pac_cos
     );
 
-    sig_gen_env_gen : env_gen port map (
+    sig_gen_env_gen : env_gen generic map (
+        DRAG_DERIV_EN => false,
+        DRAG_K_SHIFT  => 0
+    ) port map (
         clk_i    => clk_i,
         rst_i    => rst_i,
         adr_i    => env_seq_addr,

@@ -23,19 +23,30 @@ end entity env_gen;
 
 architecture rtl of env_gen is
 
+    function get_drag_bits return natural is
+    begin
+        if DRAG_DERIV_EN then
+            return ENV_OUT_RES_BITS + DRAG_K_SHIFT;
+        else
+            return ENV_OUT_RES_BITS;
+        end if;
+    end function;
+
+    constant DRAG_BITS : natural := get_drag_bits;
+
     signal lut_pha : std_logic;
     signal lut_adr : unsigned(ENV_LUT_ADDR_BITS-2 downto 0);
 
     signal gauss_reg : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
 
     signal gauss : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
-    signal drag  : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
+    signal drag  : std_logic_vector(DRAG_BITS-1 downto 0);
 
     signal gauss_pipe_reg : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
-    signal drag_pipe_reg  : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
+    signal drag_pipe_reg  : std_logic_vector(DRAG_BITS-1 downto 0);
 
     signal amp_mult   : unsigned(ENV_OUT_RES_BITS+15 downto 0);
-    signal env_q_mult : signed(ENV_OUT_RES_BITS+15 downto 0);
+    signal env_q_mult : signed(DRAG_BITS+15 downto 0);
 
     signal gauss_out_reg : std_logic_vector(OUT_RES_BITS downto 0);
     signal drag_out_reg  : std_logic_vector(OUT_RES_BITS downto 0);
@@ -96,7 +107,7 @@ begin
         
         gauss <= gauss_reg;
         drag_diff <= signed(gauss_reg) - signed(gauss_prev);
-        drag <= std_logic_vector(drag_diff sll DRAG_K_SHIFT);
+        drag <= std_logic_vector(resize(drag_diff, DRAG_BITS) sll DRAG_K_SHIFT);
     end generate;
 
     neg_pipe_proc : process(clk_i)
