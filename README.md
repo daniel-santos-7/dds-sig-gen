@@ -12,7 +12,7 @@ wb_sig_gen (Wishbone peripheral, ADDR_WIDTH=3)
     ├── pha_acc       — Phase accumulator (32-bit), resets on trigger
     ├── sine_cos_lut  — Quarter-wave LUT + full-wave reconstruction (sin + cos)
     ├── env_gen       — Gaussian envelope + DRAG correction (amplitude scaling)
-    └── iq_mod        — IQ modulator: envelope × sine, DRAG cross-terms, output pipeline
+    └── iq_mod        — IQ modulator: I = gauss·cos − drag·sin, Q = gauss·sin + drag·cos (complex mult. of envelope × carrier)
 ```
 
 ## CSR Map
@@ -22,8 +22,8 @@ wb_sig_gen (Wishbone peripheral, ADDR_WIDTH=3)
 | `0x0` | FTW | Frequency tuning word (32-bit) |
 | `0x1` | POW | Phase offset word (32-bit) |
 | `0x2` | AMP | Amplitude scalar (16-bit, unsigned) |
-| `0x3` | ENV | Envelope step (32-bit) |
-| `0x4` | DRAG | DRAG coefficient Q1.15 (16-bit) |
+| `0x3` | DRAG | DRAG coefficient Q1.15 (16-bit) |
+| `0x4` | ENV | Envelope step (32-bit) |
 | `0x5` | DELAY | Inter-pulse delay in clock cycles (24-bit) |
 | `0x6` | TRIG | Write bit-0 to trigger; readback `{24'b0, 5'b0, ready, valid}` |
 

@@ -11,7 +11,7 @@ def _i_model(t, A, sigma, t0, freq, phase, beta, offset):
     g = A * np.exp(-0.5 * tau ** 2)
     d = tau * g
     omega_t = 2 * np.pi * freq * (t - t0) + phase
-    return g * np.sin(omega_t) - beta * d * np.cos(omega_t) + offset
+    return g * np.cos(omega_t) + beta * d * np.sin(omega_t) + offset
 
 
 def _q_model(t, A, sigma, t0, freq, phase, beta, offset):
@@ -19,7 +19,7 @@ def _q_model(t, A, sigma, t0, freq, phase, beta, offset):
     g = A * np.exp(-0.5 * tau ** 2)
     d = tau * g
     omega_t = 2 * np.pi * freq * (t - t0) + phase
-    return g * np.cos(omega_t) + beta * d * np.sin(omega_t) + offset
+    return g * np.sin(omega_t) - beta * d * np.cos(omega_t) + offset
 
 
 class Channel:

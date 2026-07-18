@@ -61,11 +61,11 @@ class Channel:
         g = amp * np.exp(-0.5 * tau ** 2)
         theta = 2 * np.pi * self.freq * (self._t - t0)
         d = tau * g
-        denom = d * np.cos(theta)
+        denom = d * np.sin(theta)
         mask = np.abs(denom) > amp * 0.01
         if np.any(mask):
-            res = self._values - g * np.sin(theta) - np.mean(self._values)
-            return float(np.median(-res[mask] / denom[mask]))
+            res = self._values - g * np.cos(theta) - np.mean(self._values)
+            return float(np.median(res[mask] / denom[mask]))
         return 0.0
 
     def __str__(self):

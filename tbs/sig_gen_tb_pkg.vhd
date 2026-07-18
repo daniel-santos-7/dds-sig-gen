@@ -36,9 +36,10 @@ package sig_gen_tb_pkg is
     constant REG_FTW        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "000"; -- 0x0
     constant REG_POW        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "001"; -- 0x1
     constant REG_AMP        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "010"; -- 0x2
-    constant REG_ENV   : std_logic_vector(ADDR_WIDTH-1 downto 0) := "011"; -- 0x3
-    constant REG_DELAY : std_logic_vector(ADDR_WIDTH-1 downto 0) := "100"; -- 0x4
-    constant REG_TRIG       : std_logic_vector(ADDR_WIDTH-1 downto 0) := "101"; -- 0x5
+    constant REG_DRAG  : std_logic_vector(ADDR_WIDTH-1 downto 0) := "011"; -- 0x3
+    constant REG_ENV   : std_logic_vector(ADDR_WIDTH-1 downto 0) := "100"; -- 0x4
+    constant REG_DELAY : std_logic_vector(ADDR_WIDTH-1 downto 0) := "101"; -- 0x5
+    constant REG_TRIG       : std_logic_vector(ADDR_WIDTH-1 downto 0) := "110"; -- 0x6
 
     type wb_bus is record
         adr_i : std_logic_vector(ADDR_WIDTH-1 downto 0);
@@ -227,7 +228,8 @@ package body sig_gen_tb_pkg is
     begin
         wb_write(clk, wb, REG_FTW, regs.ftw);
         wb_write(clk, wb, REG_POW, regs.pow);
-        wb_write(clk, wb, REG_AMP, regs.drag(15 downto 0) & regs.amp(15 downto 0));
+        wb_write(clk, wb, REG_AMP, regs.amp);
+        wb_write(clk, wb, REG_DRAG, regs.drag);
         wb_write(clk, wb, REG_ENV, regs.env);
         wb_write(clk, wb, REG_TRIG, WRITE_COMMAND);
     end procedure wb_write_config;

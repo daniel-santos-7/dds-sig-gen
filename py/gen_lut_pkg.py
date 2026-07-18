@@ -55,7 +55,7 @@ def generate_env_pkg(lut_addr_bits=10, out_res_bits=16):
     for i in range(half_samples):
         t = (i / (samples - 1)) * 2 * sigma_range - sigma_range
         gauss = math.exp(-0.5 * (t ** 2))
-        drag = t * math.exp(-0.5 * (t ** 2))
+        drag = -t * math.exp(-0.5 * (t ** 2))
         g_val = int(round(gauss * amplitude))
         d_val = int(round(drag * amplitude / 0.6065306597))
         g_val = max(0, min(amplitude, g_val))
