@@ -81,6 +81,9 @@ spectrum: $(VENVDIR) $(SAMPLES_FILE)
 
 analyze: raw fit spectrum
 
+sweep: $(VENVDIR)
+	@$(VENVDIR)/bin/python3 py/sweep.py $(SWEEP_ARGS)
+
 clean:
 	@$(GHDL) clean $(GHDL_OPTS)
 	@rm -rf $(WORKDIR) $(OUTDIR) .import .make
