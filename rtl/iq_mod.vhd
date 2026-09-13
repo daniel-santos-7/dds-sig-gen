@@ -57,8 +57,8 @@ begin
                 i_reg <= (others => '0');
                 q_reg <= (others => '0');
             else
-                i_reg <= std_logic_vector(sig_i(2*OUT_RES_BITS-1 downto OUT_RES_BITS));
-                q_reg <= std_logic_vector(sig_q(2*OUT_RES_BITS-1 downto OUT_RES_BITS));
+                i_reg <= std_logic_vector(sig_i(2*OUT_RES_BITS downto OUT_RES_BITS+1));
+                q_reg <= std_logic_vector(sig_q(2*OUT_RES_BITS downto OUT_RES_BITS+1));
             end if;
         end if;
     end process sig_reg_proc;
