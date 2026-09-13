@@ -22,10 +22,25 @@ wb_sig_gen (Wishbone peripheral, ADDR_WIDTH=3)
 | `0x0` | FTW | Frequency tuning word (32-bit) |
 | `0x1` | POW | Phase offset word (32-bit) |
 | `0x2` | AMP | Amplitude scalar (16-bit, unsigned) |
-| `0x3` | DRAG | DRAG coefficient Q1.15 (16-bit) |
+| `0x3` | DRAG | Pre-scaled DRAG value, Q1.15 (16-bit) — **not** β; see [DRAG scaling](#drag-scaling) |
 | `0x4` | ENV | Envelope step (32-bit) |
 | `0x5` | DELAY | Inter-pulse delay in clock cycles (24-bit) |
 | `0x6` | TRIG | Write bit-0 to trigger; readback `{24'b0, 5'b0, ready, valid}` |
+
+### DRAG scaling
+
+The DRAG register does **not** hold the DRAG coefficient β directly. Two factors sit between them:
+
+```
+DRAG_csr = β · 0.6065306597 · (AMP / 65535)     in Q1.15
+```
+
+- `0.6065306597` is the peak of `-t·exp(-t²/2)`, by which `DRAG_TABLE` is normalised so it spans full scale (`DRAG_PEAK` in `py/gen_lut_pkg.py`).
+- `AMP / 65535` is required because `env_gen` scales only the gaussian path by `amp_i`. The DRAG register is expected to arrive already scaled by the amplitude, which keeps a full-width multiplier out of the sample-rate datapath.
+
+β is the coefficient of the Motzoi et al. (2009) / Qiskit Pulse `Drag` convention, and may be negative. Writing β directly instead yields `β_eff = β · 1.6488 · 65535/AMP` — wrong by 1.65× at full scale, and inversely proportional to amplitude below it.
+
+Resolution of the register falls with `AMP` (~11 bits at `AMP=16384`), since the DRAG path has no amplitude multiplier of its own.
 
 ## Building & Running
 
@@ -51,7 +66,7 @@ make run FREQ_HZ=1000000 PHASE_DEG=45 AMP_VAL=65535 PULSE_LEN=500 DRAG_COEFF=0.3
 | `PHASE_DEG` | 0 | Initial phase (degrees) |
 | `AMP_VAL` | 65535 | Written to AMP CSR register; scales Gaussian envelope amplitude |
 | `PULSE_LEN` | 200 | Envelope pulse length in clock cycles |
-| `DRAG_COEFF` | 0.5 | DRAG coefficient (real; make auto-converts to Q1.15 integer) |
+| `DRAG_COEFF` | 0.5 | Raw DRAG register value, **not** the physical β (make converts to Q1.15 integer); see [DRAG scaling](#drag-scaling) |
 | `CLK_PERIODS` | 4 | Number of output periods to simulate |
 | `OUT_RES_BITS` | 12 | Sine LUT output resolution (bits), affects SNR |
 | `CLK_FREQ_HZ` | 100e6 | Python analysis only (`make verify`/`make plot`); VHDL sim uses 100 MHz |

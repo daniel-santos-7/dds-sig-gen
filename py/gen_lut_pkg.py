@@ -3,6 +3,18 @@
 import math
 
 
+# Peak of -t*exp(-t^2/2), reached at t = -1. DRAG_TABLE is normalised by it so
+# the table spans full scale, which means the factor does not disappear: it is
+# part of the DRAG register contract, and callers must fold it back in.
+#
+#     DRAG_csr = beta * DRAG_PEAK * (AMP / 65535)    in Q1.15
+#
+# where beta is the Motzoi et al. (2009) / Qiskit Pulse DRAG coefficient. The
+# AMP term is there because env_gen scales only the gaussian path by amp_i; the
+# DRAG register is expected to arrive already scaled by the amplitude.
+DRAG_PEAK = 0.6065306597
+
+
 def _int_to_vhdl_hex_str(integer: int, bits: int) -> str:
     value = (2 ** bits + integer) if integer < 0 else integer
     hex_digits = math.ceil(bits / 4)
@@ -57,7 +69,7 @@ def generate_env_pkg(lut_addr_bits=10, out_res_bits=16):
         gauss = math.exp(-0.5 * (t ** 2))
         drag = -t * math.exp(-0.5 * (t ** 2))
         g_val = int(round(gauss * amplitude))
-        d_val = int(round(drag * amplitude / 0.6065306597))
+        d_val = int(round(drag * amplitude / DRAG_PEAK))
         g_val = max(0, min(amplitude, g_val))
         d_val = max(-amplitude, min(amplitude, d_val))
         gauss_values.append(_int_to_vhdl_hex_str(g_val, out_res_bits))
