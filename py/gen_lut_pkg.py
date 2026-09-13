@@ -6,7 +6,9 @@ import math
 def _int_to_vhdl_hex_str(integer: int, bits: int) -> str:
     value = (2 ** bits + integer) if integer < 0 else integer
     hex_digits = math.ceil(bits / 4)
-    return f'x"{value:0{hex_digits}x}"'
+    # Length-qualified literal: a plain x"..." is always a multiple of 4 bits
+    # wide and would overflow a vector whose width is not.
+    return f'{bits}x"{value:0{hex_digits}x}"'
 
 
 def generate_pkg(lut_type, lut_addr_bits=10, out_res_bits=12, initial_phase=0, final_phase=90):
