@@ -26,6 +26,12 @@ architecture rtl of iq_mod is
     signal sin_drag_reg  : signed(2*OUT_RES_BITS downto 0);
     signal cos_gauss_reg : signed(2*OUT_RES_BITS downto 0);
 
+    -- Half an output LSB. A bare slice floors, because the discarded low bits
+    -- are always a non-negative remainder in two's complement, so every sample
+    -- is biased down by half an LSB. Adding this first re-centres the error.
+    -- It folds into the adders below as a carry-in, so it costs no hardware.
+    constant ROUND_HALF : signed(2*OUT_RES_BITS downto 0) := (OUT_RES_BITS => '1', others => '0');
+
     signal sig_i : signed(2*OUT_RES_BITS downto 0);
     signal sig_q : signed(2*OUT_RES_BITS downto 0);
 
@@ -47,8 +53,8 @@ begin
         end if;
     end process mult_pipe_proc;
 
-    sig_i <= cos_gauss_reg - sin_drag_reg;
-    sig_q <= sin_gauss_reg + cos_drag_reg;
+    sig_i <= cos_gauss_reg - sin_drag_reg + ROUND_HALF;
+    sig_q <= sin_gauss_reg + cos_drag_reg + ROUND_HALF;
 
     sig_reg_proc : process(clk_i)
     begin
