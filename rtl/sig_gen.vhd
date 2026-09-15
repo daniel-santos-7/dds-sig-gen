@@ -1,7 +1,6 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
-use work.sig_gen_pkg.all;
 use work.sine_lut_pkg.LUT_ADDR_BITS;
 use work.sine_lut_pkg.OUT_RES_BITS;
 use work.envelope_lut_pkg.ENV_LUT_ADDR_BITS;
@@ -51,7 +50,7 @@ architecture rtl of sig_gen is
 
 begin
 
-    sig_gen_sig_gen_ctrl : sig_gen_ctrl generic map (
+    sig_gen_sig_gen_ctrl : entity work.sig_gen_ctrl generic map (
         PHA_ACC_BITS => PHA_ACC_BITS
     ) port map (
         clk_i   => clk_i,
@@ -74,7 +73,7 @@ begin
         en_o    => ctrl_active
     );
 
-    sig_gen_env_seq : env_seq port map (
+    sig_gen_env_seq : entity work.env_seq port map (
         clk_i    => clk_i,
         rst_i    => rst_i,
         clr_i    => ctrl_sync,
@@ -84,7 +83,7 @@ begin
         done_o   => env_seq_done
     );
 
-    sig_gen_pha_acc : pha_acc generic map (
+    sig_gen_pha_acc : entity work.pha_acc generic map (
         PHA_ACC_BITS => PHA_ACC_BITS
     ) port map (
         clk_i  => clk_i,
@@ -96,7 +95,7 @@ begin
         adr_o  => pha_acc_addr
     );
 
-    sig_gen_sin_pac : sin_pac port map (
+    sig_gen_sin_pac : entity work.sin_pac port map (
         rst_i => rst_i,
         clk_i => clk_i,
         adr_i => pha_acc_addr,
@@ -104,7 +103,7 @@ begin
         cos_o => sin_pac_cos
     );
 
-    sig_gen_env_gen : env_gen generic map (
+    sig_gen_env_gen : entity work.env_gen generic map (
         DRAG_DERIV_EN => false,
         DRAG_K_SHIFT  => 0
     ) port map (
@@ -118,7 +117,7 @@ begin
         drag_o   => env_gen_drag
     );
 
-    sig_gen_iq_mod : iq_mod port map (
+    sig_gen_iq_mod : entity work.iq_mod port map (
         clk_i   => clk_i,
         rst_i   => rst_i,
         gauss_i => env_gen_gauss,

@@ -1,5 +1,5 @@
 GHDL = ghdl
-GHDL_OPTS = --std=08 --workdir=$(WORKDIR)
+GHDL_OPTS = --std=93 -fsynopsys --workdir=$(WORKDIR)
 
 WORKDIR = work
 OUTDIR  = output

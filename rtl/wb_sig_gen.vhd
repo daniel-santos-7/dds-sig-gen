@@ -1,6 +1,5 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
-use work.sig_gen_pkg.all;
 use work.sine_lut_pkg.OUT_RES_BITS;
 
 entity wb_sig_gen is

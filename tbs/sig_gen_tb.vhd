@@ -1,7 +1,6 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.math_real.all;
-use work.sig_gen_pkg.all;
 use work.sig_gen_tb_pkg.all;
 use work.sine_lut_pkg.OUT_RES_BITS;
 use IEEE.numeric_std.all;
@@ -50,7 +49,7 @@ architecture tb of sig_gen_tb is
 
 begin
 
-    uut : wb_sig_gen generic map (
+    uut : entity work.wb_sig_gen generic map (
         DATA_WIDTH   => DATA_WIDTH,
         ADDR_WIDTH   => ADDR_WIDTH,
         PHA_ACC_BITS => PHA_ACC_BITS
