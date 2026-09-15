@@ -62,10 +62,12 @@ rtl/envelope_lut_pkg.vhd: py/gen_lut_pkg.py py/sig_gen.py
 luts: $(LUT_PKGS)
 
 .import: $(RTL_SRC) $(TBS_SRC) $(LUT_PKGS) | $(WORKDIR)
-	@$(GHDL) import $(GHDL_OPTS) $^ | tee $@
+	@$(GHDL) import $(GHDL_OPTS) $^
+	@touch $@
 
 .make: .import
-	@$(GHDL) make $(GHDL_OPTS) $(TBS_TOP) | tee $@
+	@$(GHDL) make $(GHDL_OPTS) $(TBS_TOP)
+	@touch $@
 
 run: .make | $(OUTDIR) $(TESTDIR)
 	@$(GHDL) run $(TBS_TOP) $(GHDL_RUNOPTS)
