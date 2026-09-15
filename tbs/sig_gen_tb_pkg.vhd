@@ -3,6 +3,7 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 use IEEE.math_real.all;
 use STD.textio.all;
+use IEEE.std_logic_textio.all;
 
 package sig_gen_tb_pkg is
 
@@ -156,11 +157,11 @@ package body sig_gen_tb_pkg is
         file f : text open write_mode is file_name;
         variable l : line;
     begin
-        write(l, string'("ftw: 0x")); hwrite(l, to_bitvector(regs.ftw)); writeline(f, l);
-        write(l, string'("pow: 0x")); hwrite(l, to_bitvector(regs.pow)); writeline(f, l);
-        write(l, string'("amp: 0x")); hwrite(l, to_bitvector(regs.amp)); writeline(f, l);
-        write(l, string'("env: 0x")); hwrite(l, to_bitvector(regs.env)); writeline(f, l);
-        write(l, string'("drag: 0x")); hwrite(l, to_bitvector(regs.drag)); writeline(f, l);
+        write(l, string'("ftw: 0x")); hwrite(l, regs.ftw); writeline(f, l);
+        write(l, string'("pow: 0x")); hwrite(l, regs.pow); writeline(f, l);
+        write(l, string'("amp: 0x")); hwrite(l, regs.amp); writeline(f, l);
+        write(l, string'("env: 0x")); hwrite(l, regs.env); writeline(f, l);
+        write(l, string'("drag: 0x")); hwrite(l, regs.drag); writeline(f, l);
     end procedure;
 
     procedure wb_init (

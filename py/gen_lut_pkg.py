@@ -15,12 +15,12 @@ import math
 DRAG_PEAK = 0.6065306597
 
 
-def _int_to_vhdl_hex_str(integer: int, bits: int) -> str:
+def _int_to_vhdl_bit_str(integer: int, bits: int) -> str:
+    # Binary string literal, exactly `bits` wide. A hex literal x"..." is always
+    # a multiple of 4 bits and overflows a vector whose width is not, and the
+    # length-qualified form 10x"..." is VHDL-2008 only.
     value = (2 ** bits + integer) if integer < 0 else integer
-    hex_digits = math.ceil(bits / 4)
-    # Length-qualified literal: a plain x"..." is always a multiple of 4 bits
-    # wide and would overflow a vector whose width is not.
-    return f'{bits}x"{value:0{hex_digits}x}"'
+    return f'"{value:0{bits}b}"'
 
 
 def generate_pkg(lut_type, lut_addr_bits=10, out_res_bits=12, initial_phase=0, final_phase=90):
@@ -36,7 +36,7 @@ def generate_sine_pkg(lut_addr_bits=10, out_res_bits=12, initial_phase=0, final_
     omega = delta / samples
     phi = initial_phase / 180 * math.pi
     sine_values = [amplitude * math.sin(omega * n + phi) for n in range(samples)]
-    hex_values = [_int_to_vhdl_hex_str(int(v), out_res_bits) for v in sine_values]
+    hex_values = [_int_to_vhdl_bit_str(int(v), out_res_bits) for v in sine_values]
     lut = ',\n\t\t'.join(hex_values)
 
     return f'''library IEEE;
@@ -48,7 +48,11 @@ package sine_lut_pkg is
 
     constant OUT_RES_BITS  : natural := {out_res_bits};
 
-    type sine_lut_array is array (0 to 2 ** LUT_ADDR_BITS-1) of std_logic_vector(OUT_RES_BITS-1 downto 0);
+    -- Named constant so the bound is a natural expression: VHDL-93 rejects a
+    -- universal-integer range bound that is not a literal or an attribute.
+    constant LUT_DEPTH : natural := 2 ** LUT_ADDR_BITS;
+
+    type sine_lut_array is array (0 to LUT_DEPTH-1) of std_logic_vector(OUT_RES_BITS-1 downto 0);
 
     constant SINE_TABLE : sine_lut_array := (
 \t\t{lut}
@@ -74,8 +78,8 @@ def generate_env_pkg(lut_addr_bits=10, out_res_bits=16):
         d_val = int(round(drag * amplitude / DRAG_PEAK))
         g_val = max(0, min(amplitude, g_val))
         d_val = max(-amplitude, min(amplitude, d_val))
-        gauss_values.append(_int_to_vhdl_hex_str(g_val, out_res_bits))
-        drag_values.append(_int_to_vhdl_hex_str(d_val, out_res_bits))
+        gauss_values.append(_int_to_vhdl_bit_str(g_val, out_res_bits))
+        drag_values.append(_int_to_vhdl_bit_str(d_val, out_res_bits))
 
     gauss_lut = ',\n\t\t'.join(gauss_values)
     drag_lut = ',\n\t\t'.join(drag_values)
@@ -88,7 +92,11 @@ package envelope_lut_pkg is
     constant ENV_LUT_ADDR_BITS : natural := {lut_addr_bits};
     constant ENV_OUT_RES_BITS  : natural := {out_res_bits};
 
-    type env_lut_array is array (0 to 2 ** (ENV_LUT_ADDR_BITS-1) - 1) of std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
+    -- Named constant so the bound is a natural expression: VHDL-93 rejects a
+    -- universal-integer range bound that is not a literal or an attribute.
+    constant ENV_LUT_DEPTH : natural := 2 ** (ENV_LUT_ADDR_BITS-1);
+
+    type env_lut_array is array (0 to ENV_LUT_DEPTH-1) of std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
 
     constant GAUSS_TABLE : env_lut_array := (
 \t\t{gauss_lut}
