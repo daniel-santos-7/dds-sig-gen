@@ -20,6 +20,8 @@ architecture rtl of iq_mod is
 
     signal gauss : signed(OUT_RES_BITS downto 0);
     signal drag  : signed(OUT_RES_BITS downto 0);
+    signal sin   : signed(OUT_RES_BITS-1 downto 0);
+    signal cos   : signed(OUT_RES_BITS-1 downto 0);
 
     signal sin_gauss_reg : signed(2*OUT_RES_BITS downto 0);
     signal cos_drag_reg  : signed(2*OUT_RES_BITS downto 0);
@@ -42,6 +44,8 @@ begin
 
     gauss <= signed(gauss_i);
     drag  <= signed(drag_i);
+    sin   <= signed(sin_i);
+    cos   <= signed(cos_i);
 
     mult_pipe_proc : process(clk_i)
     begin
@@ -52,10 +56,10 @@ begin
                 sin_drag_reg  <= (others => '0');
                 cos_gauss_reg <= (others => '0');
             else
-                sin_gauss_reg <= signed(sin_i) * gauss;
-                cos_drag_reg  <= signed(cos_i) * drag;
-                sin_drag_reg  <= signed(sin_i) * drag;
-                cos_gauss_reg <= signed(cos_i) * gauss;
+                sin_gauss_reg <= sin * gauss;
+                cos_drag_reg  <= cos * drag;
+                sin_drag_reg  <= sin * drag;
+                cos_gauss_reg <= cos * gauss;
             end if;
         end if;
     end process mult_pipe_proc;
