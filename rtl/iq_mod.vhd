@@ -46,10 +46,17 @@ begin
     mult_pipe_proc : process(clk_i)
     begin
         if rising_edge(clk_i) then
-            sin_gauss_reg <= signed(sin_i) * gauss;
-            cos_drag_reg  <= signed(cos_i) * drag;
-            sin_drag_reg  <= signed(sin_i) * drag;
-            cos_gauss_reg <= signed(cos_i) * gauss;
+            if rst_i = '1' then
+                sin_gauss_reg <= (others => '0');
+                cos_drag_reg  <= (others => '0');
+                sin_drag_reg  <= (others => '0');
+                cos_gauss_reg <= (others => '0');
+            else
+                sin_gauss_reg <= signed(sin_i) * gauss;
+                cos_drag_reg  <= signed(cos_i) * drag;
+                sin_drag_reg  <= signed(sin_i) * drag;
+                cos_gauss_reg <= signed(cos_i) * gauss;
+            end if;
         end if;
     end process mult_pipe_proc;
 
