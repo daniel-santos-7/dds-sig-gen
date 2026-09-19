@@ -20,15 +20,15 @@ end entity env_seq;
 
 architecture rtl of env_seq is
 
-    signal env_cnt_inc  : unsigned(ENV_ACC_BITS downto 0);
+    signal env_cnt_inc  : unsigned(ENV_ACC_BITS-1 downto 0);
     signal env_cnt_val  : unsigned(ENV_ACC_BITS downto 0);
     signal env_cnt_reg  : unsigned(ENV_ACC_BITS-1 downto 0);
     signal env_cnt_done : std_logic;
 
 begin
 
-    env_cnt_inc  <= unsigned('0' & step_i);
-    env_cnt_val  <= ('0' & env_cnt_reg) + env_cnt_inc;
+    env_cnt_inc  <= unsigned(step_i);
+    env_cnt_val  <= ('0' & env_cnt_reg) + ('0' & env_cnt_inc);
     env_cnt_done <= env_cnt_val(ENV_ACC_BITS);
 
     env_cnt_reg_proc : process(clk_i)
