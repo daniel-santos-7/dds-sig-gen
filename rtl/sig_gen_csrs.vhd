@@ -1,3 +1,11 @@
+----------------------------------------------------------------------
+-- DDS Signal Generator
+-- developed by: Daniel Santos
+-- module: sig_gen_csrs
+-- description: Control and Status Registers (CSRs) with Wishbone interface
+-- license: MIT
+----------------------------------------------------------------------
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 

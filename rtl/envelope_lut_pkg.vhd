@@ -1,3 +1,11 @@
+----------------------------------------------------------------------
+-- DDS Signal Generator
+-- developed by: Daniel Santos
+-- module: envelope_lut_pkg
+-- description: generated Gaussian envelope and DRAG lookup tables
+-- license: MIT
+----------------------------------------------------------------------
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 

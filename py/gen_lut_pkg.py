@@ -23,6 +23,17 @@ def _int_to_vhdl_bit_str(integer: int, bits: int) -> str:
     return f'"{value:0{bits}b}"'
 
 
+def _header(module: str, description: str) -> str:
+    rule = "-" * 70
+    return (f"{rule}\n"
+            f"-- DDS Signal Generator\n"
+            f"-- developed by: Daniel Santos\n"
+            f"-- module: {module}\n"
+            f"-- description: {description}\n"
+            f"-- license: MIT\n"
+            f"{rule}\n\n")
+
+
 def generate_pkg(lut_type, lut_addr_bits=10, out_res_bits=12, initial_phase=0, final_phase=90):
     if lut_type == "sine":
         return generate_sine_pkg(lut_addr_bits, out_res_bits, initial_phase, final_phase)
@@ -39,7 +50,7 @@ def generate_sine_pkg(lut_addr_bits=10, out_res_bits=12, initial_phase=0, final_
     hex_values = [_int_to_vhdl_bit_str(int(v), out_res_bits) for v in sine_values]
     lut = ',\n\t\t'.join(hex_values)
 
-    return f'''library IEEE;
+    return f'''{_header("sine_lut_pkg", "generated quarter-wave sine lookup table")}library IEEE;
 use IEEE.std_logic_1164.all;
 
 package sine_lut_pkg is
@@ -84,7 +95,7 @@ def generate_env_pkg(lut_addr_bits=10, out_res_bits=16):
     gauss_lut = ',\n\t\t'.join(gauss_values)
     drag_lut = ',\n\t\t'.join(drag_values)
 
-    return f'''library IEEE;
+    return f'''{_header("envelope_lut_pkg", "generated Gaussian envelope and DRAG lookup tables")}library IEEE;
 use IEEE.std_logic_1164.all;
 
 package envelope_lut_pkg is

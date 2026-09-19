@@ -1,3 +1,11 @@
+----------------------------------------------------------------------
+-- DDS Signal Generator
+-- developed by: Daniel Santos
+-- module: iq_mod
+-- description: IQ modulator: complex envelope upconversion
+-- license: MIT
+----------------------------------------------------------------------
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;

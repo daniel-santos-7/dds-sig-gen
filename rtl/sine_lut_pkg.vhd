@@ -1,3 +1,11 @@
+----------------------------------------------------------------------
+-- DDS Signal Generator
+-- developed by: Daniel Santos
+-- module: sine_lut_pkg
+-- description: generated quarter-wave sine lookup table
+-- license: MIT
+----------------------------------------------------------------------
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 

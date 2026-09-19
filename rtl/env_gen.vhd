@@ -1,3 +1,11 @@
+----------------------------------------------------------------------
+-- DDS Signal Generator
+-- developed by: Daniel Santos
+-- module: env_gen
+-- description: Gaussian envelope lookup with amplitude and DRAG scaling
+-- license: MIT
+----------------------------------------------------------------------
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;

@@ -1,3 +1,10 @@
+----------------------------------------------------------------------
+-- DDS Signal Generator
+-- developed by: Daniel Santos
+-- module: sig_gen_tb
+-- description: system-level testbench
+----------------------------------------------------------------------
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.math_real.all;

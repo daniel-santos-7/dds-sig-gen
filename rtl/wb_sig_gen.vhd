@@ -1,3 +1,11 @@
+----------------------------------------------------------------------
+-- DDS Signal Generator
+-- developed by: Daniel Santos
+-- module: wb_sig_gen
+-- description: top level: CSRs and signal generator core
+-- license: MIT
+----------------------------------------------------------------------
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use work.sine_lut_pkg.OUT_RES_BITS;
