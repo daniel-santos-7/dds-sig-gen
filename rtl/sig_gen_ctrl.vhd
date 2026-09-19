@@ -4,7 +4,8 @@ use IEEE.numeric_std.all;
 
 entity sig_gen_ctrl is
     generic (
-        PHA_ACC_BITS : natural := 32
+        PHA_ACC_BITS : natural := 32;
+        ENV_ACC_BITS : natural := 32
     );
     port (
         clk_i    : in  std_logic;
@@ -14,7 +15,7 @@ entity sig_gen_ctrl is
         ftw_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
         pow_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
         amp_i    : in  std_logic_vector(15 downto 0);
-        env_i    : in  std_logic_vector(31 downto 0);
+        env_i    : in  std_logic_vector(ENV_ACC_BITS-1 downto 0);
         drag_i   : in  std_logic_vector(15 downto 0);
         delay_i  : in  std_logic_vector(23 downto 0);
         clr_o    : out std_logic;
@@ -22,7 +23,7 @@ entity sig_gen_ctrl is
         ftw_o    : out std_logic_vector(PHA_ACC_BITS-1 downto 0);
         pow_o    : out std_logic_vector(PHA_ACC_BITS-1 downto 0);
         amp_o    : out std_logic_vector(15 downto 0);
-        env_o    : out std_logic_vector(31 downto 0);
+        env_o    : out std_logic_vector(ENV_ACC_BITS-1 downto 0);
         drag_o   : out std_logic_vector(15 downto 0);
         en_o     : out std_logic
     );

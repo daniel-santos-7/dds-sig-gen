@@ -52,7 +52,8 @@ begin
     uut : entity work.wb_sig_gen generic map (
         DATA_WIDTH   => DATA_WIDTH,
         ADDR_WIDTH   => ADDR_WIDTH,
-        PHA_ACC_BITS => PHA_ACC_BITS
+        PHA_ACC_BITS => PHA_ACC_BITS,
+        ENV_ACC_BITS => ENV_ACC_BITS
     ) port map (
         rst_i    => rst_i,
         clk_i    => clk_i,

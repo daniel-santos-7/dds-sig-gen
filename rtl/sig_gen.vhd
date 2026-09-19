@@ -8,6 +8,7 @@ use work.envelope_lut_pkg.ENV_LUT_ADDR_BITS;
 entity sig_gen is
     generic (
         PHA_ACC_BITS  : natural := 32;
+        ENV_ACC_BITS  : natural := 32;
         DRAG_DERIV_EN : boolean := false;
         DRAG_K_SHIFT  : natural := 0
     );
@@ -18,7 +19,7 @@ entity sig_gen is
         ftw_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
         pow_i    : in  std_logic_vector(PHA_ACC_BITS-1 downto 0);
         amp_i    : in  std_logic_vector(15 downto 0);
-        env_i    : in  std_logic_vector(31 downto 0);
+        env_i    : in  std_logic_vector(ENV_ACC_BITS-1 downto 0);
         drag_i   : in  std_logic_vector(15 downto 0);
         delay_i  : in  std_logic_vector(23 downto 0);
         ready_o  : out std_logic;
@@ -38,7 +39,7 @@ architecture rtl of sig_gen is
     signal ctrl_ftw      : std_logic_vector(PHA_ACC_BITS-1 downto 0);
     signal ctrl_pow      : std_logic_vector(PHA_ACC_BITS-1 downto 0);
     signal ctrl_amp      : std_logic_vector(15 downto 0);
-    signal ctrl_env      : std_logic_vector(31 downto 0);
+    signal ctrl_env      : std_logic_vector(ENV_ACC_BITS-1 downto 0);
     signal ctrl_drag     : std_logic_vector(15 downto 0);
 
     signal env_gen_gauss : std_logic_vector(OUT_RES_BITS downto 0);
@@ -53,7 +54,8 @@ architecture rtl of sig_gen is
 begin
 
     sig_gen_sig_gen_ctrl : entity work.sig_gen_ctrl generic map (
-        PHA_ACC_BITS => PHA_ACC_BITS
+        PHA_ACC_BITS => PHA_ACC_BITS,
+        ENV_ACC_BITS => ENV_ACC_BITS
     ) port map (
         clk_i   => clk_i,
         rst_i   => rst_i,
@@ -75,7 +77,9 @@ begin
         en_o    => ctrl_active
     );
 
-    sig_gen_env_seq : entity work.env_seq port map (
+    sig_gen_env_seq : entity work.env_seq generic map (
+        ENV_ACC_BITS => ENV_ACC_BITS
+    ) port map (
         clk_i    => clk_i,
         rst_i    => rst_i,
         clr_i    => ctrl_sync,

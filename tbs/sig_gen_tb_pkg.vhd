@@ -28,6 +28,7 @@ package sig_gen_tb_pkg is
 
     constant CLK_FREQ      : real    := 100.0e6;
     constant PHA_ACC_BITS  : natural := 32;
+    constant ENV_ACC_BITS  : natural := 32;
 
     function img(r : real) return string;
     function to_regs(tv : test_case_t) return reg_values_t;
@@ -111,9 +112,9 @@ package body sig_gen_tb_pkg is
         variable step_val : real;
         variable drag_val : integer;
     begin
-        -- ENV_STEP: step size so accumulator reaches 2^32 in pulse_len cycles
-        -- step = 2^32 / pulse_len
-        step_val := (2.0**32) / real(tv.pulse_len);
+        -- ENV_STEP: step size so accumulator reaches 2^ENV_ACC_BITS in pulse_len cycles
+        -- step = 2^ENV_ACC_BITS / pulse_len
+        step_val := (2.0**ENV_ACC_BITS) / real(tv.pulse_len);
 
         -- DRAG_COEFF: signed Q1.15
         drag_val := integer(tv.drag * 32768.0);

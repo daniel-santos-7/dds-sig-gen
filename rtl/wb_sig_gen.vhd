@@ -7,6 +7,7 @@ entity wb_sig_gen is
         DATA_WIDTH    : natural := 32;
         ADDR_WIDTH    : natural := 3;
         PHA_ACC_BITS  : natural := 32;
+        ENV_ACC_BITS  : natural := 32;
         DRAG_DERIV_EN : boolean := false;
         DRAG_K_SHIFT  : natural := 0
     );
@@ -65,6 +66,7 @@ begin
 
     wb_sig_gen_sig_gen : entity work.sig_gen generic map (
         PHA_ACC_BITS  => PHA_ACC_BITS,
+        ENV_ACC_BITS  => ENV_ACC_BITS,
         DRAG_DERIV_EN => DRAG_DERIV_EN,
         DRAG_K_SHIFT  => DRAG_K_SHIFT
     ) port map (
@@ -73,7 +75,7 @@ begin
         ftw_i    => ftw(PHA_ACC_BITS-1 downto 0),
         pow_i    => pow(PHA_ACC_BITS-1 downto 0),
         amp_i    => amp,
-        env_i    => env,
+        env_i    => env(ENV_ACC_BITS-1 downto 0),
         drag_i   => drag,
         valid_i  => valid,
         delay_i  => delay,
