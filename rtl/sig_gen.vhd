@@ -7,7 +7,9 @@ use work.envelope_lut_pkg.ENV_LUT_ADDR_BITS;
 
 entity sig_gen is
     generic (
-        PHA_ACC_BITS : natural := 32
+        PHA_ACC_BITS  : natural := 32;
+        DRAG_DERIV_EN : boolean := false;
+        DRAG_K_SHIFT  : natural := 0
     );
     port (
         clk_i    : in  std_logic;
@@ -104,8 +106,8 @@ begin
     );
 
     sig_gen_env_gen : entity work.env_gen generic map (
-        DRAG_DERIV_EN => false,
-        DRAG_K_SHIFT  => 0
+        DRAG_DERIV_EN => DRAG_DERIV_EN,
+        DRAG_K_SHIFT  => DRAG_K_SHIFT
     ) port map (
         clk_i    => clk_i,
         rst_i    => rst_i,
