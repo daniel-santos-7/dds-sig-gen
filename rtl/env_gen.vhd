@@ -83,7 +83,7 @@ begin
                 end if;
             end if;
         end process reg_proc;
-        
+
         gauss <= gauss_reg;
         drag  <= std_logic_vector(-signed(drag_reg)) when lut_pha_reg = '1' else drag_reg;
     end generate;
@@ -104,7 +104,7 @@ begin
                 end if;
             end if;
         end process reg_proc;
-        
+
         gauss <= gauss_reg;
         drag_diff <= signed(gauss_reg) - signed(gauss_prev);
         drag <= std_logic_vector(resize(drag_diff, DRAG_BITS) sll DRAG_K_SHIFT);

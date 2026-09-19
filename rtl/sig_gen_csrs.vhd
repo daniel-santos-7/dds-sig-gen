@@ -40,7 +40,7 @@ architecture rtl of sig_gen_csrs is
     signal csr_req : std_logic;
     signal ack_reg : std_logic;
     signal dat_reg : std_logic_vector(DATA_WIDTH-1 downto 0);
-    
+
     signal ftw_reg   : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal pow_reg   : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal amp_reg   : std_logic_vector(15 downto 0);

@@ -29,14 +29,15 @@ end entity wb_sig_gen;
 
 architecture rtl of wb_sig_gen is
 
-    signal ftw    : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal pow    : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal amp    : std_logic_vector(15 downto 0);
-    signal env    : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal drag   : std_logic_vector(15 downto 0);
-    signal valid  : std_logic;
-    signal delay  : std_logic_vector(23 downto 0);
-    signal ready      : std_logic;
+    signal ftw   : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal pow   : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal amp   : std_logic_vector(15 downto 0);
+    signal env   : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal drag  : std_logic_vector(15 downto 0);
+    signal valid : std_logic;
+    signal delay : std_logic_vector(23 downto 0);
+    signal ready : std_logic;
+
 begin
 
     wb_sig_gen_sig_gen_csrs : entity work.sig_gen_csrs generic map (
@@ -67,19 +68,19 @@ begin
         DRAG_DERIV_EN => DRAG_DERIV_EN,
         DRAG_K_SHIFT  => DRAG_K_SHIFT
     ) port map (
-        clk_i        => clk_i,
-        rst_i        => rst_i,
-        ftw_i        => ftw(PHA_ACC_BITS-1 downto 0),
-        pow_i        => pow(PHA_ACC_BITS-1 downto 0),
-        amp_i        => amp,
-        env_i        => env,
-        drag_i       => drag,
-        valid_i      => valid,
-        delay_i      => delay,
-        ready_o      => ready,
-        sig_i_o      => sig_i_o,
-        sig_q_o      => sig_q_o,
-        active_o     => active_o
+        clk_i    => clk_i,
+        rst_i    => rst_i,
+        ftw_i    => ftw(PHA_ACC_BITS-1 downto 0),
+        pow_i    => pow(PHA_ACC_BITS-1 downto 0),
+        amp_i    => amp,
+        env_i    => env,
+        drag_i   => drag,
+        valid_i  => valid,
+        delay_i  => delay,
+        ready_o  => ready,
+        sig_i_o  => sig_i_o,
+        sig_q_o  => sig_q_o,
+        active_o => active_o
     );
 
 end architecture rtl;

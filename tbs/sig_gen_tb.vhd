@@ -26,7 +26,7 @@ architecture tb of sig_gen_tb is
     constant FREQ_HZ_VAL   : real := real(FREQ_HZ);
     constant PHASE_DEG_VAL : real := real(PHASE_DEG);
     constant AMP_VAL_VAL   : real := real(AMP_VAL);
-    
+
     constant TC   : test_case_t := (
         freq_hz   => FREQ_HZ_VAL, 
         phase_deg => PHASE_DEG_VAL, 
@@ -34,7 +34,7 @@ architecture tb of sig_gen_tb is
         pulse_len => PULSE_LEN,
         drag      => real(DRAG_COEFF) / 32768.0
     );
-    
+
     constant REGS : reg_values_t  := to_regs(TC);
 
     signal clk_en : boolean := false;
@@ -54,16 +54,16 @@ begin
         ADDR_WIDTH   => ADDR_WIDTH,
         PHA_ACC_BITS => PHA_ACC_BITS
     ) port map (
-        rst_i => rst_i,
-        clk_i => clk_i,
-        adr_i => wb.adr_i,
-        cyc_i => wb.cyc_i,
-        stb_i => wb.stb_i,
-        we_i  => wb.we_i,
-        sel_i => wb.sel_i,
-        dat_i => wb.dat_i,
-        ack_o => wb.ack_o,
-        dat_o => wb.dat_o,
+        rst_i    => rst_i,
+        clk_i    => clk_i,
+        adr_i    => wb.adr_i,
+        cyc_i    => wb.cyc_i,
+        stb_i    => wb.stb_i,
+        we_i     => wb.we_i,
+        sel_i    => wb.sel_i,
+        dat_i    => wb.dat_i,
+        ack_o    => wb.ack_o,
+        dat_o    => wb.dat_o,
         sig_i_o  => sig_i,
         sig_q_o  => sig_q,
         active_o => active

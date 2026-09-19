@@ -21,10 +21,10 @@ entity sig_gen is
         env_i    : in  std_logic_vector(31 downto 0);
         drag_i   : in  std_logic_vector(15 downto 0);
         delay_i  : in  std_logic_vector(23 downto 0);
-        ready_o      : out std_logic;
-        sig_i_o      : out std_logic_vector(OUT_RES_BITS-1 downto 0);
-        sig_q_o      : out std_logic_vector(OUT_RES_BITS-1 downto 0);
-        active_o     : out std_logic
+        ready_o  : out std_logic;
+        sig_i_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
+        sig_q_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
+        active_o : out std_logic
     );
 end entity sig_gen;
 
@@ -48,7 +48,7 @@ architecture rtl of sig_gen is
     signal sin_pac_sin   : std_logic_vector(OUT_RES_BITS-1 downto 0);
     signal sin_pac_cos   : std_logic_vector(OUT_RES_BITS-1 downto 0);
 
-    signal ctrl_ready   : std_logic;
+    signal ctrl_ready    : std_logic;
 
 begin
 

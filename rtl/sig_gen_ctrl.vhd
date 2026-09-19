@@ -35,9 +35,9 @@ architecture rtl of sig_gen_ctrl is
 
     signal delay_cnt_reg : unsigned(23 downto 0);
     signal delay_done    : std_logic;
-    signal ready    : std_logic;
-    signal sync    : std_logic;
-    signal delay_cnt_en : std_logic;
+    signal ready         : std_logic;
+    signal sync          : std_logic;
+    signal delay_cnt_en  : std_logic;
 
 begin
 

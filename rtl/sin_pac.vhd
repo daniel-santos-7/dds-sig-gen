@@ -17,7 +17,7 @@ architecture rtl of sin_pac is
 
     signal sin_pointer : std_logic_vector(LUT_ADDR_BITS-1 downto 0);
     signal cos_pointer : std_logic_vector(LUT_ADDR_BITS-1 downto 0);
-    
+
     signal sin_neg : std_logic;
     signal cos_neg : std_logic;
 

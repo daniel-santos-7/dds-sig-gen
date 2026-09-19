@@ -11,18 +11,18 @@ package sig_gen_tb_pkg is
     constant ADDR_WIDTH : natural := 3;
 
     type test_case_t is record
-        freq_hz    : real;
-        phase_deg  : real;
-        amp_val    : real;
-        pulse_len  : natural;
-        drag : real;
+        freq_hz   : real;
+        phase_deg : real;
+        amp_val   : real;
+        pulse_len : natural;
+        drag      : real;
     end record test_case_t;
 
     type reg_values_t is record
-        ftw        : std_logic_vector(31 downto 0);
-        pow        : std_logic_vector(31 downto 0);
-        amp        : std_logic_vector(31 downto 0);
-        env   : std_logic_vector(31 downto 0);
+        ftw  : std_logic_vector(31 downto 0);
+        pow  : std_logic_vector(31 downto 0);
+        amp  : std_logic_vector(31 downto 0);
+        env  : std_logic_vector(31 downto 0);
         drag : std_logic_vector(31 downto 0);
     end record reg_values_t;
 
@@ -34,13 +34,13 @@ package sig_gen_tb_pkg is
     procedure write_case_file(file_name : string; tv : test_case_t);
     procedure write_reg_file(file_name : string; regs : reg_values_t);
 
-    constant REG_FTW        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "000"; -- 0x0
-    constant REG_POW        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "001"; -- 0x1
-    constant REG_AMP        : std_logic_vector(ADDR_WIDTH-1 downto 0) := "010"; -- 0x2
+    constant REG_FTW   : std_logic_vector(ADDR_WIDTH-1 downto 0) := "000"; -- 0x0
+    constant REG_POW   : std_logic_vector(ADDR_WIDTH-1 downto 0) := "001"; -- 0x1
+    constant REG_AMP   : std_logic_vector(ADDR_WIDTH-1 downto 0) := "010"; -- 0x2
     constant REG_DRAG  : std_logic_vector(ADDR_WIDTH-1 downto 0) := "011"; -- 0x3
     constant REG_ENV   : std_logic_vector(ADDR_WIDTH-1 downto 0) := "100"; -- 0x4
     constant REG_DELAY : std_logic_vector(ADDR_WIDTH-1 downto 0) := "101"; -- 0x5
-    constant REG_TRIG       : std_logic_vector(ADDR_WIDTH-1 downto 0) := "110"; -- 0x6
+    constant REG_TRIG  : std_logic_vector(ADDR_WIDTH-1 downto 0) := "110"; -- 0x6
 
     type wb_bus is record
         adr_i : std_logic_vector(ADDR_WIDTH-1 downto 0);
@@ -58,22 +58,22 @@ package sig_gen_tb_pkg is
     );
 
     procedure wb_write (
-        signal clk : in std_logic;
-        signal wb : inout wb_bus;
+        signal clk   : in std_logic;
+        signal wb    : inout wb_bus;
         constant adr : std_logic_vector(ADDR_WIDTH-1 downto 0);
         constant dat : std_logic_vector(DATA_WIDTH-1 downto 0)
     );
 
     procedure wb_read (
-        signal clk  : in std_logic;
-        signal wb   : inout wb_bus;
+        signal clk   : in std_logic;
+        signal wb    : inout wb_bus;
         constant adr : std_logic_vector(ADDR_WIDTH-1 downto 0);
         variable dat : out std_logic_vector(DATA_WIDTH-1 downto 0)
     );
 
     procedure wb_write_config (
-        signal clk   : in std_logic;
-        signal wb    : inout wb_bus;
+        signal clk    : in std_logic;
+        signal wb     : inout wb_bus;
         constant regs : reg_values_t
     );
 
@@ -83,11 +83,11 @@ package sig_gen_tb_pkg is
     );
 
     procedure save_samples (
-        signal clk        : in  std_logic;
+        signal clk         : in  std_logic;
         constant file_name : in  string;
-        signal sig_i      : in  std_logic_vector;
-        signal sig_q      : in  std_logic_vector;
-        signal active     : in  std_logic
+        signal sig_i       : in  std_logic_vector;
+        signal sig_q       : in  std_logic_vector;
+        signal active      : in  std_logic
     );
 
 end package sig_gen_tb_pkg;
@@ -96,7 +96,7 @@ package body sig_gen_tb_pkg is
 
     function real_to_slv32(val : real) return std_logic_vector is
         variable result : unsigned(31 downto 0) := (others => '0');
-        variable v : real := val;
+        variable v      : real := val;
     begin
         for i in 0 to 31 loop
             if v >= 2.0 ** (31 - i) then
@@ -114,17 +114,17 @@ package body sig_gen_tb_pkg is
         -- ENV_STEP: step size so accumulator reaches 2^32 in pulse_len cycles
         -- step = 2^32 / pulse_len
         step_val := (2.0**32) / real(tv.pulse_len);
-        
+
         -- DRAG_COEFF: signed Q1.15
         drag_val := integer(tv.drag * 32768.0);
         if drag_val > 32767 then drag_val := 32767; end if;
         if drag_val < -32768 then drag_val := -32768; end if;
-        
+
         return (
-        ftw        => real_to_slv32(tv.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS)),
-        pow        => real_to_slv32(tv.phase_deg / 360.0 * (2.0 ** PHA_ACC_BITS)),
-            amp        => real_to_slv32(tv.amp_val),
-            env   => std_logic_vector(to_unsigned(integer(step_val), 32)),
+            ftw  => real_to_slv32(tv.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS)),
+            pow  => real_to_slv32(tv.phase_deg / 360.0 * (2.0 ** PHA_ACC_BITS)),
+            amp  => real_to_slv32(tv.amp_val),
+            env  => std_logic_vector(to_unsigned(integer(step_val), 32)),
             drag => std_logic_vector(to_signed(drag_val, 32))
         );
     end function;
@@ -143,7 +143,7 @@ package body sig_gen_tb_pkg is
     end function;
 
     procedure write_case_file(file_name : string; tv : test_case_t) is
-        file f : text open write_mode is file_name;
+        file f     : text open write_mode is file_name;
         variable l : line;
     begin
         write(l, string'("freq_hz: ")   & img(tv.freq_hz)); writeline(f, l);
@@ -154,7 +154,7 @@ package body sig_gen_tb_pkg is
     end procedure;
 
     procedure write_reg_file(file_name : string; regs : reg_values_t) is
-        file f : text open write_mode is file_name;
+        file f     : text open write_mode is file_name;
         variable l : line;
     begin
         write(l, string'("ftw: 0x")); hwrite(l, regs.ftw); writeline(f, l);
@@ -201,8 +201,8 @@ package body sig_gen_tb_pkg is
     end procedure wb_write;
 
     procedure wb_read (
-        signal clk  : in std_logic;
-        signal wb   : inout wb_bus;
+        signal clk   : in std_logic;
+        signal wb    : inout wb_bus;
         constant adr : std_logic_vector(ADDR_WIDTH-1 downto 0);
         variable dat : out std_logic_vector(DATA_WIDTH-1 downto 0)
     ) is
@@ -221,8 +221,8 @@ package body sig_gen_tb_pkg is
     end procedure wb_read;
 
     procedure wb_write_config (
-        signal clk   : in std_logic;
-        signal wb    : inout wb_bus;
+        signal clk    : in std_logic;
+        signal wb     : inout wb_bus;
         constant regs : reg_values_t
     ) is
         constant WRITE_COMMAND : std_logic_vector(DATA_WIDTH-1 downto 0) := x"00000001";
@@ -247,14 +247,14 @@ package body sig_gen_tb_pkg is
     end procedure wb_reset;
 
     procedure save_samples (
-        signal clk        : in  std_logic;
+        signal clk         : in  std_logic;
         constant file_name : in  string;
-        signal sig_i      : in  std_logic_vector;
-        signal sig_q      : in  std_logic_vector;
-        signal active     : in  std_logic
+        signal sig_i       : in  std_logic_vector;
+        signal sig_q       : in  std_logic_vector;
+        signal active      : in  std_logic
     ) is
-        file f : text open write_mode is file_name;
-        variable l : line;
+        file f        : text open write_mode is file_name;
+        variable l    : line;
         variable prev : std_logic := '0';
     begin
         loop
