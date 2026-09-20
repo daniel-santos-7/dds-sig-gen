@@ -11,7 +11,9 @@ use IEEE.std_logic_1164.all;
 
 entity sig_gen_csrs is
     generic (
-        DATA_WIDTH : natural := 32
+        DATA_WIDTH   : natural := 32;
+        PHA_ACC_BITS : natural := 32;
+        ENV_ACC_BITS : natural := 32
     );
     port (
         rst_i   : in  std_logic;
@@ -24,11 +26,11 @@ entity sig_gen_csrs is
         dat_i   : in  std_logic_vector(DATA_WIDTH-1 downto 0);
         ack_o   : out std_logic;
         dat_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
-        ftw_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
-        pow_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        ftw_o   : out std_logic_vector(PHA_ACC_BITS-1 downto 0);
+        pow_o   : out std_logic_vector(PHA_ACC_BITS-1 downto 0);
         amp_o   : out std_logic_vector(15 downto 0);
         drag_o  : out std_logic_vector(15 downto 0);
-        env_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        env_o   : out std_logic_vector(ENV_ACC_BITS-1 downto 0);
         delay_o : out std_logic_vector(23 downto 0);
         valid_o : out std_logic;
         ready_i : in  std_logic
@@ -162,11 +164,11 @@ begin
     -- Output assignments --
     dat_o   <= dat_reg;
     ack_o   <= ack_reg;
-    ftw_o   <= ftw_reg;
-    pow_o   <= pow_reg;
+    ftw_o   <= ftw_reg(PHA_ACC_BITS-1 downto 0);
+    pow_o   <= pow_reg(PHA_ACC_BITS-1 downto 0);
     amp_o   <= amp_reg;
     drag_o  <= drag_reg;
-    env_o   <= env_reg;
+    env_o   <= env_reg(ENV_ACC_BITS-1 downto 0);
     delay_o <= delay_reg;
     valid_o <= valid_reg;
 
