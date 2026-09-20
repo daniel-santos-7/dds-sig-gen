@@ -34,6 +34,17 @@ Total latency from the phase accumulator to `sig_i_o`/`sig_q_o` is 5 clock cycle
 | `0x5` | DELAY | Inter-pulse delay in clock cycles (24-bit), written independently of TRIG |
 | `0x6` | TRIG | Write bit-0 to request a trigger; readback `{30'b0, ready, valid}` |
 
+### Bus interface
+
+The slave follows the **Wishbone B4 pipelined** protocol, not classic:
+
+- `STALL_O` is tied low — the register file accepts one request per clock, so a request is always taken on the rising edge where `CYC_I & STB_I` are asserted.
+- `ACK_O` follows one clock later, one acknowledge per accepted request, and is a registered output. `DAT_O` is valid in the same cycle as `ACK_O`.
+- The slave assumes a B4-compliant master, which holds `CYC_I` asserted through termination. `ACK_O` is deliberately not gated with `CYC_I`: cycle framing belongs to the interconnect, and gating it there keeps `ACK_O` off a combinational path from the bus inputs.
+- A master must therefore assert `STB_I` for a single clock per transfer; holding it, as a classic master does, issues one transfer per clock.
+
+Port size is 32-bit with 8-bit granularity (`SEL_I` selects byte lanes on writes and is ignored on reads), and `ADR_I` is a register index rather than a byte address.
+
 Writing TRIG sets `valid`, which stays high — even across further register writes — until the FSM returns to IDLE. Triggering during an active pulse or its post-pulse delay therefore queues the request instead of dropping it. FTW/POW/AMP/ENV/DRAG are latched atomically at the instant the pulse starts, not when they are written.
 
 ### Pulse length

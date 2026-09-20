@@ -2,7 +2,7 @@
 -- DDS Signal Generator
 -- developed by: Daniel Santos
 -- module: sig_gen_csrs
--- description: Control and Status Registers (CSRs) with Wishbone interface
+-- description: Control and Status Registers (CSRs), Wishbone B4 pipelined
 -- license: MIT
 ----------------------------------------------------------------------
 
@@ -25,6 +25,7 @@ entity sig_gen_csrs is
         sel_i   : in  std_logic_vector(DATA_WIDTH/8-1 downto 0);
         dat_i   : in  std_logic_vector(DATA_WIDTH-1 downto 0);
         ack_o   : out std_logic;
+        stall_o : out std_logic;
         dat_o   : out std_logic_vector(DATA_WIDTH-1 downto 0);
         ftw_o   : out std_logic_vector(PHA_ACC_BITS-1 downto 0);
         pow_o   : out std_logic_vector(PHA_ACC_BITS-1 downto 0);
@@ -61,6 +62,7 @@ architecture rtl of sig_gen_csrs is
 
 begin
 
+    -- No wait states: a request is accepted on every cycle it is presented
     csr_req <= cyc_i and stb_i;
 
     ack_proc : process(clk_i)
@@ -68,10 +70,8 @@ begin
         if rising_edge(clk_i) then
             if rst_i = '1' then
                 ack_reg <= '0';
-            elsif csr_req = '1' and ack_reg = '0' then
-                ack_reg <= '1';
             else
-                ack_reg <= '0';
+                ack_reg <= csr_req;
             end if;
         end if;
     end process ack_proc;
@@ -91,7 +91,7 @@ begin
                 if ready_i = '1' then
                     valid_reg <= '0';
                 end if;
-                if csr_req = '1' and ack_reg = '0' and we_i = '1' then
+                if csr_req = '1' and we_i = '1' then
                     case adr_i is
                         when REG_FTW =>
                             for i in 0 to 3 loop
@@ -145,7 +145,7 @@ begin
             if rst_i = '1' then
                 dat_reg <= (others => '0');
             else
-                if csr_req = '1' and ack_reg = '0' then
+                if csr_req = '1' then
                     case adr_i is
                         when REG_FTW   => dat_reg <= ftw_reg;
                         when REG_POW   => dat_reg <= pow_reg;
@@ -164,6 +164,7 @@ begin
     -- Output assignments --
     dat_o   <= dat_reg;
     ack_o   <= ack_reg;
+    stall_o <= '0';
     ftw_o   <= ftw_reg(PHA_ACC_BITS-1 downto 0);
     pow_o   <= pow_reg(PHA_ACC_BITS-1 downto 0);
     amp_o   <= amp_reg;

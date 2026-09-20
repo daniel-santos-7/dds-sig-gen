@@ -29,6 +29,7 @@ entity wb_sig_gen is
         sel_i    : in  std_logic_vector(DATA_WIDTH/8-1 downto 0);
         dat_i    : in  std_logic_vector(DATA_WIDTH-1 downto 0);
         ack_o    : out std_logic;
+        stall_o  : out std_logic;
         dat_o    : out std_logic_vector(DATA_WIDTH-1 downto 0);
         sig_i_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
         sig_q_o  : out std_logic_vector(OUT_RES_BITS-1 downto 0);
@@ -63,6 +64,7 @@ begin
         sel_i   => sel_i,
         dat_i   => dat_i,
         ack_o   => ack_o,
+        stall_o => stall_o,
         dat_o   => dat_o,
         ftw_o   => ftw,
         pow_o   => pow,

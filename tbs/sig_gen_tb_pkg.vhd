@@ -2,7 +2,7 @@
 -- DDS Signal Generator
 -- developed by: Daniel Santos
 -- module: sig_gen_tb_pkg
--- description: test case types and Wishbone helper procedures
+-- description: test case types and Wishbone B4 pipelined helper procedures
 ----------------------------------------------------------------------
 
 library IEEE;
@@ -51,14 +51,15 @@ package sig_gen_tb_pkg is
     constant REG_TRIG  : std_logic_vector(ADDR_WIDTH-1 downto 0) := "110"; -- 0x6
 
     type wb_bus is record
-        adr_i : std_logic_vector(ADDR_WIDTH-1 downto 0);
-        cyc_i : std_logic;
-        stb_i : std_logic;
-        we_i  : std_logic;
-        sel_i : std_logic_vector(DATA_WIDTH/8-1 downto 0);
-        dat_i : std_logic_vector(DATA_WIDTH-1 downto 0);
-        dat_o : std_logic_vector(DATA_WIDTH-1 downto 0);
-        ack_o : std_logic;
+        adr_i   : std_logic_vector(ADDR_WIDTH-1 downto 0);
+        cyc_i   : std_logic;
+        stb_i   : std_logic;
+        we_i    : std_logic;
+        sel_i   : std_logic_vector(DATA_WIDTH/8-1 downto 0);
+        dat_i   : std_logic_vector(DATA_WIDTH-1 downto 0);
+        dat_o   : std_logic_vector(DATA_WIDTH-1 downto 0);
+        ack_o   : std_logic;
+        stall_o : std_logic;
     end record wb_bus;
 
     procedure wb_init (
@@ -176,14 +177,15 @@ package body sig_gen_tb_pkg is
         signal wb : inout wb_bus
     ) is
     begin
-        wb.adr_i <= (others => '0');
-        wb.cyc_i <= '0';
-        wb.stb_i <= '0';
-        wb.we_i  <= '0';
-        wb.sel_i <= (others => '0');
-        wb.dat_i <= (others => '0');
-        wb.dat_o <= (others => 'Z');
-        wb.ack_o <= 'Z';
+        wb.adr_i   <= (others => '0');
+        wb.cyc_i   <= '0';
+        wb.stb_i   <= '0';
+        wb.we_i    <= '0';
+        wb.sel_i   <= (others => '0');
+        wb.dat_i   <= (others => '0');
+        wb.dat_o   <= (others => 'Z');
+        wb.ack_o   <= 'Z';
+        wb.stall_o <= 'Z';
     end procedure wb_init;
 
     procedure wb_write (
@@ -200,12 +202,18 @@ package body sig_gen_tb_pkg is
         wb.cyc_i <= '1';
         wb.stb_i <= '1';
         wb.we_i  <= '1';
-        wait until rising_edge(clk) and wb.ack_o = '1';
-        wb.cyc_i <= '0';
+        -- request phase: held until the slave accepts it (stall low)
+        loop
+            wait until rising_edge(clk);
+            exit when wb.stall_o = '0';
+        end loop;
         wb.stb_i <= '0';
         wb.we_i  <= '0';
         wb.sel_i <= (others => '0');
         wb.dat_i <= (others => '0');
+        -- response phase: cyc stays asserted until the acknowledge
+        wait until rising_edge(clk) and wb.ack_o = '1';
+        wb.cyc_i <= '0';
     end procedure wb_write;
 
     procedure wb_read (
@@ -221,11 +229,17 @@ package body sig_gen_tb_pkg is
         wb.cyc_i <= '1';
         wb.stb_i <= '1';
         wb.we_i  <= '0';
+        -- request phase: held until the slave accepts it (stall low)
+        loop
+            wait until rising_edge(clk);
+            exit when wb.stall_o = '0';
+        end loop;
+        wb.stb_i <= '0';
+        wb.sel_i <= (others => '0');
+        -- response phase: cyc stays asserted until the acknowledge
         wait until rising_edge(clk) and wb.ack_o = '1';
         dat := wb.dat_o;
         wb.cyc_i <= '0';
-        wb.stb_i <= '0';
-        wb.sel_i <= (others => '0');
     end procedure wb_read;
 
     procedure wb_write_config (

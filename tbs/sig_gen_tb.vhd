@@ -71,6 +71,7 @@ begin
         sel_i    => wb.sel_i,
         dat_i    => wb.dat_i,
         ack_o    => wb.ack_o,
+        stall_o  => wb.stall_o,
         dat_o    => wb.dat_o,
         sig_i_o  => sig_i,
         sig_q_o  => sig_q,
