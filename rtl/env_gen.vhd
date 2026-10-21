@@ -13,10 +13,6 @@ use work.envelope_lut_pkg.all;
 use work.sine_lut_pkg.OUT_RES_BITS;
 
 entity env_gen is
-    generic (
-        DRAG_DERIV_EN : boolean := true;
-        DRAG_K_SHIFT  : natural := 6
-    );
     port (
         clk_i    : in  std_logic;
         rst_i    : in  std_logic;
@@ -31,30 +27,21 @@ end entity env_gen;
 
 architecture rtl of env_gen is
 
-    function get_drag_bits return natural is
-    begin
-        if DRAG_DERIV_EN then
-            return ENV_OUT_RES_BITS + DRAG_K_SHIFT;
-        else
-            return ENV_OUT_RES_BITS;
-        end if;
-    end function;
-
-    constant DRAG_BITS : natural := get_drag_bits;
-
-    signal lut_pha : std_logic;
-    signal lut_adr : unsigned(ENV_LUT_ADDR_BITS-2 downto 0);
+    signal lut_pha     : std_logic;
+    signal lut_pha_reg : std_logic;
+    signal lut_adr     : unsigned(ENV_LUT_ADDR_BITS-2 downto 0);
 
     signal gauss_reg : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
+    signal drag_reg  : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
 
     signal gauss : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
-    signal drag  : std_logic_vector(DRAG_BITS-1 downto 0);
+    signal drag  : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
 
     signal gauss_pipe_reg : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
-    signal drag_pipe_reg  : std_logic_vector(DRAG_BITS-1 downto 0);
+    signal drag_pipe_reg  : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
 
     signal amp_mult   : unsigned(ENV_OUT_RES_BITS+15 downto 0);
-    signal env_q_mult : signed(DRAG_BITS+15 downto 0);
+    signal env_q_mult : signed(ENV_OUT_RES_BITS+15 downto 0);
 
     signal gauss_out_reg : std_logic_vector(OUT_RES_BITS downto 0);
     signal drag_out_reg  : std_logic_vector(OUT_RES_BITS downto 0);
@@ -64,59 +51,32 @@ begin
     lut_pha <= adr_i(ENV_LUT_ADDR_BITS-1);
     lut_adr <= not unsigned(adr_i(ENV_LUT_ADDR_BITS-2 downto 0)) when lut_pha = '1' else unsigned(adr_i(ENV_LUT_ADDR_BITS-2 downto 0));
 
-    orig_gen: if not DRAG_DERIV_EN generate
-        signal drag_reg    : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
-        signal lut_pha_reg : std_logic;
+    phase_proc : process(clk_i)
     begin
-        phase_proc : process(clk_i)
-        begin
-            if rising_edge(clk_i) then
-                if rst_i = '1' then
-                    lut_pha_reg <= '0';
-                else
-                    lut_pha_reg <= lut_pha;
-                end if;
+        if rising_edge(clk_i) then
+            if rst_i = '1' then
+                lut_pha_reg <= '0';
+            else
+                lut_pha_reg <= lut_pha;
             end if;
-        end process phase_proc;
+        end if;
+    end process phase_proc;
 
-        reg_proc: process(clk_i)
-        begin
-            if rising_edge(clk_i) then
-                if active_i = '1' then
-                    gauss_reg <= GAUSS_TABLE(to_integer(lut_adr));
-                    drag_reg  <= DRAG_TABLE(to_integer(lut_adr));
-                else
-                    gauss_reg <= (others => '0');
-                    drag_reg  <= (others => '0');
-                end if;
-            end if;
-        end process reg_proc;
-
-        gauss <= gauss_reg;
-        drag  <= std_logic_vector(-signed(drag_reg)) when lut_pha_reg = '1' else drag_reg;
-    end generate;
-
-    deriv_gen: if DRAG_DERIV_EN generate
-        signal gauss_prev : std_logic_vector(ENV_OUT_RES_BITS-1 downto 0);
-        signal drag_diff  : signed(ENV_OUT_RES_BITS-1 downto 0);
+    reg_proc: process(clk_i)
     begin
-        reg_proc: process(clk_i)
-        begin
-            if rising_edge(clk_i) then
-                if active_i = '1' then
-                    gauss_reg <= GAUSS_TABLE(to_integer(lut_adr));
-                    gauss_prev <= gauss_reg;
-                else
-                    gauss_reg <= (others => '0');
-                    gauss_prev <= (others => '0');
-                end if;
+        if rising_edge(clk_i) then
+            if active_i = '1' then
+                gauss_reg <= GAUSS_TABLE(to_integer(lut_adr));
+                drag_reg  <= DRAG_TABLE(to_integer(lut_adr));
+            else
+                gauss_reg <= (others => '0');
+                drag_reg  <= (others => '0');
             end if;
-        end process reg_proc;
+        end if;
+    end process reg_proc;
 
-        gauss <= gauss_reg;
-        drag_diff <= signed(gauss_reg) - signed(gauss_prev);
-        drag <= std_logic_vector(resize(drag_diff, DRAG_BITS) sll DRAG_K_SHIFT);
-    end generate;
+    gauss <= gauss_reg;
+    drag  <= std_logic_vector(-signed(drag_reg)) when lut_pha_reg = '1' else drag_reg;
 
     neg_pipe_proc : process(clk_i)
     begin

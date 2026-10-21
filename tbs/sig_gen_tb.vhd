@@ -20,8 +20,6 @@ entity sig_gen_tb is
         AMP_VAL       : natural := 65535;
         PULSE_LEN     : natural := 200;
         DRAG_COEFF    : integer := 16384;  -- Q1.15: 0.5 * 32768
-        DRAG_DERIV_EN : boolean := false;
-        DRAG_K_SHIFT  : natural := 0;
         SAMPLES_FILE  : string  := "samples.txt";
         CASE_FILE     : string  := "test_case.txt";
         REG_FILE      : string  := "reg_values.txt"
@@ -59,12 +57,10 @@ architecture tb of sig_gen_tb is
 begin
 
     uut : entity work.wb_sig_gen generic map (
-        DATA_WIDTH    => DATA_WIDTH,
-        ADDR_WIDTH    => ADDR_WIDTH,
-        PHA_ACC_BITS  => PHA_ACC_BITS,
-        ENV_ACC_BITS  => ENV_ACC_BITS,
-        DRAG_DERIV_EN => DRAG_DERIV_EN,
-        DRAG_K_SHIFT  => DRAG_K_SHIFT
+        DATA_WIDTH   => DATA_WIDTH,
+        ADDR_WIDTH   => ADDR_WIDTH,
+        PHA_ACC_BITS => PHA_ACC_BITS,
+        ENV_ACC_BITS => ENV_ACC_BITS
     ) port map (
         rst_i    => rst_i,
         clk_i    => clk_i,

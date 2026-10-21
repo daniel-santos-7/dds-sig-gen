@@ -82,10 +82,6 @@ Set on `wb_sig_gen` and forwarded down unchanged.
 | `ADDR_WIDTH` | 3 | Wishbone address width |
 | `PHA_ACC_BITS` | 32 | Phase accumulator width; sets FTW/POW resolution |
 | `ENV_ACC_BITS` | 32 | Envelope accumulator width; sets the ENV contract above |
-| `DRAG_DERIV_EN` | false | `false` reads `DRAG_TABLE`; `true` derives DRAG as the finite difference of consecutive `GAUSS_TABLE` samples |
-| `DRAG_K_SHIFT` | 0 | Left shift applied to the derived DRAG term, only when `DRAG_DERIV_EN` is true |
-
-The derivative path is step-size dependent (its scaling varies with `PULSE_LEN`), unlike the LUT path. It also has a known overflow at short pulse lengths — see issue #4.
 
 ## Building & Running
 

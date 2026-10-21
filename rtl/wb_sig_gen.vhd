@@ -12,12 +12,10 @@ use work.sine_lut_pkg.OUT_RES_BITS;
 
 entity wb_sig_gen is
     generic (
-        DATA_WIDTH    : natural := 32;
-        ADDR_WIDTH    : natural := 3;
-        PHA_ACC_BITS  : natural := 32;
-        ENV_ACC_BITS  : natural := 32;
-        DRAG_DERIV_EN : boolean := false;
-        DRAG_K_SHIFT  : natural := 0
+        DATA_WIDTH   : natural := 32;
+        ADDR_WIDTH   : natural := 3;
+        PHA_ACC_BITS : natural := 32;
+        ENV_ACC_BITS : natural := 32
     );
     port (
         rst_i    : in  std_logic;
@@ -77,10 +75,8 @@ begin
     );
 
     wb_sig_gen_sig_gen : entity work.sig_gen generic map (
-        PHA_ACC_BITS  => PHA_ACC_BITS,
-        ENV_ACC_BITS  => ENV_ACC_BITS,
-        DRAG_DERIV_EN => DRAG_DERIV_EN,
-        DRAG_K_SHIFT  => DRAG_K_SHIFT
+        PHA_ACC_BITS => PHA_ACC_BITS,
+        ENV_ACC_BITS => ENV_ACC_BITS
     ) port map (
         clk_i    => clk_i,
         rst_i    => rst_i,
