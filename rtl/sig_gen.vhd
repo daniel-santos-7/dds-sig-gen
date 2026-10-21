@@ -109,7 +109,7 @@ begin
         adr_o  => pha_acc_addr
     );
 
-    sig_gen_sin_pac : entity work.sin_pac port map (
+    sig_gen_sin_pac : entity work.sin_pac(octant) port map (
         rst_i => rst_i,
         clk_i => clk_i,
         adr_i => pha_acc_addr,
