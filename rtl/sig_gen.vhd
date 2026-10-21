@@ -63,24 +63,25 @@ begin
         PHA_ACC_BITS => PHA_ACC_BITS,
         ENV_ACC_BITS => ENV_ACC_BITS
     ) port map (
-        clk_i   => clk_i,
-        rst_i   => rst_i,
-        valid_i => valid_i,
-        done_i  => env_seq_done,
-        ftw_i   => ftw_i,
-        pow_i   => pow_i,
-        amp_i   => amp_i,
-        env_i   => env_i,
-        drag_i  => drag_i,
-        delay_i => delay_i,
-        clr_o   => ctrl_sync,
-        ready_o => ctrl_ready,
-        ftw_o   => ctrl_ftw,
-        pow_o   => ctrl_pow,
-        amp_o   => ctrl_amp,
-        env_o   => ctrl_env,
-        drag_o  => ctrl_drag,
-        en_o    => ctrl_active
+        clk_i    => clk_i,
+        rst_i    => rst_i,
+        valid_i  => valid_i,
+        done_i   => env_seq_done,
+        ftw_i    => ftw_i,
+        pow_i    => pow_i,
+        amp_i    => amp_i,
+        env_i    => env_i,
+        drag_i   => drag_i,
+        delay_i  => delay_i,
+        clr_o    => ctrl_sync,
+        ready_o  => ctrl_ready,
+        ftw_o    => ctrl_ftw,
+        pow_o    => ctrl_pow,
+        amp_o    => ctrl_amp,
+        env_o    => ctrl_env,
+        drag_o   => ctrl_drag,
+        en_o     => ctrl_active,
+        active_o => active_o
     );
 
     sig_gen_env_seq : entity work.env_seq generic map (
@@ -137,7 +138,6 @@ begin
         sig_q_o => sig_q_o
     );
 
-    active_o <= ctrl_active;
     ready_o  <= ctrl_ready;
 
 end architecture rtl;

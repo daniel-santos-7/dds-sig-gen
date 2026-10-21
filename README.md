@@ -20,7 +20,7 @@ wb_sig_gen (Wishbone peripheral, ADDR_WIDTH=3)
 
 `iq_mod` computes the complex product `(gauss + j·drag)·e^{jθ}` (I = Re, Q = Im), the standard IQ-upconversion convention. Its output is the top `OUT_RES_BITS` of the `2*OUT_RES_BITS+1`-bit product with a half-LSB carry-in, so the slice rounds rather than floors.
 
-Total latency from the phase accumulator to `sig_i_o`/`sig_q_o` is 5 clock cycles (3 in `sin_pac`, 2 in `iq_mod`), matched by the envelope path.
+Total latency from the phase accumulator to `sig_i_o`/`sig_q_o` is 5 clock cycles (3 in `sin_pac`, 2 in `iq_mod`), matched by the envelope path. `active_o` is delayed by the same 5 cycles in `sig_gen_ctrl`, so it is high exactly while `sig_i_o`/`sig_q_o` carry the pulse.
 
 ## CSR Map
 
@@ -52,10 +52,10 @@ Writing TRIG sets `valid`, which stays high — even across further register wri
 `env_seq` accumulates the ENV step and ends the pulse when the accumulator overflows, so the value to write is
 
 ```
-ENV = 2^ENV_ACC_BITS / PULSE_LEN
+ENV = ceil(2^ENV_ACC_BITS / PULSE_LEN)
 ```
 
-with `ENV_ACC_BITS` defaulting to 32. That division lives in software, not in the RTL.
+with `ENV_ACC_BITS` defaulting to 32. That division lives in software, not in the RTL. A pulse lasts `ceil(2^ENV_ACC_BITS / ENV)` cycles, so the division must round **up**: rounding down or to nearest adds a cycle whenever the quotient is not an integer (201 cycles for `PULSE_LEN=200`). Rounding up gives exactly `PULSE_LEN` cycles whenever `PULSE_LEN·(PULSE_LEN−1) ≤ 2^ENV_ACC_BITS`.
 
 ### DRAG scaling
 

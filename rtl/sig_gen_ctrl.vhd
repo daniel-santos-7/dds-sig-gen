@@ -33,14 +33,21 @@ entity sig_gen_ctrl is
         amp_o    : out std_logic_vector(15 downto 0);
         env_o    : out std_logic_vector(ENV_ACC_BITS-1 downto 0);
         drag_o   : out std_logic_vector(15 downto 0);
-        en_o     : out std_logic
+        en_o     : out std_logic;
+        active_o : out std_logic
     );
 end entity sig_gen_ctrl;
 
 architecture rtl of sig_gen_ctrl is
 
+    -- cycles from en_o to the matching sig_i_o/sig_q_o sample
+    constant OUT_LATENCY : natural := 5;
+
     type state_t is (IDLE, ACTIVE, DELAY);
     signal state_reg : state_t;
+
+    signal en              : std_logic;
+    signal active_pipe_reg : std_logic_vector(OUT_LATENCY-1 downto 0);
 
     signal delay_cnt_reg : unsigned(23 downto 0);
     signal delay_done    : std_logic;
@@ -84,15 +91,15 @@ begin
     begin
         case state_reg is
             when IDLE =>
-                en_o         <= '0';
+                en           <= '0';
                 ready        <= '1';
                 delay_cnt_en <= '0';
             when ACTIVE =>
-                en_o         <= '1';
+                en           <= '1';
                 ready        <= '0';
                 delay_cnt_en <= done_i and not delay_done;
             when DELAY =>
-                en_o         <= '0';
+                en           <= '0';
                 ready        <= '0';
                 delay_cnt_en <= not delay_done;
         end case;
@@ -134,7 +141,20 @@ begin
 
     delay_done <= '1' when delay_cnt_reg = 0 else '0';
 
-    clr_o   <= done_i;
-    ready_o <= ready;
+    active_pipe_proc : process(clk_i)
+    begin
+        if rising_edge(clk_i) then
+            if rst_i = '1' then
+                active_pipe_reg <= (others => '0');
+            else
+                active_pipe_reg <= active_pipe_reg(OUT_LATENCY-2 downto 0) & en;
+            end if;
+        end if;
+    end process active_pipe_proc;
+
+    clr_o    <= done_i;
+    ready_o  <= ready;
+    en_o     <= en;
+    active_o <= active_pipe_reg(OUT_LATENCY-1);
 
 end architecture rtl;

@@ -121,8 +121,8 @@ package body sig_gen_tb_pkg is
         variable drag_val : integer;
     begin
         -- ENV_STEP: step size so accumulator reaches 2^ENV_ACC_BITS in pulse_len cycles
-        -- step = 2^ENV_ACC_BITS / pulse_len
-        step_val := (2.0**ENV_ACC_BITS) / real(tv.pulse_len);
+        -- step = ceil(2^ENV_ACC_BITS / pulse_len); rounding down adds a cycle
+        step_val := ceil((2.0**ENV_ACC_BITS) / real(tv.pulse_len));
 
         -- DRAG_COEFF: signed Q1.15
         drag_val := integer(tv.drag * 32768.0);
@@ -133,7 +133,7 @@ package body sig_gen_tb_pkg is
             ftw  => real_to_slv32(tv.freq_hz / CLK_FREQ * (2.0 ** PHA_ACC_BITS)),
             pow  => real_to_slv32(tv.phase_deg / 360.0 * (2.0 ** PHA_ACC_BITS)),
             amp  => real_to_slv32(tv.amp_val),
-            env  => std_logic_vector(to_unsigned(integer(step_val), 32)),
+            env  => real_to_slv32(step_val),
             drag => std_logic_vector(to_signed(drag_val, 32))
         );
     end function;
